@@ -8,15 +8,14 @@ close all; clear all; clc;
 
 % Import ALL data
 % Column definitions in the Tunnel-Turbulence_Run-*.dat files: P_transducer (psf) | I_sensor (mA)
-dataTurb = [];
-dataTurb = [dataTurb; load('data/Lab02-Tunnel-Turbulence_Run-1_Thursday-Session_20180208.dat')];
-dataTurb = [dataTurb; load('data/Lab02-Tunnel-Turbulence_Run-1_Tuesday-Session_20180206.dat')];
-dataTurb = [dataTurb; load('data/Lab02-Tunnel-Turbulence_Run-1_Wednesday-Session-1_20180207.dat')];
-dataTurb = [dataTurb; load('data/Lab02-Tunnel-Turbulence_Run-1_Wednesday-Session-2_20180207.dat')];
-dataTurb = [dataTurb; load('data/Lab02-Tunnel-Turbulence_Run-2_Thursday-Session_20180208.dat')];
-dataTurb = [dataTurb; load('data/Lab02-Tunnel-Turbulence_Run-2_Tuesday-Session_20180206.dat')];
-dataTurb = [dataTurb; load('data/Lab02-Tunnel-Turbulence_Run-2_Wednesday-Session-1_20180207.dat')];
-dataTurb = [dataTurb; load('data/Lab02-Tunnel-Turbulence_Run-2_Wednesday-Session-2_20180207.dat')];
+dataTurb{1} = load('data/Lab02-Tunnel-Turbulence_Run-1_Thursday-Session_20180208.dat');
+dataTurb{2} = load('data/Lab02-Tunnel-Turbulence_Run-1_Tuesday-Session_20180206.dat');
+dataTurb{3} = load('data/Lab02-Tunnel-Turbulence_Run-1_Wednesday-Session-1_20180207.dat');
+dataTurb{4} = load('data/Lab02-Tunnel-Turbulence_Run-1_Wednesday-Session-2_20180207.dat');
+dataTurb{5} = load('data/Lab02-Tunnel-Turbulence_Run-2_Thursday-Session_20180208.dat');
+dataTurb{6} = load('data/Lab02-Tunnel-Turbulence_Run-2_Tuesday-Session_20180206.dat');
+dataTurb{7} = load('data/Lab02-Tunnel-Turbulence_Run-2_Wednesday-Session-1_20180207.dat');
+dataTurb{8} = load('data/Lab02-Tunnel-Turbulence_Run-2_Wednesday-Session-2_20180207.dat');
 
 % Import the data for TF vs PerCentT
 % Column definitions in the TF_vs_PerCentT.txt files: Turbulence Factor | Per cent turbulence
@@ -35,10 +34,10 @@ lab1eqnB = 4.1194;		% y-intercept
 lab1eqnM = 0.0121;		% slope
 
 % calculate delta P from I values using eqn from lab 1 for inc vel to get delta P = P manometer
-deltaP = (dataTurb(:,2) - lab1eqnB) ./ lab1eqnM;
+deltaP = (dataTurb{1}(:,2) - lab1eqnB) ./ lab1eqnM;
 
 % Ptransducer corresponds to freestream dynamic pressure
-qinf = dataTurb(:,1) * psf_to_pa;
+qinf = dataTurb{1}(:,1) * psf_to_pa;
 
 % calculate freestream velocity using q
 vinf = sqrt(2 * qinf ./ rhoAir);
@@ -49,6 +48,10 @@ re = rhoAir * vinf * diamSphere / muAir;
 % calculate pressure coefficient
 cp = deltaP ./ qinf;
 
+% find a point where the pressure coefficient decreases rapidly
+% to get the critical reynolds num
+rec = findchangepts(cp);
+
 % plot data for p vs i
 fig1 = figure(1);
 hold on;
@@ -57,7 +60,8 @@ grid on;
 xl = [0 1000];		% x range (p values)
 yl = [0 20];		% y range (i values)
 
-plot(re,cp,'bo-');
+plot(re,cp,'o-');
+plot(re(rec),cp(rec),'*');
 
 %xlim(xl);
 %ylim(yl);
