@@ -28,48 +28,83 @@ rhoAir = 1.185;			% kg/m^3
 muAir = 1.831e-5;		% Ns
 g = 9.8;				% m/s^2
 diamSphere = 0.2032;	% m
+tfconst = 3.85e5;		% (dimensionless)
 
 % from lab 1 - inc vel: Isensor = 0.0121 * Pmanometer + 4.1194
 lab1eqnB = 4.1194;		% y-intercept
 lab1eqnM = 0.0121;		% slope
 
 % calculate delta P from I values using eqn from lab 1 for inc vel to get delta P = P manometer
-deltaP = (dataTurb{1}(:,2) - lab1eqnB) ./ lab1eqnM;
+deltaP = cellfun(@(x) (x(:,2) - lab1eqnB) ./ lab1eqnM, dataTurb, 'UniformOutput', false);
 
 % Ptransducer corresponds to freestream dynamic pressure
-qinf = dataTurb{1}(:,1) * psf_to_pa;
+qinf = cellfun(@(x) x(:,1) * psf_to_pa, dataTurb, 'UniformOutput', false);
 
 % calculate freestream velocity using q
-vinf = sqrt(2 * qinf ./ rhoAir);
+vinf = cellfun(@(x) sqrt(2 * x ./ rhoAir), qinf, 'UniformOutput', false);
 
 % calculate Reynolds number
-re = rhoAir * vinf * diamSphere / muAir;
+re = cellfun(@(x) rhoAir * x * diamSphere / muAir, vinf, 'UniformOutput', false);
 
 % calculate pressure coefficient
-cp = deltaP ./ qinf;
+cp = cellfun(@(x,y) x ./ y, deltaP, qinf, 'UniformOutput', false);
 
 % find a point where the pressure coefficient decreases rapidly
 % to get the critical reynolds num
-rec = findchangepts(cp);
+recridx = cellfun(@(x) findchangepts(x), cp, 'UniformOutput', false);
 
-% plot data for p vs i
+% loop to get actual critical reynolds number values and calculate turbulence factor
+for i = 1:8
+	% lookup reynolds number by index found with findchangepts
+	reval = re{i}(recridx{i});
+
+	% lookup the corresponding pressure coefficient (delta P)
+	cpval = cp{i}(recridx{i});
+
+	% calculate the turbulence factor
+	tfval = tfconst / reval;
+
+	% interpolate to get the percent turbulence value
+	tpcntval = interp1(dataTFvsPerCentT(:,1),dataTFvsPerCentT(:,2),tfval);
+
+	% save value pairs to cell arrays for plotting
+	recr{i} = [reval,cpval];
+	tf{i} = [tfval,tpcntval];
+end
+
+
+% plot data for cp (delta P) vs re
 fig1 = figure(1);
 hold on;
 grid on;
 
-xl = [0 1000];		% x range (p values)
-yl = [0 20];		% y range (i values)
+for i = 1:8
+	% plot cp (delta P) vs re, save handle for legend
+	leghand(i) = plot(re{i},cp{i},'o-');
 
-plot(re,cp,'o-');
-plot(re(rec),cp(rec),'*');
+	% plot and highlight points for critical reynolds number
+	plot(recr{i}(1), recr{i}(2),'r*','MarkerSize',12);
+end
+%plot(re{1}(rec),cp{1}(rec),'*');
+legend([leghand(1) leghand(2) leghand(3) leghand(4) leghand(5) leghand(6) leghand(7) leghand(8)],...
+{'Thur r1','Tues r1','Wed s1-r1','Wed s2-r1','Thur r2','Tues r2','Wed s1-r2', 'Wed s2-r2'},...
+'Location','Northeast'); 
 
 %xlim(xl);
 %ylim(yl);
 
 title('Pressure Coefficient vs Reynolds Number');
 xlabel('Reynolds Number');
-ylabel('\delta p / q');
+ylabel('^{\Delta p}/_{q}');
+
+% plot data for TF vs PerCentT, inc critical reynolds numbers found
+fig2 = figure(2);
+hold on;
+grid on;
+
+plot(dataTFvsPerCentT(:,1), dataTFvsPerCentT(:,2));
+%plot(tf{:},tpcnt,'o');
 
 % save plots to jpg
-%saveas(fig1,'lab01_p_vs_i.jpg');
+%saveas(fig1,'lab02_cp_vs_re.jpg');
 
