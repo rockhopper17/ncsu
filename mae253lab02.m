@@ -55,16 +55,17 @@ cp = cellfun(@(x,y) x ./ y, deltaP, qinf, 'UniformOutput', false);
 % interpolating for the Re value at Cp = 1.22
 %recridx = cellfun(@(x) findchangepts(x), cp, 'UniformOutput', false);
 recr = cellfun(@(re,cp) interp1(cp,re,cprecrconst), re, cp, 'UniformOutput', false);
+recr = cell2mat(recr);  % convert to matrix since we have same dimensions now (1x1 essentially)
 
 % calculate the turbulence factor
-tf = cellfun(@(recr) tfconst ./ recr, recr, 'UniformOutput', false);
+tf = tfconst ./ recr;
 
 % interpolate to get the percent turbulence value
-tpcnt = cellfun(@(tf) interp1(dataTFvsPerCentT(:,1),dataTFvsPerCentT(:,2),tf), tf, 'UniformOutput', false);
+tpcnt = interp1(dataTFvsPerCentT(:,1),dataTFvsPerCentT(:,2),tf);
 
 % get final tf and tpcnt values for wind tunnel by taking average
-tfwt = cellfun(@mean, tf);
-tpcntwt = cellfun(@mean, tpcnt);
+tfwt = mean(tf);
+tpcntwt = mean(tpcnt);
 
 %---------------------------------------------------------------------
 % plot data for cp (deltaP / q) vs re
@@ -77,7 +78,7 @@ for i = 1:8
 	leghand(i) = plot(re{i},cp{i},'o-');
 
 	% plot and highlight points for critical reynolds number
-	plot(recr{i}, cprecrconst,'r*','MarkerSize',12);
+	plot(recr(i), cprecrconst,'r*','MarkerSize',12);
 end
 
 title('Pressure Coefficient vs Reynolds Number');
@@ -86,7 +87,9 @@ ylabel('^{\Delta p}/_{q}');
 
 legend([leghand(1) leghand(2) leghand(3) leghand(4) leghand(5) leghand(6) leghand(7) leghand(8)],...
 {'Thur r1','Tues r1','Wed s1-r1','Wed s2-r1','Thur r2','Tues r2','Wed s1-r2', 'Wed s2-r2'},...
-'Location','Northeast'); 
+'Location','Northeast');
+
+text(1.5e5,cprecrconst,'Critical Reynolds Number \rightarrow');
 
 % plot data for TF vs PerCentT, inc critical reynolds numbers found
 fig2 = figure(2);
@@ -94,18 +97,17 @@ hold on;
 grid on;
 
 plot(dataTFvsPerCentT(:,1), dataTFvsPerCentT(:,2));
-
-for i = 1:8
-	plot(tf{i},tpcnt{i},'ro');
-end
-
-plot(tfwt,tpcntwt,'r*');
+plot(tf,tpcnt,'ro');
+plot(tfwt,tpcntwt,'r*','MarkerSize',12);
 
 title('Percent Turbulence vs Turbulence Factor');
 xlabel('TF');
 ylabel('% turbulence');
-%plot(tf{:},tpcnt,'o');
+
+str = sprintf('Session Values giving Avg %% Turbulence for WT = %.2f%%',tpcntwt);
+text(1.35,tpcntwt,'\leftarrow');
+text(1.4,tpcntwt,str);
 
 % save plots to jpg
-%saveas(fig1,'lab02_cp_vs_re.jpg');
-
+saveas(fig1,'lab02_cp_vs_re.jpg');
+saveas(fig2,'lab02_tf_vs_tpcnt.jpg');
