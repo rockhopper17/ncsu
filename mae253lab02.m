@@ -29,11 +29,13 @@ muAir = 1.831e-5;		% Ns
 g = 9.8;				% m/s^2
 diamSphere = 0.2032;	% m
 tfconst = 3.85e5;		% (dimensionless)
+cprecrconst = 1.22;		% pressure coefficient value for looking up critical reynolds number
 
 % from lab 1 - inc vel: Isensor = 0.0121 * Pmanometer + 4.1194
 lab1eqnB = 4.1194;		% y-intercept
 lab1eqnM = 0.0121;		% slope
 
+%---------------------------------------------------------------------
 % calculate delta P from I values using eqn from lab 1 for inc vel to get delta P = P manometer
 deltaP = cellfun(@(x) (x(:,2) - lab1eqnB) ./ lab1eqnM, dataTurb, 'UniformOutput', false);
 
@@ -49,53 +51,42 @@ re = cellfun(@(x) rhoAir * x * diamSphere / muAir, vinf, 'UniformOutput', false)
 % calculate pressure coefficient
 cp = cellfun(@(x,y) x ./ y, deltaP, qinf, 'UniformOutput', false);
 
-% find a point where the pressure coefficient decreases rapidly
-% to get the critical reynolds num
-recridx = cellfun(@(x) findchangepts(x), cp, 'UniformOutput', false);
+% find a point where the pressure coefficient decreases rapidly by
+% interpolating for the Re value at Cp = 1.22
+%recridx = cellfun(@(x) findchangepts(x), cp, 'UniformOutput', false);
+recr = cellfun(@(re,cp) interp1(cp,re,cprecrconst), re, cp, 'UniformOutput', false);
 
-% loop to get actual critical reynolds number values and calculate turbulence factor
-for i = 1:8
-	% lookup reynolds number by index found with findchangepts
-	reval = re{i}(recridx{i});
+% calculate the turbulence factor
+tf = cellfun(@(recr) tfconst ./ recr, recr, 'UniformOutput', false);
 
-	% lookup the corresponding pressure coefficient (delta P)
-	cpval = cp{i}(recridx{i});
+% interpolate to get the percent turbulence value
+tpcnt = cellfun(@(tf) interp1(dataTFvsPerCentT(:,1),dataTFvsPerCentT(:,2),tf), tf, 'UniformOutput', false);
 
-	% calculate the turbulence factor
-	tfval = tfconst / reval;
+% get final tf and tpcnt values for wind tunnel by taking average
+tfwt = cellfun(@mean, tf);
+tpcntwt = cellfun(@mean, tpcnt);
 
-	% interpolate to get the percent turbulence value
-	tpcntval = interp1(dataTFvsPerCentT(:,1),dataTFvsPerCentT(:,2),tfval);
-
-	% save value pairs to cell arrays for plotting
-	recr{i} = [reval,cpval];
-	tf{i} = [tfval,tpcntval];
-end
-
-
-% plot data for cp (delta P) vs re
+%---------------------------------------------------------------------
+% plot data for cp (deltaP / q) vs re
 fig1 = figure(1);
 hold on;
 grid on;
 
 for i = 1:8
-	% plot cp (delta P) vs re, save handle for legend
+	% plot cp (deltaP / q) vs re, save handle for legend
 	leghand(i) = plot(re{i},cp{i},'o-');
 
 	% plot and highlight points for critical reynolds number
-	plot(recr{i}(1), recr{i}(2),'r*','MarkerSize',12);
+	plot(recr{i}, cprecrconst,'r*','MarkerSize',12);
 end
-%plot(re{1}(rec),cp{1}(rec),'*');
-legend([leghand(1) leghand(2) leghand(3) leghand(4) leghand(5) leghand(6) leghand(7) leghand(8)],...
-{'Thur r1','Tues r1','Wed s1-r1','Wed s2-r1','Thur r2','Tues r2','Wed s1-r2', 'Wed s2-r2'},...
-'Location','Northeast'); 
-
-%xlim(xl);
-%ylim(yl);
 
 title('Pressure Coefficient vs Reynolds Number');
 xlabel('Reynolds Number');
 ylabel('^{\Delta p}/_{q}');
+
+legend([leghand(1) leghand(2) leghand(3) leghand(4) leghand(5) leghand(6) leghand(7) leghand(8)],...
+{'Thur r1','Tues r1','Wed s1-r1','Wed s2-r1','Thur r2','Tues r2','Wed s1-r2', 'Wed s2-r2'},...
+'Location','Northeast'); 
 
 % plot data for TF vs PerCentT, inc critical reynolds numbers found
 fig2 = figure(2);
@@ -103,6 +94,16 @@ hold on;
 grid on;
 
 plot(dataTFvsPerCentT(:,1), dataTFvsPerCentT(:,2));
+
+for i = 1:8
+	plot(tf{i},tpcnt{i},'ro');
+end
+
+plot(tfwt,tpcntwt,'r*');
+
+title('Percent Turbulence vs Turbulence Factor');
+xlabel('TF');
+ylabel('% turbulence');
 %plot(tf{:},tpcnt,'o');
 
 % save plots to jpg
