@@ -26,7 +26,6 @@ in_to_m = 0.0254;		% 0.0254 m / 1 in
 psf_to_pa = 47.88;		% 47.88 pa / 1 psf
 rhoAir = 1.185;			% kg/m^3
 muAir = 1.831e-5;		% Ns
-g = 9.8;				% m/s^2
 diamSphere = 0.2032;	% m
 tfconst = 3.85e5;		% (dimensionless)
 cprecrconst = 1.22;		% pressure coefficient value for looking up critical reynolds number
@@ -104,7 +103,7 @@ title('Percent Turbulence vs Turbulence Factor');
 xlabel('TF');
 ylabel('% turbulence');
 
-str = sprintf('Session Values giving Avg %% Turbulence for WT = %.2f%%',tpcntwt);
+str = sprintf('Average values for WT: TF = %.2f, %% Turbulence = %.2f%%',tfwt, tpcntwt);
 text(1.35,tpcntwt,'\leftarrow');
 text(1.4,tpcntwt,str);
 
