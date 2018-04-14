@@ -198,4 +198,10 @@ xlabel('C_{l}');
 ylabel('C_{d}');
 legend([leg5(1) leg5(2)],{'Experiment','Xfoil'},'Location','Northwest');
 
+% save plots to jpg
+saveas(fig1,'lab03_cp_vs_xc.jpg');
+saveas(fig2,'lab03_cl_vs_alpha.jpg');
+saveas(fig3,'lab03_pdef_vs_yc.jpg');
+saveas(fig4,'lab03_cd_vs_alpha.jpg');
+saveas(fig5,'lab03_drag_polar.jpg');
 
