@@ -7,11 +7,11 @@
 close all; clear all; clc;
 
 % constants / conversions / coefficients
-psf_to_pa = 47.88;		% 47.88 pa / 1 psf
-rhoAir = 1.18;			% density air (kg/m^3)
-muAir = 1.846e-5;		% dynamic viscosity air (Pa s)
-TF = 1.2512;			% wind tunnel turbulence factor
 chord = 304.8;			% airfoil chord (mm)
+ReNum = '7e5';			% Reynolds Number - change this to match folder name for 2-5e5, 5e5, 6e5, 7e5
+						% this is utilized as folder name, titles in plots, and jpg file save names
+AlphaLow = -6;			% iterator value for angles of attack - min
+AlphaHigh = 22;			% iterator value for angles of attack - max
 
 %===========================================================================
 % LIFT
@@ -22,10 +22,9 @@ cpData = {};
 clData = [];
 idx = 1;
 
-% Import data for our lab: re_5e5
 % Column definitions in the alpha_*.dat files: Tap Number | Tap X-Coordinate (mm) | Tap Y-Coordinate (mm) | Dynamic Pressure (psf) | 10 Static Gauge Pressure Readings (psf)
-for i = -6:24
-	fname = sprintf('data/Lab3/re_5e5/alpha_%d.dat',i);
+for i = AlphaLow:AlphaHigh
+	fname = sprintf('data/Lab3/re_%s/alpha_%d.dat',ReNum,i);
 	data = load(fname);
 
 	xc = data(:,2) ./ chord;			% x/c value
@@ -35,7 +34,7 @@ for i = -6:24
 	qinf = data(:,4);					% dynamic pressure
 	cp = pgauge ./ qinf;				% pressure coefficient
 	cpAvg = mean(cp,2);			% pass dim value of 2 for averaging columns in each row
-
+	
 	cpData{idx} = [xc cpAvg];
 	idx = idx + 1;
 
@@ -57,11 +56,10 @@ pdefData = {};
 cdData = [];
 idx = 1;
 
-% Import data for our lab: re_5e5
 % Column definitions in the alpha_*.dat files: Spanwise Tap Location (mm) | Dynamic Pressure (psf) | 10 Total Gauge Pressure Readings (psf)
 
-for i = -6:3:24
-	fname = sprintf('data/Lab5/re_5e5/alpha_%d.dat',i);
+for i = AlphaLow:3:AlphaHigh
+	fname = sprintf('data/Lab5/re_%s/alpha_%d.dat',ReNum,i);
 	data = load(fname);
 
 	yc = data(:,1) ./ chord;
@@ -72,7 +70,7 @@ for i = -6:3:24
 	pdef = (qinf - pgauge) ./ qinf;
 	pdefAvg = mean(pdef,2);
 
-	pdefData{idx} = [yc pdefAvg];
+	pdefData{idx} = sortrows([yc pdefAvg]);
 	idx = idx + 1;
 
 	% zero out all negative pdef values as the interim correction
@@ -91,7 +89,8 @@ end
 %===========================================================================
 % XFOIL
 %===========================================================================
-fid = fopen('data/Lab4/red_5e5.pol');
+fname = sprintf('data/Lab4/red_%s.pol',ReNum);
+fid = fopen(fname);
 
 for i = 1:12
 	fgetl(fid);
@@ -121,7 +120,7 @@ for i = 1:numel(cpData)
 end
 
 set(gca,'Ydir','reverse');
-title('Pressure Coefficient vs Normalized x-coordinate (Re 5e5)');
+title(sprintf('Pressure Coefficient vs Normalized x-coordinate (Re %s)',ReNum));
 xlabel('x/c');
 ylabel('Cp');
 
@@ -142,7 +141,7 @@ for i = 1:numReadings
 	plot(clData(:,1),clData(:,2+i),'*b');
 end
 
-title('Lift Coefficient vs Angle of Attack (Re 5e5)');
+title(sprintf('Lift Coefficient vs Angle of Attack (Re %s)',ReNum));
 xlabel('\alpha');
 ylabel('C_{l}');
 legend([leg2(1) leg2(2)],{'Experiment','Xfoil'},'Location','Southeast');
@@ -156,7 +155,7 @@ for i = 1:numel(pdefData)
 	plot(pdefData{i}(:,2), pdefData{i}(:,1));
 end
 
-title('Pressure Defecit vs Normalized y-coordinate (Re 5e5)');
+title(sprintf('Pressure Defecit vs Normalized y-coordinate (Re %s)',ReNum));
 ylabel('y/c');
 xlabel('(p_{\infty} - p_{wake})/q_{\infty}');
 
@@ -176,7 +175,7 @@ for i = 1:numReadings
 	plot(cdData(:,1),cdData(:,2+i),'*b');
 end
 
-title('Drag Coefficient vs Angle of Attack (Re 5e5)');
+title(sprintf('Drag Coefficient vs Angle of Attack (Re %s)',ReNum));
 xlabel('\alpha');
 ylabel('C_{d}');
 legend([leg4(1) leg4(2)],{'Experiment','Xfoil'},'Location','Northwest');
@@ -193,15 +192,15 @@ leg5(1) = plot(clData(1:3:end,2),cdData(:,2),'r--');
 % plot xfoil
 leg5(2) = plot(clXfoil,cdXfoil,'k-');
 
-title('Drag Polar (Re 5e5)');
+title(sprintf('Drag Polar (Re %s)',ReNum));
 xlabel('C_{l}');
 ylabel('C_{d}');
 legend([leg5(1) leg5(2)],{'Experiment','Xfoil'},'Location','Northwest');
 
 % save plots to jpg
-saveas(fig1,'lab03_cp_vs_xc.jpg');
-saveas(fig2,'lab03_cl_vs_alpha.jpg');
-saveas(fig3,'lab03_pdef_vs_yc.jpg');
-saveas(fig4,'lab03_cd_vs_alpha.jpg');
-saveas(fig5,'lab03_drag_polar.jpg');
+saveas(fig1,sprintf('lab03_cp_vs_xc_Re_%s.jpg',ReNum));
+saveas(fig2,sprintf('lab03_cl_vs_alpha_Re_%s.jpg',ReNum));
+saveas(fig3,sprintf('lab03_pdef_vs_yc_Re_%s.jpg',ReNum));
+saveas(fig4,sprintf('lab03_cd_vs_alpha_Re_%s.jpg',ReNum));
+saveas(fig5,sprintf('lab03_drag_polar_Re_%s.jpg',ReNum));
 
