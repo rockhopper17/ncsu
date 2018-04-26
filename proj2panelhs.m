@@ -9,22 +9,27 @@ close all; clear all; clc;
 %c ----- import panel coordinates (x, y (1:npanel+1))
 %c ----- Note:  ordering must be from bottom trailing edge to top trailing edge (clockwise)
 
-airfoilName = 'ME163 Komet';
-fid = fopen('data/me163-panel');  % don't forget to comment out flipud's below for this
-data = cell2mat(textscan(fid,'%f%f','headerlines',1));
-fclose(fid);
-fid = fopen('data/me163-camber');
-dataCamber = cell2mat(textscan(fid,'%f%f%f','headerlines',1)); % comment out camber calcs below for this
-fclose(fid);
+%airfoilName = 'ME163 Komet';
+%fid = fopen('data/me163-panel');  % don't forget to comment out flipud's below for this
+%data = cell2mat(textscan(fid,'%f%f','headerlines',1));
+%fclose(fid);
+%fid = fopen('data/me163-camber');
+%dataCamber = cell2mat(textscan(fid,'%f%f%f','headerlines',1)); % comment out camber calcs below for this
+%fclose(fid);
 
 %airfoilName = 'NACA 0010';
 %fid = fopen('data/naca0010.dat');
 %data = cell2mat(textscan(fid,'%f%f','headerlines',1));
 %fclose(fid);
 
-%airfoilName = 'Prandtl-D';
-%fid = fopen('data/prandtl-d-tip-ns.dat');
-%data = cell2mat(textscan(fid,'%f%f','headerlines',1));
+airfoilName = 'Prandtl-D';
+fid = fopen('data/prandtl-d-root.dat');
+data = cell2mat(textscan(fid,'%f%f','headerlines',1));
+fclose(fid);
+
+%airfoilName = 'Dolphin';
+%fid = fopen('data/dolphin5.dat');
+%data = cell2mat(textscan(fid,'%f%f'));
 %fclose(fid);
 
 % variables
@@ -37,8 +42,8 @@ uinf = 50;					% freestream velocity (m/s)
 x = data(:,1);
 y = data(:,2);
 % for NACA 0010 and prandtl-d need to reorder
-%x = flipud(x);
-%y = flipud(y);
+x = flipud(x);
+y = flipud(y);
 npanel = numel(x)-1;
 
 %-------------------------------------------------------------------------
@@ -132,6 +137,7 @@ end
 %-------------------------------------------------------------------------
 % CL calculations
 %-------------------------------------------------------------------------
+
 % calculate Cl from panel method technique using computed circulation distribution (Kutta-Joukowski)
 dsTotal = sum(ds);	% total surface path length around airfoil
 aidx = 1;
@@ -142,17 +148,23 @@ for alpha = alphaRangeRad
 	aidx = aidx+1;
 end
 
-%-------------------------------------------------------------------------
-% Camber calculations
-%-------------------------------------------------------------------------
 % calculate Cl from thin airfoil theory using camber line
-xcam = dataCamber(:,1);
-ycam = dataCamber(:,2);
-thetacam = dataCamber(:,3);
-%[C,ia,idx] = unique(x,'rows');
-%xcam = C;   % x values are the same for upper and lower
-%ycam = accumarray(idx,y,[],@mean);  % average y value pairs at each x
-%thetacam = acos(1.0 - 2.0*xcam);
+
+% me163-camber file import
+%xcam = dataCamber(:,1);
+%ycam = dataCamber(:,2);
+%thetacam = dataCamber(:,3);
+
+% airfoil specific settings
+[C,ia,idx] = unique(x,'rows');
+xcam = C;   % x values are the same for upper and lower
+ycam = accumarray(idx,y,[],@mean);  % average y value pairs at each x
+
+% dolphin specific settings
+%xcam = x(1:38);
+%ycam = 0.5*(y(1:38)+y(76:-1:39));
+
+thetacam = acos(1.0 - 2.0*xcam);
 npanelcam = numel(xcam) - 1;
 
 aidx = 1;
@@ -164,7 +176,7 @@ for alpha = alphaRangeRad
 		dtheta = thetacam(i+1) - thetacam(i);
 		csum = csum + (df*c2*dtheta);
 	end
-	clTat(aidx) = 2*pi*(alpha + csum);
+	clTat(aidx) = 2*pi*(alpha + csum/pi);
 	aidx = aidx+1;
 end
 
@@ -173,8 +185,6 @@ for i=1:npanel
 	xmid(i) = 0.5*(x(i) + x(i+1));
 	ymid(i) = 0.5*(y(i) + y(i+1));
 end
-
-if false
 
 %-------------------------------------------------------------------------
 % Plot -Cp vs x/c, CL vs alpha
@@ -189,7 +199,13 @@ yyaxis left;
 set(gca,{'ycolor'},{'k'});
 %ylim([-max(max(cp))-2,-min(min(cp))+1]);
 %ylim([-2 20]);
+
+% dolphine specific settings
+%ylim([-200 150]);
+
+% airfoil settings
 ylim([-4 15]);
+
 ylabel('-C_{p}');
 
 colors = {'k','b','g',[.75 0 .75],'r'};
@@ -209,6 +225,7 @@ ylim([-0.1,1.5]);
 ylabel('y/c');
 
 plot(x,y,'k');
+%plot(xcam,ycam,'r--');
 legendInfo{cidx} = 'airfoil';
 
 legend(legendInfo,'location','northeast');
@@ -227,66 +244,93 @@ legend('TAT','Panel Method','location','southeast');
 
 saveas(fig2,fullfile('plots/proj2/',sprintf('proj2_cl_vs_alpha_%s.jpg',strrep(airfoilName,' ','_'))));
 
-end
-
 %-------------------------------------------------------------------------
 % Velocity Magnitude Contours
 %-------------------------------------------------------------------------
 % variables
-alphavelDeg = 0;			% angle of attack in deg for use in velocity mag contour plot
+alphavelDeg = 15;			% angle of attack in deg for use in velocity mag contour plot
 alphavelRad = alphavelDeg*pi/180.0;
-aidxvel = 6;				% index into ss, must match alphavelDeg col (alpha=-5 -> idx=1,.. alpha=0 -> idx=6)
-xoffset = .5;				% x offset distance to put airfoil in middle of vel grid
-yoffset = .5;				% y offset distance to put airfoil in middle of vel grid
-xr = linspace(0,2,200);		% x points for grid
-yr = linspace(0,1,100);		% y points for grid
+aidxvel = 21;				% index into ss, must match alphavelDeg col (alpha=-5 -> idx=1,.. alpha=0 -> idx=6)
+
+% airfoil specific settings
+xoffset = 1.0;				% x offset distance to put airfoil in middle of vel grid
+yoffset = 0.75;				% y offset distance to put airfoil in middle of vel grid
+xr = linspace(0,3,200);		% x points for grid
+yr = linspace(0,1.5,100);		% y points for grid
+
+% dolphin specific settings
+%xoffset = 1.0;				% x offset distance to put airfoil in middle of vel grid
+%yoffset = 1.0;				% y offset distance to put airfoil in middle of vel grid
+%xr = linspace(0,3,200);		% x points for grid
+%yr = linspace(0,2.5,100);		% y points for grid
+
 [xgrid,ygrid] = meshgrid(xr,yr);	% meshgrid for calculating z values
 
 % add offset to midpoints to center airfoil in grid
 xmidvel = xmid + xoffset;
 ymidvel = ymid + yoffset;
 
-% elementary flow streamfunctions in cartesian (x,y)
-psiUniform = @(alpha) uinf * ( cos(alpha)*(ygrid) - sin(alpha)*(xgrid) );
-psiSource = @(x0,y0,lambda) (lambda/(2*pi)) * atan2(ygrid-y0, xgrid-x0);
-psiVortex = @(x0,y0,gamma) (gamma/(2*pi)) * log(sqrt((xgrid-x0).^2 + (ygrid-y0).^2));
-
 % elementary flow velocities in cartesian (u = vel x, v = vel y)
 uUniform = @(alpha) uinf*cos(alpha);
 vUniform = @(alpha) uinf*sin(alpha);
-uSource = @(x0,y0,lambda) (lambda/(2*pi)) * ( (xgrid-x0) ./ ( (xgrid-x0).^2 + (ygrid-y0).^2 ) );
-vSource = @(x0,y0,lambda) (lambda/(2*pi)) * ( (ygrid-y0) ./ ( (xgrid-x0).^2 + (ygrid-y0).^2 ) );
-uVortex = @(x0,y0,gamma) (gamma/(2*pi)) * ( (ygrid-y0) ./ ( (xgrid-x0).^2 + (ygrid-y0).^2 ) );
-vVortex = @(x0,y0,gamma) (-gamma/(2*pi)) * ( (xgrid-x0) ./ ( (xgrid-x0).^2 + (ygrid-y0).^2 ) );
+uSrcVortex = @(xip,yip,plen) 0.5/pi*(atan2(yip,xip-plen)-atan2(yip,xip)); 
+vSrcVortex = @(xip,yip,plen) 0.25/pi*log(((xip-plen).^2 + yip.^2)./(xip.^2 + yip.^2));
 
 % calculate velocities and streamlines for panels
 uTotal = [xgrid*0];
 vTotal = [xgrid*0];
-psiTotal = [xgrid*0];
-gamma = ss(npanel+1,aidxvel);
-for i=1:npanel
-	uTotal = uTotal + uSource(xmidvel(i),ymidvel(i),ss(i,aidxvel)) + uVortex(xmidvel(i),ymidvel(i),gamma);
-	vTotal = vTotal + vSource(xmidvel(i),ymidvel(i),ss(i,aidxvel)) + vVortex(xmidvel(i),ymidvel(i),gamma);
-	psiTotal = psiTotal + psiSource(xmidvel(i),ymidvel(i),ss(i,aidxvel)) + psiVortex(xmidvel(i),ymidvel(i),gamma); 
+
+% use panel method logic to calculate velocities and corresponding streamlines
+for j=1:npanel
+	xip =  tnx(j)*(xgrid-xmidvel(j)) + tny(j)*(ygrid-ymidvel(j));  %x* location in panel coord. system          
+	yip = -tny(j)*(xgrid-xmidvel(j)) + tnx(j)*(ygrid-ymidvel(j));  %y* location in panel coord. system
+	upv = uSrcVortex(xip,yip,ds(j));
+	vpv = vSrcVortex(xip,yip,ds(j));
+	%if (i==j) % to do: will we run into this issue using grid points? probably not..
+		%upv = 0.5;
+		%vpv = 0.0;
+	%end
+	uv = tnx(j)*upv - tny(j)*vpv;  %x component of induced velocity in Cart. system
+	vv = tny(j)*upv + tnx(j)*vpv;  %y component of induced velocity in Cart. system
+	us = -vv; %x component of source velocity
+	vs =  uv; %y component of source velocity
+
+	uTotal = uTotal + (ss(end,aidxvel)*uv) + (ss(j,aidxvel)*us);
+	vTotal = vTotal + (ss(end,aidxvel)*vv) + (ss(j,aidxvel)*vs);
 end
+
+% add uniform vel
 uTotal = uTotal + uUniform(alphavelRad);
 vTotal = vTotal + vUniform(alphavelRad);
 velTotal = sqrt(uTotal.^2 + vTotal.^2);
-psiTotal = psiTotal + psiUniform(alphavelRad);
+
+% calculate streamlines
+
+% airfoil specific settings
+startx = [zeros(15,1);linspace(0,3,10)'];
+starty = [linspace(0,1.5,15)';zeros(10,1)];
+
+% dolphin specific settings
+%startx = [zeros(15,1);linspace(0,3,10)'];
+%starty = [linspace(0,2.5,15)';zeros(10,1)];
+
+psiTotal = stream2(xgrid,ygrid,uTotal,vTotal,startx,starty);
 
 % plot velocity magnitude contours
 fig3 = figure(3);
-velBins = linspace(0,3,50);
+colormap('jet');
+velBins = linspace(0,2,200);
 [C,h] = contourf(xgrid,ygrid,velTotal/uinf,velBins);
 set(h,'LineStyle','none');
 c = colorbar;
 c.Label.String = 'u_{mag} / u_{\infty}';
 title(sprintf('Velocity Magnitude Contours at %s = %d deg. for  %s','\alpha',alphavelDeg,airfoilName));
-caxis([0 3]);
+caxis([0 2]);
 pbaspect([2 1 1]);
 hold on;
-contour(xgrid,ygrid,psiTotal,25,'k-');  % streamlines
-fill(x+xoffset,y+yoffset,'w');  % airfoil shape
+h = streamline(psiTotal);		% streamlines
+set(h,'color','k');
+fill(x+xoffset,y+yoffset,'w');  % airfoil body
 
 saveas(fig3,fullfile('plots/proj2/',sprintf('proj2_velmag_%s.jpg',strrep(airfoilName,' ','_'))));
 
