@@ -29,6 +29,7 @@ subFolders(ismember( {subFolders.name},{'.','..'})) = [];
 %for subfolder = subFolders.name'
 for idxi = 1:numel(subFolders)
 	pd = [];
+	pderr = [];
 	files = dir(fullfile( subFolders(idxi).folder, subFolders(idxi).name, DataFileExtensions));
 
 	for idxj = 1:numel(files)
@@ -43,41 +44,59 @@ for idxi = 1:numel(subFolders)
 
 		y = yRaw * in_to_mm;
 		z = zRaw * in_to_mm;
-	
+		tempK = (tempRaw + degF_to_degR) * degR_to_K;
+		
+		% calculate measured values
 		% using abs here due to anomalous negative reading in q_0-5/z-loc_13.txt, row 88 column 21	
 		pDynamic = abs(pgaugeRaw) * psf_to_pa;
-
-		pTotal = (pgaugeRaw * psf_to_pa) + (pstaticRaw * inHg_to_pa);
-
-		tempK = (tempRaw + degF_to_degR) * degR_to_K;
+		pTotal = pDynamic + (pstaticRaw * inHg_to_pa);
 		rho = pTotal ./ (R * tempK);
 		vel = sqrt(2 * pDynamic ./ rho);
-	
+		
+		% calculate expected values
+		pDynamicBase = qinfRaw * psf_to_pa;
+		pTotalBase = pDynamicBase + (pstaticRaw * inHg_to_pa);
+		rhoBase = pTotalBase ./ (R * tempK);
+		velBase = sqrt(2 * pDynamicBase ./ rho);
+
+		% calculate relative errors
+		errDynamic = abs(pDynamic - pDynamicBase) ./ pDynamicBase * 100;
+		errTotal = abs(pTotal - pTotalBase) ./ pTotalBase * 100;
+		errVel = abs(vel - velBase) ./ velBase * 100;
+		
 		% flatten matrices so we just have one column for each
 		y = y(:);
 		z = z(:);
 		pDynamic = pDynamic(:);
 		pTotal = pTotal(:);
 		vel = vel(:);
+		errDynamic = errDynamic(:);
+		errTotal = errTotal(:);
+		errVel = errVel(:);
 
 		% average duplicate entries and add to pd
 		[C,ia,idx] = unique([y z],'rows');
 		avgDynamic = accumarray(idx,pDynamic,[],@mean);
 		avgTotal = accumarray(idx,pTotal,[],@mean);
 		avgVel = accumarray(idx,vel,[],@mean);
-		pd = [pd; C avgDynamic avgTotal avgVel];
+		avgErrDynamic = accumarray(idx,errDynamic,[],@mean);
+		avgErrTotal = accumarray(idx,errTotal,[],@mean);
+		avgErrVel = accumarray(idx,errVel,[],@mean);
+		pd = [pd; C avgDynamic avgTotal avgVel avgErrDynamic avgErrTotal avgErrVel];
+
 	end
 	
 	pdAll{idxi} = {subFolders(idxi).name,pd};
 end
+
 
 idx = 1; % use this to separate 3 plots for each subfolder (qinf)
 for idxi = 1:numel(subFolders)
 	% modified code sample from Narsipur
 
 	% pull out the data for the folder we are working on
-	folderName = pdAll{idxi}{1};
-	folderName = strrep(folderName,'_',' ');
+	folderNameOrig = pdAll{idxi}{1};
+	folderName = strrep(folderNameOrig,'_',' ');
 	folderName = strrep(folderName,'-','.');
 	pd = pdAll{idxi}{2};
 
@@ -97,84 +116,55 @@ for idxi = 1:numel(subFolders)
 
 	%-------------------------------------------------
 	% plot dynamic pressure distribution
-	z = pd(:,3);
-	% do inteprolation 
-	P = [x,y] ; V = z ;
-	F = scatteredInterpolant(P,V) ;
-	F.Method = 'natural';
-	F.ExtrapolationMethod = 'linear' ;  % none if you dont want to extrapolate
-	% Take points lying insuide the region
-	pq = [X(:),Y(:)] ; 
-	vq = F(pq) ;
-	Z = vq ;
-	Z = reshape(Z,size(X)) ;
+	for idxj = 3:8
+		z = pd(:,idxj);		% pull out the data we are working on this iteration
+		% do inteprolation 
+		P = [x,y] ; V = z ;
+		F = scatteredInterpolant(P,V) ;
+		F.Method = 'natural';
+		F.ExtrapolationMethod = 'linear' ;  % none if you dont want to extrapolate
+		% Take points lying insuide the region
+		pq = [X(:),Y(:)] ; 
+		vq = F(pq) ;
+		Z = vq ;
+		Z = reshape(Z,size(X)) ;
 
-	% Plot
-	colormap('jet');
-	fig = figure(idx);
-	idx = idx + 1;
-	hold all;
-	contourf(X,Y,Z);
-	caxis([min(z) max(z)]);
-	h = colorbar;
-	ylabel(h, 'Dynamic Pressure (Pa)')
-	title(sprintf('Dynamic Pressure Distribution %s',folderName));
-	
-	saveas(fig,sprintf('labFinal_DynamicPressure_%s.jpg',folderName));
-	
-	%-------------------------------------------------
-	% plot total pressure distribution
-	z = pd(:,4);
-	% do inteprolation 
-	P = [x,y] ; V = z ;
-	F = scatteredInterpolant(P,V) ;
-	F.Method = 'natural';
-	F.ExtrapolationMethod = 'linear' ;  % none if you dont want to extrapolate
-	% Take points lying insuide the region
-	pq = [X(:),Y(:)] ; 
-	vq = F(pq) ;
-	Z = vq ;
-	Z = reshape(Z,size(X)) ;
+		% Plot
+		fig = figure();
+		colormap('jet');
+		idx = idx + 1;
+		hold all;
+		contourf(X,Y,Z);
+		caxis([min(z) max(z)]);
+		h = colorbar;
 
-	% Plot
-	colormap('jet');
-	fig = figure(idx);
-	idx = idx + 1;
-	hold all;
-	contourf(X,Y,Z);
-	caxis([min(z) max(z)]);
-	h = colorbar;
-	ylabel(h, 'Total Pressure (Pa)')
-	title(sprintf('Total Pressure Distribution %s',folderName));
-	
-	saveas(fig,sprintf('labFinal_TotalPressure_%s.jpg',folderName));
-	
-	%-------------------------------------------------
-	% plot velocity distribution
-	z = pd(:,5);
-	% do inteprolation 
-	P = [x,y] ; V = z ;
-	F = scatteredInterpolant(P,V) ;
-	F.Method = 'natural';
-	F.ExtrapolationMethod = 'linear' ;  % none if you dont want to extrapolate
-	% Take points lying insuide the region
-	pq = [X(:),Y(:)] ; 
-	vq = F(pq) ;
-	Z = vq ;
-	Z = reshape(Z,size(X)) ;
-
-	% Plot
-	colormap('jet');
-	fig = figure(idx);
-	idx = idx + 1;
-	hold all;
-	contourf(X,Y,Z);
-	caxis([min(z) max(z)]);
-	h = colorbar;
-	ylabel(h, 'Velocity (m/s)')
-	title(sprintf('Velocity Distribution %s',folderName));
-
-	saveas(fig,sprintf('labFinal_Velocity_%s.jpg',folderName));
-	
+		% switch for labels
+		switch idxj
+			case 3
+				ylabel(h, 'Dynamic Pressure (Pa)')
+				title(sprintf('Dynamic Pressure Distribution %s',folderName));
+				saveas(fig,sprintf('plots/LabFinal/labFinal_DynamicPressure_%s.jpg',folderNameOrig));
+			case 6
+				ylabel(h, 'Relative Error (%)')
+				title(sprintf('Relative Error in Dynamic Pressure %s',folderName));
+				saveas(fig,sprintf('plots/LabFinal/labFinal_DynamicPressure_Err_%s.jpg',folderNameOrig));
+			case 4
+				ylabel(h, 'Total Pressure (Pa)')
+				title(sprintf('Total Pressure Distribution %s',folderName));
+				saveas(fig,sprintf('plots/LabFinal/labFinal_TotalPressure_%s.jpg',folderNameOrig));
+			case 7
+				ylabel(h, 'Relative Error (%)')
+				title(sprintf('Relative Error in Total Pressure %s',folderName));
+				saveas(fig,sprintf('plots/LabFinal/labFinal_TotalPressure_Err_%s.jpg',folderNameOrig));
+			case 5
+				ylabel(h, 'Velocity (m/s)')
+				title(sprintf('Velocity Distribution %s',folderName));
+				saveas(fig,sprintf('plots/LabFinal/labFinal_Velocity_%s.jpg',folderNameOrig));
+			case 8
+				ylabel(h, 'Relative Error (%)')
+				title(sprintf('Relative Error in Velocity %s',folderName));
+				saveas(fig,sprintf('plots/LabFinal/labFinal_Velocity_Err_%s.jpg',folderNameOrig));
+		end
+	end
 end
 
