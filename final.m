@@ -3,27 +3,127 @@
 % Final Project - planar n-body problem
 % Due 2018-11-28
 
-% referencing Orbital Mechanics for Engineering Students, Curtis for physical data
+% referencing Orbital Mechanics for Engineering Students, Curtis for some physical data
 
 % clear all vars and plots
 close all; clear all; clc;
 
-% variables to play with - num links, step size, initial conditions
-n = 2;              % number of orbital bodies
+% globals to be used in state file
+global n m
 
+% step size values
 deltaT = 1*3600; % step size (hr * s/hr) [s]
-N = 30*(24*3600)/deltaT;  % num steps days * (hrs/day * s/hr)
-numFrameSkip = 100;		% only capture every numFrameSkip'th frame, animation code takes awhile
+N = 365*2*(24*3600)/deltaT;  % num steps days * (hrs/day * s/hr)
+numFrameSkip = 10;		% only capture every numFrameSkip'th frame, animation code takes awhile
 
 % initial conditions 
-x(1) = 0;  % earth - x init
-x(2) = 0;  % earth - y init
-x(3) = 0;  % moon - x init
-x(4) = 384400;  % moon - y init using avg distance to earth [km]
-x(5) = 0; % x1 dot
-x(6) = 0; % y1 dot
-x(7) = -1.022; % x2 dot - mean orbital velocity of moon [km/s]
-x(8) = 0; % y2 dot
+% ic = 1: sun/earth/moon
+% ic = 2: inner solar system (sun/mercury/venus/earth/mars)
+ic = 1;
+
+if ic == 1
+
+n = 3;  % number of bodies
+m = zeros(1,n);  % masses
+m(1) = 1.9885e30;  % mass of sun [kg]
+m(2) = 5.974e24;    % mass of earth [kg]
+m(3) = 73.48e21;    % mass of moon [kg]
+
+x(1) = 0;  % sun x init
+x(2) = 0;  % sun y init
+x(3) = 0;  % earth - x init
+x(4) = 1.4960e8;  % earth - y init
+x(5) = 0;  % moon - x init
+x(6) = x(4) + 3.844e5;  % moon - y init using avg distance to earth [km]
+
+x(7) = 0; % sun x vel init
+x(8) = 0; % sun y vel init
+x(9) = -29.78;  % earth x vel init - mean orbital velocity [km/s]
+x(10) = 0;  % earth y vel init
+x(11) = x(9) - 1.022; % moon x vel init - mean orbital velocity of moon [km/s]
+x(12) = 0; % moon y vel init
+
+elseif ic == 2
+
+n = 5;  % number of bodies
+m = zeros(1,n);  % masses in [kg]
+m(1) = 1.9885e30;  % sun
+m(2) = 3.302e23;  % mercury
+m(3) = 4.869e24;  % venus
+m(4) = 5.974e24;  % earth 
+m(5) = 6.419e23;  % mars
+
+%http://hyperphysics.phy-astr.gsu.edu/hbase/Solar/soldata2.html
+% positions in [km]
+x(1) = 0;  % sun x init
+x(2) = 0;  % sun y init
+x(3) = 0;  % mercury x init
+x(4) = 5.79e7; % mercury y init
+x(5) = 0;  % venus x init
+x(6) = 1.082e8; % venus y init
+x(7) = 0;  % earth x init
+x(8) = 1.4960e8;  % earth y init
+x(9) = 0;  % mars x init
+x(10) = 2.279e8;  % mars y init
+
+% velocities in [km/s]
+x(11) = 0; % sun x vel init
+x(12) = 0; % sun y vel init
+x(13) = -47.4;  % mercury x vel init (mean)
+x(14) = 0;  % mercury y vel init
+x(15) = -35.0;  % venus x vel init (mean)
+x(16) = 0;  % venus y vel init
+x(17) = -29.8;  % earth x vel init (mean)
+x(18) = 0;  % earth y vel init
+x(19) = -24.1;  % mars x vel init
+x(20) = 0;  % mars y vel init
+
+elseif ic == 3
+
+n = 3;  % number of bodies
+m = zeros(1,n);  % masses
+m(1) = 1.9885e30;  % star 1
+m(2) = 1.9885e30;  % star 2
+m(3) = 5.974e24;  % planet 1
+
+x(1) = -2e7;  % star 1 x init
+x(2) = 0;  % star 1 y init
+x(3) = 2e7;  % star 2 x init
+x(4) = 0;  % star 2 y init
+x(5) = 0;  % planet 1 x init
+x(6) = 5e8;  % planet 1 y init 
+
+x(7) = 0; % star 1 x vel init
+x(8) = -50; % star 2 y vel init
+x(9) = 0;  % star 1 x vel init 
+x(10) = 50;  % star 2 y vel init
+x(11) = -20; % planet 1 x vel init 
+x(12) = 0; % planet 1 y vel init
+
+elseif ic == 4
+
+n = 3;  % number of bodies
+m = zeros(1,n);  % masses
+m(1) = 2e30;  % star 1
+m(2) = 2e30;  % star 2
+m(3) = 2e30;  % planet 1
+
+x(1) = -2e7;  % star 1 x init
+x(2) = 0;  % star 1 y init
+x(3) = 2e7;  % star 2 x init
+x(4) = 0;  % star 2 y init
+x(5) = 0;  % planet 1 x init
+x(6) = 0;  % planet 1 y init 
+
+x(7) = 0.347111; % star 1 x vel init
+x(8) = 0.53278; % star 2 y vel init
+x(9) = 0.347111;  % star 1 x vel init 
+x(10) = 0.53278;  % star 2 y vel init
+x(11) = -2*0.34711; % planet 1 x vel init 
+x(12) = 0; % planet 1 y vel init
+
+
+end
 
 % main integration loop
 % time(i) = vector to hold time values
@@ -54,43 +154,33 @@ title(sprintf('%d-body problem: x position vs y position',n));
 xlabel('x position (km)');
 ylabel('y position (km)');
 
-plot(xgraph(1,:),ygraph(1,:),'.-');
-plot(xgraph(2,:),ygraph(2,:),'.-');
-legend('earth','moon');
+% enlarge moon positions so we can see it orbit eart
+%xgraph(3,:) = xgraph(3,:) * 1.1;
+%ygraph(3,:) = ygraph(3,:) * 1.1;
+
+for i = 1:n
+	plot(xgraph(i,:),ygraph(i,:),'.-');
+end
+%legend('sun','earth','moon');
 
 %end
 
-if false
+%if false
 
 % animation
-% only take every 100th frame for animation, it's not changing enough in between to notice
-%   otherwise this part of code takes forever
-figure(4);
-writerObj = VideoWriter('nlink.avi');
-writerObj.FrameRate = 1/(deltaT*numFrameSkip);
+figure;
+writerObj = VideoWriter('nbodyEarthMoonSun.avi');
+%writerObj.FrameRate = 1/(deltaT*numFrameSkip);
 %writerObj.FrameRate = 30;
+writerObj.FrameRate = N/(30*numFrameSkip);  % N / desired length of movie in sec
 open(writerObj);
 for i = 1:numFrameSkip:N
-	plot(xgraph(i,1),ygraph(i,1),'.','markersize',50);
-	hold on;
-	line([0 xgraph(i,1)],[0 ygraph(i,1)],'color','black','linewidth',2);
+	for j = 1:n
+		plot(xgraph(j,i),ygraph(j,i),'.','markersize',5);
+		if j==1	hold on; end
+	end
+	axis([-2.5e8 2.5e8 -2.5e8 2.5e8]);
 	
-	if numl >= 2
-		plot(xgraph(i,2),ygraph(i,2),'.','markersize',50);
-		line([xgraph(i,1) xgraph(i,2)],[ygraph(i,1) ygraph(i,2)],'color','black','linewidth',2);
-	end
-	if numl >= 3
-		plot(xgraph(i,3),ygraph(i,3),'.','markersize',50);
-		line([xgraph(i,2) xgraph(i,3)],[ygraph(i,2) ygraph(i,3)],'color','black','linewidth',2);
-	end
-
-	if numl == 2
-		axis([-1.25 1.25 0 2.5]);
-	end
-	if numl == 3
-		axis([-2.25 2.25 0 3.5]);
-	end
-	set(gca,'Ydir','reverse');
 	M = getframe;
 	writeVideo(writerObj,M);
 	hold off;
@@ -99,4 +189,4 @@ end
 movie(M);
 close(writerObj);
 
-end
+%end
