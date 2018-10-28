@@ -19,7 +19,7 @@ numFrameSkip = 10;		% only capture every numFrameSkip'th frame, animation code t
 % initial conditions 
 % ic = 1: sun/earth/moon
 % ic = 2: inner solar system (sun/mercury/venus/earth/mars)
-ic = 1;
+ic = 2;
 
 if ic == 1
 
@@ -94,8 +94,8 @@ x(5) = 0;  % planet 1 x init
 x(6) = 5e8;  % planet 1 y init 
 
 x(7) = 0; % star 1 x vel init
-x(8) = -50; % star 2 y vel init
-x(9) = 0;  % star 1 x vel init 
+x(8) = -50; % star 1 y vel init
+x(9) = 0;  % star 2 x vel init 
 x(10) = 50;  % star 2 y vel init
 x(11) = -20; % planet 1 x vel init 
 x(12) = 0; % planet 1 y vel init
@@ -106,21 +106,21 @@ n = 3;  % number of bodies
 m = zeros(1,n);  % masses
 m(1) = 2e30;  % star 1
 m(2) = 2e30;  % star 2
-m(3) = 2e30;  % planet 1
+m(3) = 2e30;  % star 3
 
-x(1) = -2e7;  % star 1 x init
+x(1) = -1e7;  % star 1 x init
 x(2) = 0;  % star 1 y init
-x(3) = 2e7;  % star 2 x init
+x(3) = 1e7;  % star 2 x init
 x(4) = 0;  % star 2 y init
-x(5) = 0;  % planet 1 x init
-x(6) = 0;  % planet 1 y init 
+x(5) = 0;  % star 3 x init
+x(6) = 0;  % star 3 y init 
 
-x(7) = 0.347111; % star 1 x vel init
-x(8) = 0.53278; % star 2 y vel init
-x(9) = 0.347111;  % star 1 x vel init 
-x(10) = 0.53278;  % star 2 y vel init
-x(11) = -2*0.34711; % planet 1 x vel init 
-x(12) = 0; % planet 1 y vel init
+x(7) = 125*0.34711; % star 1 x vel init
+x(8) = 125*0.53278; % star 1 y vel init
+x(9) = x(7);  % star 2 x vel init 
+x(10) = x(8);  % star 2 y vel init
+x(11) = -2*x(7); % star 3 x vel init 
+x(12) = -2*x(8); % star 3 y vel init
 
 
 end
@@ -169,6 +169,7 @@ end
 
 % animation
 figure;
+%hold on;
 writerObj = VideoWriter('nbodyEarthMoonSun.avi');
 %writerObj.FrameRate = 1/(deltaT*numFrameSkip);
 %writerObj.FrameRate = 30;
@@ -176,13 +177,19 @@ writerObj.FrameRate = N/(30*numFrameSkip);  % N / desired length of movie in sec
 open(writerObj);
 for i = 1:numFrameSkip:N
 	for j = 1:n
-		plot(xgraph(j,i),ygraph(j,i),'.','markersize',5);
+		plot(xgraph(j,i),ygraph(j,i),'.','markersize',50);
 		if j==1	hold on; end
 	end
-	axis([-2.5e8 2.5e8 -2.5e8 2.5e8]);
+
+	if ic == 4
+		axis([-1.5e7 1.5e7 -1.5e7 1.5e7]);
+	else
+		axis([-2.5e8 2.5e8 -2.5e8 2.5e8]);
+	end
 	
 	M = getframe;
 	writeVideo(writerObj,M);
+	delete(findobj(gca, 'type', 'marker'));
 	hold off;
 end
 
