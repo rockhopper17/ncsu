@@ -8,18 +8,29 @@
 % clear all vars and plots
 close all; clear all; clc;
 
+% set some colors
+colormap('autumn');
+colors = get(gca,'colororder');
+
 % globals to be used in state file
-global n m
+global n m G
+
+% universal gravitational constant [km^3/kg/s^2]
+G = 6.67259e-20;      
 
 % step size values
 deltaT = 1*3600; % step size (hr * s/hr) [s]
-N = 365*2*(24*3600)/deltaT;  % num steps days * (hrs/day * s/hr)
+N = 60*(24*3600)/deltaT;  % num steps days * (hrs/day * s/hr)
 numFrameSkip = 10;		% only capture every numFrameSkip'th frame, animation code takes awhile
 
 % initial conditions 
 % ic = 1: sun/earth/moon
 % ic = 2: inner solar system (sun/mercury/venus/earth/mars)
-ic = 2;
+% ic = 3: 3 body - 2 stars orbiting each other + 1 planet orbiting way out
+% ic = 4: 3body figure 8s w real m,G values (blows up sometime after 60 days)
+% ic = 5: 3body periodic solns w m=1, G=1
+% ic = 6: multiple solar systems interacting
+ic = 6;
 
 if ic == 1
 
@@ -123,6 +134,114 @@ x(11) = -2*x(7); % star 3 x vel init
 x(12) = -2*x(8); % star 3 y vel init
 
 
+elseif ic == 5
+
+% this uses the data for 3-body orbits
+% where G = 1
+% http://three-body.ipb.ac.rs/
+
+% figure 8
+%p1 = 0.347111
+%p2 = 0.532728
+%T = 6.32449
+
+% butterfly (1)
+%p1 = 0.415251
+%p2 = 0.291346
+%T = 47.925856
+
+% butterfly (1)
+p1 = 0.184279
+p2 = 0.587188
+T = 63.534541
+
+G = 1;
+deltaT = 0.1; % step size (hr * s/hr) [s]
+N = T*100/deltaT;  % num steps days * (hrs/day * s/hr)
+numFrameSkip = 10;		% only capture every numFrameSkip'th frame, animation code takes awhile
+
+n = 3;  % number of bodies
+m = zeros(1,n);  % masses
+m(1) = 1;  % star 1
+m(2) = 1;  % star 2
+m(3) = 1;  % star 3
+
+x(1) = -1;  % star 1 x init
+x(2) = 0;  % star 1 y init
+x(3) = 1;  % star 2 x init
+x(4) = 0;  % star 2 y init
+x(5) = 0;  % star 3 x init
+x(6) = 0;  % star 3 y init 
+
+x(7) = p1; % star 1 x vel init
+x(8) = p2; % star 1 y vel init
+x(9) = p1;  % star 2 x vel init 
+x(10) = p2;  % star 2 y vel init
+x(11) = -2*p1; % star 3 x vel init 
+x(12) = -2*p2; % star 3 y vel init
+
+elseif ic == 6
+
+deltaT = 12*3600; % step size (hr * s/hr) [s]
+N = 365*35*(24*3600)/deltaT;  % num steps days * (hrs/day * s/hr)
+numFrameSkip = 100;		% only capture every numFrameSkip'th frame, animation code takes awhile
+
+n = 5*3;  % number of bodies
+m = zeros(1,n);  % masses in [kg]
+m(1) = 1.9885e30;  % sun
+m(2) = 3.302e23;  % mercury
+m(3) = 4.869e24;  % venus
+m(4) = 5.974e24;  % earth 
+m(5) = 6.419e23;  % mars
+
+m(6:10) = m(1:5);
+m(11:15) = m(1:5);
+%m(16:20) = m(1:5);
+%m(21:25) = m(1:5);
+
+%http://hyperphysics.phy-astr.gsu.edu/hbase/Solar/soldata2.html
+% positions in [km]
+x(1) = 0;  % sun x init
+x(2) = 0;  % sun y init
+x(3) = 0;  % mercury x init
+x(4) = 5.79e7; % mercury y init
+x(5) = 0;  % venus x init
+x(6) = 1.082e8; % venus y init
+x(7) = 0;  % earth x init
+x(8) = 1.4960e8;  % earth y init
+x(9) = 0;  % mars x init
+x(10) = 2.279e8;  % mars y init
+
+posoff = 5e9;
+x(11:20) = x(1:10) + posoff;
+x(21:2:29) = x(1:2:9) - posoff;
+x(22:2:30) = x(2:2:10) + posoff;
+%x(31:2:39) = x(1:2:9) - posoff;
+%x(32:2:40) = x(2:2:10) - posoff;
+%x(41:2:49) = x(1:2:9) + posoff;
+%x(42:2:50) = x(2:2:10) - posoff;
+
+% velocities in [km/s]
+x(2*n+1) = 0; % sun x vel init
+x(2*n+2) = 0; % sun y vel init
+x(2*n+3) = -47.4;  % mercury x vel init (mean)
+x(2*n+4) = 0;  % mercury y vel init
+x(2*n+5) = -35.0;  % venus x vel init (mean)
+x(2*n+6) = 0;  % venus y vel init
+x(2*n+7) = -29.8;  % earth x vel init (mean)
+x(2*n+8) = 0;  % earth y vel init
+x(2*n+9) = -24.1;  % mars x vel init
+x(2*n+10) = 0;  % mars y vel init
+
+veloff = 2;
+x(2*n+11:2*n+20) = x(2*n+1:2*n+10) - veloff;
+x(2*n+21:2:2*n+29) = x(2*n+1:2:2*n+9) + veloff;
+x(2*n+22:2:2*n+30) = x(2*n+2:2:2*n+10) - veloff;
+%x(2*n+31:2:2*n+39) = x(2*n+1:2:2*n+9) + veloff;
+%x(2*n+32:2:2*n+40) = x(2*n+2:2:2*n+10) + veloff;
+%x(2*n+41:2:2*n+49) = x(2*n+1:2:2*n+9) - veloff;
+%x(2*n+42:2:2*n+50) = x(2*n+2:2:2*n+10) + veloff;
+
 end
 
 % main integration loop
@@ -147,7 +266,7 @@ end
 
 % plot x position vs y position for moon
 fig1 = figure(1);
-colormap(jet); 
+%colormap(jet); 
 hold on;
 grid on;
 title(sprintf('%d-body problem: x position vs y position',n));
@@ -161,39 +280,76 @@ ylabel('y position (km)');
 for i = 1:n
 	plot(xgraph(i,:),ygraph(i,:),'.-');
 end
+set(gca,'color','black');
 %legend('sun','earth','moon');
 
 %end
 
-%if false
+if false
 
 % animation
 figure;
-%hold on;
-writerObj = VideoWriter('nbodyEarthMoonSun.avi');
+hold on;
+writerObj = VideoWriter('nbody3sol.avi');
 %writerObj.FrameRate = 1/(deltaT*numFrameSkip);
 %writerObj.FrameRate = 30;
 writerObj.FrameRate = N/(30*numFrameSkip);  % N / desired length of movie in sec
 open(writerObj);
-for i = 1:numFrameSkip:N
-	for j = 1:n
-		plot(xgraph(j,i),ygraph(j,i),'.','markersize',50);
-		if j==1	hold on; end
-	end
+if ic == 4
+	axis([-1.5e7 1.5e7 -1.5e7 1.5e7]);
+elseif ic == 5
+	axis([-1.5 1.5 -1.5 1.5]);
+elseif ic == 6
+	axis([-1.5e10 1.5e10 -1e9 6e9]);
+else
+	axis([-2.5e8 2.5e8 -2.5e8 2.5e8]);
+end
 
-	if ic == 4
-		axis([-1.5e7 1.5e7 -1.5e7 1.5e7]);
-	else
-		axis([-2.5e8 2.5e8 -2.5e8 2.5e8]);
+set(gca,'color','black');
+
+% first plot all the discs and just change their positions later on
+%   hard code some colors to fit some scenarios
+for j = 1:n
+	p(j) = plot(xgraph(j,1),ygraph(j,1),'.','markersize',25);
+	%if j==1
+		%%p(j) = plot(xgraph(j,1),ygraph(j,1),'.','markersize',50,'color',colors(1,:));
+		%p(j) = plot(xgraph(j,1),ygraph(j,1),'.','markersize',50,'color','red');
+	%elseif j==2
+		%p(j) = plot(xgraph(j,1),ygraph(j,1),'.g','markersize',50,'color','green');
+	%elseif j==3
+		%p(j) = plot(xgraph(j,1),ygraph(j,1),'.b','markersize',50,'color','blue');
+	%else
+		%p(j) = plot(xgraph(j,1),ygraph(j,1),'.','markersize',50);
+	%end
+end
+
+% start at 1*numFrameSkip, first point already plotted
+% now plot all the orbit lines following the discs so the orbits are created as the disc moves
+% keep the same colors used above for the first few discs
+for i = numFrameSkip:numFrameSkip:N
+	for j = 1:n
+		plot(xgraph(j,1:numFrameSkip:i),ygraph(j,1:numFrameSkip:i),'-');
+		%if j==1
+			%plot(xgraph(j,1:numFrameSkip:i),ygraph(j,1:numFrameSkip:i),'-r');
+		%elseif j==2
+			%plot(xgraph(j,1:numFrameSkip:i),ygraph(j,1:numFrameSkip:i),'-g');
+		%elseif j==3
+			%plot(xgraph(j,1:numFrameSkip:i),ygraph(j,1:numFrameSkip:i),'-b');
+		%else
+			%plot(xgraph(j,1:numFrameSkip:i),ygraph(j,1:numFrameSkip:i),'-');
+		%end
+
+		p(j).XData = xgraph(j,i);
+		p(j).YData = ygraph(j,i);
+		%drawnow;
 	end
 	
 	M = getframe;
 	writeVideo(writerObj,M);
-	delete(findobj(gca, 'type', 'marker'));
-	hold off;
+	%hold off;
 end
 
 movie(M);
 close(writerObj);
 
-%end
+end
