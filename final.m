@@ -22,9 +22,14 @@ G = 6.67259e-20;
 deltaT = 1*3600; % step size (hr * s/hr) [s]
 N = 2*365*(24*3600)/deltaT;  % num steps days * (hrs/day * s/hr)
 
-% set this to true for writing out a movie file
-makemovie = false;
-numFrameSkip = 4;  % only capture every numFrameSkip'th frame, animation code takes awhile
+% only capture every numFrameSkip'th frame, animation code takes awhile
+%numFrameSkip = 100;  % default number of frames to skip
+% base the frame rate on the inner sol and calculate others to match this
+% 30 seconds for each scenario
+%frate = N/(30*numFrameSkip);
+frate = 30;  % frame rate for movie file
+runtime = 20;  % default num seconds to run each scenario
+numframes = frate * runtime;  % total number of frames to capture
 
 % ****************************************************************************************
 % initial conditions 
@@ -35,16 +40,36 @@ numFrameSkip = 4;  % only capture every numFrameSkip'th frame, animation code ta
 % ic = 4: 3body figure 8s w real m,G values (blows up sometime after 60 days)
 % ic = 5: 3body periodic solns w m=1, G=1
 % ic = 6: multiple solar systems interacting
+% ****************************************************************************************
 movienames = {'SunEarthMoon','innersol','3body1planet','3bodyFig8Real',...
-    '3bodyFig8G1','multiplesols'};
+    '3bodyFig8G1','multiplesols'};  % used for plot title
 
-ic = 2;  % set which scenario to execute ***********
+%ic = 2;  % set which scenario to execute ***********
+iclist = [2 5];  % list of scenarios to execute in order (for presentation)
+makemovie = true; % set this to true for writing out a movie file
+
+% loop scenarios to concatenate a movie file, lookup in the iclist
+for icidx = 1:length(iclist)
+
+ic = iclist(icidx);  % set which scenario to execute currently
+
+if makemovie == true
+	% animation - open movie file now so we can concatenate multiple scenarios
+	%writerObj = VideoWriter(char(movienames(ic)));
+	writerObj = VideoWriter('Navratil-Tran-ThreeBodyPblmOrbits.avi');
+	%writerObj.FrameRate = 1/(deltaT*numFrameSkip);
+	%writerObj.FrameRate = 30;
+	writerObj.FrameRate = frate;  % N / desired length of movie in sec
+	open(writerObj);
+end
 
 % switch on ic (initial conditions) for different scenarios
 if ic == 1
 
 	n = 3;  % number of bodies
 	m = zeros(1,n);  % masses
+	x = zeros(1,4*n);  % state space variables
+
 	m(1) = 1.9885e30;  % mass of sun [kg]
 	m(2) = 5.974e24;    % mass of earth [kg]
 	m(3) = 73.48e21;    % mass of moon [kg]
@@ -67,6 +92,8 @@ elseif ic == 2
 
 	n = 5;  % number of bodies
 	m = zeros(1,n);  % masses in [kg]
+	x = zeros(1,4*n);  % state space variables
+	
 	m(1) = 1.9885e30;  % sun
 	m(2) = 3.302e23;  % mercury
 	m(3) = 4.869e24;  % venus
@@ -106,7 +133,9 @@ elseif ic == 3
 	n = 3;  % number of bodies
 	
 	m = zeros(1,n);  % masses
-	m(1) = 1.9885e30;  % star 1
+	x = zeros(1,4*n);  % state space variables
+	
+	km(1) = 1.9885e30;  % star 1
 	m(2) = 1.9885e30;  % star 2
 	m(3) = 5.974e24;  % planet 1
 
@@ -132,6 +161,8 @@ elseif ic == 4
 	n = 3;  % number of bodies
 	
 	m = zeros(1,n);  % masses
+	x = zeros(1,4*n);  % state space variables
+	
 	m(1) = 2e30;  % star 1
 	m(2) = 2e30;  % star 2
 	m(3) = 2e30;  % star 3
@@ -178,6 +209,8 @@ elseif ic == 5
 
 	n = 3;  % number of bodies
 	m = zeros(1,n);  % masses
+	x = zeros(1,4*n);  % state space variables
+	
 	m(1) = 1;  % star 1
 	m(2) = 1;  % star 2
 	m(3) = 1;  % star 3
@@ -204,6 +237,8 @@ elseif ic == 6
 
 	n = 5*3;  % number of bodies
 	m = zeros(1,n);  % masses in [kg]
+	x = zeros(1,4*n);  % state space variables
+	
 	m(1) = 1.9885e30;  % sun
 	m(2) = 3.302e23;  % mercury
 	m(3) = 4.869e24;  % venus
@@ -280,7 +315,7 @@ end
 % ****************************************************************************************
 % plot x position vs y position
 % ****************************************************************************************
-fig1 = figure(1);
+figure;
 hold on;
 grid on;
 %title(sprintf('%d-body problem: x position vs y position',n));
@@ -292,7 +327,7 @@ ylabel('y position (km)');
 %xgraph(3,:) = xgraph(3,:) * 1.1;
 %ygraph(3,:) = ygraph(3,:) * 1.1;
 
-if ic==2
+if ic==2222222
 	% inner solar system
 	plot(xgraph(1,:),ygraph(1,:),'.','markersize',50,'color','yellow');
 	plot(xgraph(2,:),ygraph(2,:),'.-','color','magenta');	
@@ -317,75 +352,76 @@ elseif ic == 6
 else
 	axis([-2.5e8 2.5e8 -2.5e8 2.5e8]);
 end
+drawnow;
 
 % ****************************************************************************************
 % animation code
 % ****************************************************************************************
 if makemovie == true
-
-% animation
-figure;
-hold on;
-writerObj = VideoWriter(char(movienames(ic)));
-%writerObj.FrameRate = 1/(deltaT*numFrameSkip);
-%writerObj.FrameRate = 30;
-writerObj.FrameRate = N/(30*numFrameSkip);  % N / desired length of movie in sec
-open(writerObj);
-if ic == 4
-	axis([-1.5e7 1.5e7 -1.5e7 1.5e7]);
-elseif ic == 5
-	axis([-1.5 1.5 -1.5 1.5]);
-elseif ic == 6
-	axis([-1.5e10 1.5e10 -1e9 6e9]);
-else
-	axis([-2.5e8 2.5e8 -2.5e8 2.5e8]);
-end
-
-set(gca,'color','black');
-
-% first plot all the discs and just change their positions later on
-for j = 1:n
-	p(j) = plot(xgraph(j,1),ygraph(j,1),'.','markersize',50);
-	%if j==1
-		%%p(j) = plot(xgraph(j,1),ygraph(j,1),'.','markersize',50,'color',colors(1,:));
-		%p(j) = plot(xgraph(j,1),ygraph(j,1),'.','markersize',50,'color','red');
-	%elseif j==2
-		%p(j) = plot(xgraph(j,1),ygraph(j,1),'.g','markersize',50,'color','green');
-	%elseif j==3
-		%p(j) = plot(xgraph(j,1),ygraph(j,1),'.b','markersize',50,'color','blue');
-	%else
-		%p(j) = plot(xgraph(j,1),ygraph(j,1),'.','markersize',50);
-	%end
-end
-
-% start at 1*numFrameSkip, first point already plotted
-% now plot all the orbit lines following the discs so the orbits are created as the disc moves
-% keep the same colors used above for the first few discs
-for i = numFrameSkip:numFrameSkip:N
-	for j = 1:n
-		plot(xgraph(j,1:numFrameSkip:i),ygraph(j,1:numFrameSkip:i),'-w');
-		%if j==1
-			%plot(xgraph(j,1:numFrameSkip:i),ygraph(j,1:numFrameSkip:i),'-r');
-		%elseif j==2
-			%plot(xgraph(j,1:numFrameSkip:i),ygraph(j,1:numFrameSkip:i),'-g');
-		%elseif j==3
-			%plot(xgraph(j,1:numFrameSkip:i),ygraph(j,1:numFrameSkip:i),'-b');
-		%else
-			%plot(xgraph(j,1:numFrameSkip:i),ygraph(j,1:numFrameSkip:i),'-');
-		%end
-
-		p(j).XData = xgraph(j,i);
-		p(j).YData = ygraph(j,i);
-		drawnow;
+	% setup plot
+	figure;
+	hold on;
+	if ic == 4
+		axis([-1.5e7 1.5e7 -1.5e7 1.5e7]);
+	elseif ic == 5
+		axis([-1.5 1.5 -1.5 1.5]);
+	elseif ic == 6
+		axis([-1.5e10 1.5e10 -1e9 6e9]);
+	else
+		axis([-2.5e8 2.5e8 -2.5e8 2.5e8]);
 	end
-	
-	M = getframe;
-	writeVideo(writerObj,M);
-	%hold off;
-end
 
-movie(M);
-close(writerObj);
+	set(gca,'color','black');
+
+	% first plot all the discs and just change their positions later on
+	for j = 1:n
+		p(j) = plot(xgraph(j,1),ygraph(j,1),'.','markersize',50);
+		%if j==1
+			%%p(j) = plot(xgraph(j,1),ygraph(j,1),'.','markersize',50,'color',colors(1,:));
+			%p(j) = plot(xgraph(j,1),ygraph(j,1),'.','markersize',50,'color','red');
+		%elseif j==2
+			%p(j) = plot(xgraph(j,1),ygraph(j,1),'.g','markersize',50,'color','green');
+		%elseif j==3
+			%p(j) = plot(xgraph(j,1),ygraph(j,1),'.b','markersize',50,'color','blue');
+		%else
+			%p(j) = plot(xgraph(j,1),ygraph(j,1),'.','markersize',50);
+		%end
+	end
+
+	% start at 1*numFrameSkip, first point already plotted
+	% now plot all the orbit lines following the discs so the orbits are created as the disc moves
+	% keep the same colors used above for the first few discs
+	numFrameSkip = floor(N/numframes);
+	for i = numFrameSkip:numFrameSkip:numframes*numFrameSkip
+		for j = 1:n
+			plot(xgraph(j,1:numFrameSkip:i),ygraph(j,1:numFrameSkip:i),'-w');
+			%if j==1
+				%plot(xgraph(j,1:numFrameSkip:i),ygraph(j,1:numFrameSkip:i),'-r');
+			%elseif j==2
+				%plot(xgraph(j,1:numFrameSkip:i),ygraph(j,1:numFrameSkip:i),'-g');
+			%elseif j==3
+				%plot(xgraph(j,1:numFrameSkip:i),ygraph(j,1:numFrameSkip:i),'-b');
+			%else
+				%plot(xgraph(j,1:numFrameSkip:i),ygraph(j,1:numFrameSkip:i),'-');
+			%end
+
+			p(j).XData = xgraph(j,i);
+			p(j).YData = ygraph(j,i);
+			drawnow;
+		end
+		
+		M = getframe;
+		writeVideo(writerObj,M);
+		%hold off;
+	end
 
 end  % end animation code
+
+end % end ic iteration
+
+if makemovie == true
+	movie(M);
+	close(writerObj);
+end
+
 
