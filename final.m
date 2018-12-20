@@ -23,12 +23,13 @@ deltaT = 1*3600; % step size (hr * s/hr) [s]
 N = 2*365*(24*3600)/deltaT;  % num steps days * (hrs/day * s/hr)
 
 % only capture every numFrameSkip'th frame, animation code takes awhile
-%numFrameSkip = 100;  % default number of frames to skip
+%numFrameSkip = 25;  % default number of frames to skip
+%numFrameSkipMult = 1;  % default multiplier on number of frames to skip
 % base the frame rate on the inner sol and calculate others to match this
 % 30 seconds for each scenario
-%frate = N/(30*numFrameSkip);
-frate = 30;  % frame rate for movie file
-runtime = 20;  % default num seconds to run each scenario
+runtime = 30;  % default num seconds to run each scenario
+%frate = N/(30*numFrameSkip);  % frame rate
+frate = 60;  % frame rate for movie file, hard coded so all match when concatenating
 numframes = frate * runtime;  % total number of frames to capture
 
 % ****************************************************************************************
@@ -40,28 +41,21 @@ numframes = frate * runtime;  % total number of frames to capture
 % ic = 4: 3body figure 8s w real m,G values (blows up sometime after 60 days)
 % ic = 5: 3body periodic solns w m=1, G=1
 % ic = 6: multiple solar systems interacting
+% ic = 7: solar system with black hole
 % ****************************************************************************************
 movienames = {'SunEarthMoon','innersol','3body1planet','3bodyFig8Real',...
-    '3bodyFig8G1','multiplesols'};  % used for plot title
+    '3bodyFig8G1','multiplesols','BlackHole'};
 
-%ic = 2;  % set which scenario to execute ***********
-iclist = [2 5];  % list of scenarios to execute in order (for presentation)
-makemovie = true; % set this to true for writing out a movie file
+%iclist = [2 5];  % list of scenarios to execute in order (for presentation)
 
 % loop scenarios to concatenate a movie file, lookup in the iclist
-for icidx = 1:length(iclist)
+% doing this in vlc now, just manually do one scenario at a time
+%for icidx = 1:length(iclist)
+%ic = iclist(icidx);  % set which scenario to execute currently
 
-ic = iclist(icidx);  % set which scenario to execute currently
+ic = 2;  % set which scenario to execute ***********
 
-if makemovie == true
-	% animation - open movie file now so we can concatenate multiple scenarios
-	%writerObj = VideoWriter(char(movienames(ic)));
-	writerObj = VideoWriter('Navratil-Tran-ThreeBodyPblmOrbits.avi');
-	%writerObj.FrameRate = 1/(deltaT*numFrameSkip);
-	%writerObj.FrameRate = 30;
-	writerObj.FrameRate = frate;  % N / desired length of movie in sec
-	open(writerObj);
-end
+makemovie = true; % set this to true for writing out a movie file
 
 % switch on ic (initial conditions) for different scenarios
 if ic == 1
@@ -90,7 +84,10 @@ if ic == 1
 
 elseif ic == 2
 
-	n = 5;  % number of bodies
+	%numFrameSkip = 25;
+
+	n = 6;  % number of bodies total
+	numbodies = 6;  % num unique bodies
 	m = zeros(1,n);  % masses in [kg]
 	x = zeros(1,4*n);  % state space variables
 	
@@ -99,6 +96,7 @@ elseif ic == 2
 	m(3) = 4.869e24;  % venus
 	m(4) = 5.974e24;  % earth 
 	m(5) = 6.419e23;  % mars
+	m(6) = 358;  % mars
 
 	%http://hyperphysics.phy-astr.gsu.edu/hbase/Solar/soldata2.html
 	% positions in [km]
@@ -111,19 +109,23 @@ elseif ic == 2
 	x(7) = 0;  % earth x init
 	x(8) = 1.4960e8;  % earth y init
 	x(9) = 0;  % mars x init
-	x(10) = 2.279e8;  % mars y init
+	x(10) = -2.279e8;  % mars y init
+	x(11) = 0;  % rocket x init (on earth)
+	x(12) = 1.4960e8;  % rocket y init (on earth)
 
 	% velocities in [km/s]
-	x(11) = 0; % sun x vel init
-	x(12) = 0; % sun y vel init
-	x(13) = -47.4;  % mercury x vel init (mean)
-	x(14) = 0;  % mercury y vel init
-	x(15) = -35.0;  % venus x vel init (mean)
-	x(16) = 0;  % venus y vel init
-	x(17) = -29.8;  % earth x vel init (mean)
-	x(18) = 0;  % earth y vel init
-	x(19) = -24.1;  % mars x vel init
-	x(20) = 0;  % mars y vel init
+	x(13) = 0; % sun x vel init
+	x(14) = 0; % sun y vel init
+	x(15) = -47.4;  % mercury x vel init (mean)
+	x(16) = 0;  % mercury y vel init
+	x(17) = -35.0;  % venus x vel init (mean)
+	x(18) = 0;  % venus y vel init
+	x(19) = -29.8;  % earth x vel init (mean)
+	x(20) = 0;  % earth y vel init
+	x(21) = 24.1;  % mars x vel init
+	x(22) = 0;  % mars y vel init
+	x(23) = -29.8;  % rocket x init
+	x(24) = 0;  % rocket y init
 
 elseif ic == 3
 
@@ -156,7 +158,8 @@ elseif ic == 3
 elseif ic == 4
 
 	deltaT = 1*3600; % step size (hr * s/hr) [s]
-	N = 60*(24*3600)/deltaT;  % num steps days * (hrs/day * s/hr)
+	N = 110*(24*3600)/deltaT;  % num steps days * (hrs/day * s/hr)
+	%numFrameSkip = 2; % number for frames to skip for animation
 
 	n = 3;  % number of bodies
 	
@@ -174,8 +177,8 @@ elseif ic == 4
 	x(5) = 0;  % star 3 x init
 	x(6) = 0;  % star 3 y init 
 
-	x(7) = 125*0.34711; % star 1 x vel init
-	x(8) = 125*0.53278; % star 1 y vel init
+	x(7) = 100*0.35; % star 1 x vel init
+	x(8) = 100*0.54; % star 1 y vel init
 	x(9) = x(7);  % star 2 x vel init 
 	x(10) = x(8);  % star 2 y vel init
 	x(11) = -2*x(7); % star 3 x vel init 
@@ -203,9 +206,9 @@ elseif ic == 5
 	%T = 63.534541
 
 	G = 1;
-	deltaT = 0.1; % step size (hr * s/hr) [s]
-	N = T*100/deltaT;  % num steps days * (hrs/day * s/hr)
-	numFrameSkip = 1; % only capture every numFrameSkip'th frame, animation code takes awhile
+	deltaT = 0.01; % step size 
+	N = T*1/deltaT;  % period * num iterations to display / step size
+	%numFrameSkip = 1; % number for frames to skip for animation
 
 	n = 3;  % number of bodies
 	m = zeros(1,n);  % masses
@@ -232,10 +235,11 @@ elseif ic == 5
 elseif ic == 6
 
 	deltaT = 12*3600; % step size (hr * s/hr) [s]
-	N = 365*35*(24*3600)/deltaT;  % num steps days * (hrs/day * s/hr)
-	numFrameSkip = 100;		% only capture every numFrameSkip'th frame, animation code takes awhile
+	N = 365*7*(24*3600)/deltaT;  % num steps days * (hrs/day * s/hr)
+	%numFrameSkip = 5;		% only capture every numFrameSkip'th frame, animation code takes awhile
 
-	n = 5*3;  % number of bodies
+	numbodies = 5;  % number of solar systems
+	n = 5*numbodies;  % number of bodies
 	m = zeros(1,n);  % masses in [kg]
 	x = zeros(1,4*n);  % state space variables
 	
@@ -247,8 +251,8 @@ elseif ic == 6
 
 	m(6:10) = m(1:5);
 	m(11:15) = m(1:5);
-	%m(16:20) = m(1:5);
-	%m(21:25) = m(1:5);
+	m(16:20) = m(1:5);
+	m(21:25) = m(1:5);
 
 	%http://hyperphysics.phy-astr.gsu.edu/hbase/Solar/soldata2.html
 	% positions in [km]
@@ -263,14 +267,14 @@ elseif ic == 6
 	x(9) = 0;  % mars x init
 	x(10) = 2.279e8;  % mars y init
 
-	posoff = 5e9;
+	posoff = 1.5e9;
 	x(11:20) = x(1:10) + posoff;
 	x(21:2:29) = x(1:2:9) - posoff;
 	x(22:2:30) = x(2:2:10) + posoff;
-	%x(31:2:39) = x(1:2:9) - posoff;
-	%x(32:2:40) = x(2:2:10) - posoff;
-	%x(41:2:49) = x(1:2:9) + posoff;
-	%x(42:2:50) = x(2:2:10) - posoff;
+	x(31:2:39) = x(1:2:9) - posoff;
+	x(32:2:40) = x(2:2:10) - posoff;
+	x(41:2:49) = x(1:2:9) + posoff;
+	x(42:2:50) = x(2:2:10) - posoff;
 
 	% velocities in [km/s]
 	x(2*n+1) = 0; % sun x vel init
@@ -288,11 +292,60 @@ elseif ic == 6
 	x(2*n+11:2*n+20) = x(2*n+1:2*n+10) - veloff;
 	x(2*n+21:2:2*n+29) = x(2*n+1:2:2*n+9) + veloff;
 	x(2*n+22:2:2*n+30) = x(2*n+2:2:2*n+10) - veloff;
-	%x(2*n+31:2:2*n+39) = x(2*n+1:2:2*n+9) + veloff;
-	%x(2*n+32:2:2*n+40) = x(2*n+2:2:2*n+10) + veloff;
-	%x(2*n+41:2:2*n+49) = x(2*n+1:2:2*n+9) - veloff;
-	%x(2*n+42:2:2*n+50) = x(2*n+2:2:2*n+10) + veloff;
+	x(2*n+31:2:2*n+39) = x(2*n+1:2:2*n+9) + veloff;
+	x(2*n+32:2:2*n+40) = x(2*n+2:2:2*n+10) + veloff;
+	x(2*n+41:2:2*n+49) = x(2*n+1:2:2*n+9) - veloff;
+	x(2*n+42:2:2*n+50) = x(2*n+2:2:2*n+10) + veloff;
 
+elseif ic==7 % this scenario includes other body with a blackhole
+
+	%http://hyperphysics.phy-astr.gsu.edu/hbase/Solar/soldata2.html
+	% positions in [km]
+
+	deltaT = 1*3600; % step size (hr * s/hr) [s]
+	N = 100*2*(24*3600)/deltaT;  % num steps days * (hrs/day * s/hr)
+
+	n = 7;  % number of bodies
+	m = zeros(1,n);  % masses in [kg]
+	m(1) = 1.9885e30;  % sun
+	m(2) = 3.302e23;  % mercury
+	m(3) = 4.869e24;  % venus
+	m(4) = 5.974e24;  % earth 
+	m(5) = 6.419e23;  % mars
+	m(6)= 3.5e30; % Black hole's mass
+	m(7)= 3.5e5;  % rocket mass
+
+	%http://hyperphysics.phy-astr.gsu.edu/hbase/Solar/soldata2.html
+	% positions in [km]
+	x(1) = 0;  % sun x init
+	x(2) = 0;  % sun y initial
+	x(3) = 0;  % mercury x init
+	x(4) = 5.79e7; % mercury y init
+	x(5) = 0;  % venus x init
+	x(6) = 1.082e8; % venus y init
+	x(7) = 0;  % earth x init
+	x(8) = 1.4960e8;  % earth y init
+	x(9) = 0;  % mars x init
+	x(10) = 2.279e8;  % mars y init
+	x(11) = -2.279e8; % Blackhole x init
+	x(12) = -2.279e8; % Black hole y init
+	x(13)= 0; % rocket
+	x(14)= 1.4960e8;
+	% velocities in [km/s]
+	x(15) = 0; % sun x vel init
+	x(16) = 0; % sun y vel init
+	x(17) = -47.4;  % mercury x vel init (mean)
+	x(18) = 0;  % mercury y vel init
+	x(19) = -35.0;  % venus x vel init (mean)
+	x(20) = 0;  % venus y vel init
+	x(21) = -29.8;  % earth x vel init (mean)
+	x(22) = 0;  % earth y vel init
+	x(23) = -24.1;  % mars x vel init
+	x(24) = 0;  % mars y vel init    
+	x(25)= 0; % Black holes x vel init
+	x(26)=0; % Black holes y vel init
+	x(27)=-29.8; % rocket x init vel
+	x(28)=0; % rocket y init vel
 end
 
 % ****************************************************************************************
@@ -310,6 +363,15 @@ for i = 1:N
 
 	% using RK4 integrator	
 	x = rk4('final_state',x,t,deltaT);
+
+	% inject impulsive delta V
+	if ic == 2 & i == 8000
+		x(23) = x(23) + 2.75;  % add a 3 km/s burn in x dir
+		x(24) = x(24) - 3.5;  % add a 3 km/s burn in x dir
+	elseif ic==7 && i==1700
+		x(27)=x(27)-30;
+		x(28)=x(28)+20;
+	end
 end
 
 % ****************************************************************************************
@@ -323,32 +385,46 @@ title(char(movienames(ic)));
 xlabel('x position (km)');
 ylabel('y position (km)');
 
+ph = zeros(n,1);  % array of plot handles so we can change colors
+colorlist = zeros(n,3);  % array of colors given by matlab
+
 % enlarge moon positions so we can see it orbit eart
 %xgraph(3,:) = xgraph(3,:) * 1.1;
 %ygraph(3,:) = ygraph(3,:) * 1.1;
 
-if ic==2222222
-	% inner solar system
-	plot(xgraph(1,:),ygraph(1,:),'.','markersize',50,'color','yellow');
-	plot(xgraph(2,:),ygraph(2,:),'.-','color','magenta');	
-	plot(xgraph(3,:),ygraph(3,:),'.-','color','green');	
-	plot(xgraph(4,:),ygraph(4,:),'.-','color','blue');	
-	plot(xgraph(5,:),ygraph(5,:),'.-','color','red');	
+for i = 1:n
+	ph(i) = plot(xgraph(i,:),ygraph(i,:),'.-');
 	
-	legend('sun','mercury','venus','earth','mars');
-else
-	for i = 1:n
-		plot(xgraph(i,:),ygraph(i,:),'.-');
+	% only get colors for first 5 (sun and 4 planets)
+	if i <= 5
+		colorlist(i,:) = get(ph(i),'color');
 	end
 end
 
+if ic == 2 || ic == 6
+	for i = 0:numbodies:n-1
+		set(ph(1+i),'color',colorlist(3,:));  % sun
+		set(ph(2+i),'color',colorlist(4,:));  % mercury
+		set(ph(3+i),'color',colorlist(5,:));  % venus
+		set(ph(4+i),'color',colorlist(1,:));  % earth
+		set(ph(5+i),'color',colorlist(2,:));  % mars
+	end
+
+	if ic == 2
+		legend('sun','mercury','venus','earth','mars');
+	end
+end
+
+% change colors on plot
 set(gca,'color','black');
+
+% set axis
 if ic == 4
-	axis([-1.5e7 1.5e7 -1.5e7 1.5e7]);
+	axis([-3.5e7 3.5e7 -3.5e7 3.5e7]);
 elseif ic == 5
 	axis([-1.5 1.5 -1.5 1.5]);
 elseif ic == 6
-	axis([-1.5e10 1.5e10 -1e9 6e9]);
+	axis([-2e9 2e9 -2e9 2e9]);
 else
 	axis([-2.5e8 2.5e8 -2.5e8 2.5e8]);
 end
@@ -358,70 +434,127 @@ drawnow;
 % animation code
 % ****************************************************************************************
 if makemovie == true
+	% open movie file with frame rate calculated above and name from list
+	writerObj = VideoWriter(char(movienames(ic)));
+
+	%frate = N/(runtime*numFrameSkip);  % frame rate
+	writerObj.FrameRate = frate;
+	open(writerObj);
+
 	% setup plot
 	figure;
 	hold on;
+
 	if ic == 4
-		axis([-1.5e7 1.5e7 -1.5e7 1.5e7]);
+		axis([-5e7 5e7 -5e7 5e7]);
 	elseif ic == 5
 		axis([-1.5 1.5 -1.5 1.5]);
 	elseif ic == 6
-		axis([-1.5e10 1.5e10 -1e9 6e9]);
+		axis([-2e9 2e9 -2e9 2e9]);
+	elseif ic==7
+		axis([-3e8 3e8 -3e8 3e8]);
 	else
 		axis([-2.5e8 2.5e8 -2.5e8 2.5e8]);
 	end
 
-	set(gca,'color','black');
-
 	% first plot all the discs and just change their positions later on
 	for j = 1:n
-		p(j) = plot(xgraph(j,1),ygraph(j,1),'.','markersize',50);
-		%if j==1
-			%%p(j) = plot(xgraph(j,1),ygraph(j,1),'.','markersize',50,'color',colors(1,:));
-			%p(j) = plot(xgraph(j,1),ygraph(j,1),'.','markersize',50,'color','red');
-		%elseif j==2
-			%p(j) = plot(xgraph(j,1),ygraph(j,1),'.g','markersize',50,'color','green');
-		%elseif j==3
-			%p(j) = plot(xgraph(j,1),ygraph(j,1),'.b','markersize',50,'color','blue');
-		%else
-			%p(j) = plot(xgraph(j,1),ygraph(j,1),'.','markersize',50);
-		%end
+		if ic == 6
+			ph(j) = plot(xgraph(j,1),ygraph(j,1),'.','markersize',25);
+		elseif ic == 2 & mod(j,numbodies) == 1
+			ph(j) = plot(xgraph(j,1),ygraph(j,1),'.','markersize',75);
+		elseif ic == 2 & j == 6
+			ph(j) = plot(xgraph(j,1),ygraph(j,1),'<','markersize',5);
+		elseif ic == 4 || ic == 5
+			ph(j) = plot(xgraph(j,1),ygraph(j,1),'.','markersize',50);
+		elseif ic==7
+			if j==1
+				ph(j) =plot(xgraph(j,i),ygraph(j,i),'.','markersize',120,'color',[0.9100    0.4100    0.1700])
+			elseif j==4 % Earth
+				ph(j) =plot(xgraph(j,i),ygraph(j,i),'b.','markersize',20)
+			elseif j==5 % Mars
+				ph(j) =plot(xgraph(j,i),ygraph(j,i),'r.','markersize',40)
+			elseif j==6  % Blackhole
+				ph(j) =plot(xgraph(j,i),ygraph(j,i),'w.','markersize',70)
+			elseif j==7
+				ph(j) =plot(xgraph(j,i),ygraph(j,i),'y^','markersize',2)
+			else
+				ph(j) =plot(xgraph(j,i),ygraph(j,i),'.','markersize',10)
+			end
+		else
+			ph(j) = plot(xgraph(j,1),ygraph(j,1),'.','markersize',40);
+		end
 	end
 
+	if ic == 2 || ic == 6
+		for i = 0:numbodies:n-1
+			set(ph(1+i),'color',colorlist(3,:));  % sun
+			set(ph(2+i),'color',colorlist(4,:));  % mercury
+			set(ph(3+i),'color',colorlist(5,:));  % venus
+			set(ph(4+i),'color',colorlist(1,:));  % earth
+			set(ph(5+i),'color',colorlist(2,:));  % mars
+		end
+	end
+
+	if ic == 2
+		[~, objh] = legend(ph(1:5),'sun','mercury','venus','earth','mars','AutoUpdate','off');
+		objhl = findobj(objh, 'type', 'line'); %// objects of legend of type line
+		set(objhl, 'Markersize', 25); %// set marker size as desired
+	elseif ic == 7
+		[~, objh] = legend(ph(1:6),'sun','mercury','venus','earth','mars','Black Hole','AutoUpdate','off');
+		objhl = findobj(objh, 'type', 'line'); %// objects of legend of type line
+		set(objhl, 'Markersize', 25); %// set marker size as desired
+	end
+	
+	set(gca,'color','black');
+	
 	% start at 1*numFrameSkip, first point already plotted
 	% now plot all the orbit lines following the discs so the orbits are created as the disc moves
 	% keep the same colors used above for the first few discs
-	numFrameSkip = floor(N/numframes);
-	for i = numFrameSkip:numFrameSkip:numframes*numFrameSkip
-		for j = 1:n
-			plot(xgraph(j,1:numFrameSkip:i),ygraph(j,1:numFrameSkip:i),'-w');
-			%if j==1
-				%plot(xgraph(j,1:numFrameSkip:i),ygraph(j,1:numFrameSkip:i),'-r');
-			%elseif j==2
-				%plot(xgraph(j,1:numFrameSkip:i),ygraph(j,1:numFrameSkip:i),'-g');
-			%elseif j==3
-				%plot(xgraph(j,1:numFrameSkip:i),ygraph(j,1:numFrameSkip:i),'-b');
-			%else
-				%plot(xgraph(j,1:numFrameSkip:i),ygraph(j,1:numFrameSkip:i),'-');
-			%end
+	numFrameSkip = ceil(N/numframes);  % need to make sure we have correct num frames for frame rate
+	for i = numFrameSkip:numFrameSkip:N
+		if ic == 6
+			for j = 0:numbodies:n-1
+				plot(xgraph(1+j,1:numFrameSkip:i),ygraph(1+j,1:numFrameSkip:i),'-','color',colorlist(3,:));
+				plot(xgraph(2+j,1:numFrameSkip:i),ygraph(2+j,1:numFrameSkip:i),'-','color',colorlist(4,:));
+				plot(xgraph(3+j,1:numFrameSkip:i),ygraph(3+j,1:numFrameSkip:i),'-','color',colorlist(5,:));
+				plot(xgraph(4+j,1:numFrameSkip:i),ygraph(4+j,1:numFrameSkip:i),'-','color',colorlist(1,:));
+				plot(xgraph(5+j,1:numFrameSkip:i),ygraph(5+j,1:numFrameSkip:i),'-','color',colorlist(2,:));
+			end
 
-			p(j).XData = xgraph(j,i);
-			p(j).YData = ygraph(j,i);
-			drawnow;
+			for j = 1:n
+				set(ph(j),'XData',xgraph(j,i));
+				set(ph(j),'YData',ygraph(j,i));
+				drawnow;
+			end
+		elseif ic == 4
+			plot(xgraph(1,1:numFrameSkip:i),ygraph(1,1:numFrameSkip:i),'-','color',colorlist(1,:));
+			plot(xgraph(2,1:numFrameSkip:i),ygraph(2,1:numFrameSkip:i),'-','color',colorlist(2,:));
+			plot(xgraph(3,1:numFrameSkip:i),ygraph(3,1:numFrameSkip:i),'-','color',colorlist(3,:));
+
+			for j = 1:n
+				set(ph(j),'XData',xgraph(j,i));
+				set(ph(j),'YData',ygraph(j,i));
+				drawnow;
+			end
+		else
+			for j = 1:n
+				plot(xgraph(j,1:numFrameSkip:i),ygraph(j,1:numFrameSkip:i),'-w');
+
+				set(ph(j),'XData',xgraph(j,i));
+				set(ph(j),'YData',ygraph(j,i));
+				
+				drawnow;
+			end
 		end
-		
+
 		M = getframe;
 		writeVideo(writerObj,M);
 		%hold off;
 	end
 
-end  % end animation code
-
-end % end ic iteration
-
-if makemovie == true
 	movie(M);
 	close(writerObj);
-end
 
+end  % end animation code
 

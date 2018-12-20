@@ -10,11 +10,7 @@ function f = final_state(x,t)
 % final project - planar n-body problem
 
 % globals values in main file
-global n m
-
-% system parameters
-%n = 3;              % number of orbital bodies
-G = 6.67259e-20;      % universal gravitational constant [km^3/kg/s^2]
+global n m G
 
 % the x vector holds x, y positions of each body and their velocities (derivatives)
 % x(1) = x1, x(2) = y1, x(3) = x2, x(4) = y2, ...
@@ -46,6 +42,7 @@ ex(isnan(ex)) = 0;
 ey(isnan(ey)) = 0;
 
 % acceleration / second derivatives (x double dot, y double dot)
+% derived from Newton: F = G m1 m2 / r^2
 %   note: unit vector value of 0 for ith-ith (same body) will take care of
 %		the acceleration value of a body relative to itself
 %		but still must use omitnan for sum function
@@ -53,4 +50,16 @@ for i = 1:n
 	f(2*n+(2*i-1)) = sum(G.*m.*ex(i,1:end)./r(i,1:end).^2,'omitnan');
 	f(2*n+(2*i)) = sum(G.*m.*ey(i,1:end)./r(i,1:end).^2,'omitnan');
 end
+
+% energy calculations
+% sum these
+% if you get delta E,
+% total E is constant, not for each object
+% do this before the integration
+%E = zeros(n,n);
+%for i = 1:n
+	%E(i,1:end) = -G*m(i).*m./r(i,:);
+%end
+
+temp=1;
 
