@@ -41,17 +41,29 @@ def orbits_state(x, t):
     ey = np.zeros((n,n))
 
     for i in range(n):
-        r[i,:] = np.sqrt( (xvals[i] - xvals[:])**2 + (yvals[i] - yvals[:])**2 )
-        ex[i,:] = np.nan_to_num( (xvals[:] - xvals[i]) / r[i,:] )
-        ey[i,:] = np.nan_to_num( (yvals[:] - yvals[i]) / r[i,:] )
+        for j in range(n):
+            # if i == j we are on the same body, so just keep the 0 value alredy in there
+            if i != j:
+                r[i,j] = np.sqrt( (xvals[i] - xvals[j])**2 + (yvals[i] - yvals[j])**2 )
+                # could still have distance = 0, for example rocket following earth for awhile
+                if r[i,j] != 0:
+                    ex[i,j] = (xvals[j] - xvals[i]) / r[i,j]
+                    ey[i,j] = (yvals[j] - yvals[i]) / r[i,j]
 
     # acceleration / second derivatives [x double dot, y double dot]
-    # derived from Newton: F = G m1 m2 / r^2
+    # derived from Newton: F = m1 a1 = G m1 m2 / r^2 => a1 = G m2 / r^2
     # note: unit vector value of 0 for ith-ith [same body] will take care of
     #       the acceleration value of a body relative to itself
     for i in range(n):
-        f[2*n+(2*i)] = np.sum(np.nan_to_num(G * m[:] * ex[i,:] / r[i,:]**2))
-        f[2*n+(2*i+1)] = np.sum(np.nan_to_num(G *m[:] * ey[i,:] / r[i,:]**2))
+        sumx = 0
+        sumy = 0
+        for j in range(n):
+            if i != j and r[i,j] != 0:
+                sumx += (G * m[j] * ex[i,j] / r[i,j]**2)
+                sumy += (G * m[j] * ey[i,j] / r[i,j]**2)
+
+        f[2*n+(2*i)] = sumx
+        f[2*n+(2*i+1)] = sumy
 
     # energy calculations
     # sum these
