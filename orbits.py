@@ -13,6 +13,7 @@ import odeorbits
 import IPython
 ipython = IPython.get_ipython()
 ipython.reset()
+plt.close('all')
 #*****************************************************************************#
 
 # booleans for making plot or movie
@@ -29,38 +30,30 @@ G = ic.G
 m = ic.m
 n = ic.n
 x = ic.x
+ndim = ic.ndim
 
 # execute the integration loop and get plot data
-timevals = np.zeros(N)
-
-xgraph = np.zeros((N,n))
-ygraph = np.zeros((N,n))
-zgraph = np.zeros((N,n))
-xgraphG = np.zeros(N)
-ygraphG = np.zeros(N)
-zgraphG = np.zeros(N)
+t = np.zeros(N)  # time values
+gd = np.zeros((N,n,ndim))  # graph data: positions in x,y,z
+gdG = np.zeros((N,ndim))  # graph data for center of gravity in x,y,z
 
 summ = np.sum(m[:])  # sum of all masses for center of gravity calc
 
 for i in range(N):
-    t = i*deltaT
-    timevals[i] = t
-    
-    xgraph[i,:] = x[0:3*n:3]
-    ygraph[i,:] = x[1:3*n:3]
-    zgraph[i,:] = x[2:3*n:3]
+    ti = i*deltaT
+    t[i] = ti
+  
+    # pull out the positions from first half of x
+    for k in range(ndim):
+        gd[i,:,k] = x[k:ndim*n:ndim]
 
     # calculate center of gravity
-    sumx = sumy = sumz = 0
+    for k in range(ndim):
+        sumj = 0
+        for j in range(n):
+            sumj += (m[j] * gd[i,j,k])
 
-    for j in range(n):
-        sumx += (m[j] * xgraph[i,j])
-        sumy += (m[j] * ygraph[i,j])
-        sumz += (m[j] * zgraph[i,j])
-
-    xgraphG[i] = (sumx / summ)
-    ygraphG[i] = (sumy / summ)
-    zgraphG[i] = (sumz / summ)
+        gdG[i,k] = (sumj / summ)
 
     # using RK4 integrator	
     x = odeorbits.rk4(x, t, deltaT)
@@ -69,34 +62,63 @@ for i in range(N):
 if makeplot:
     plt.ion()  # turn on interactive plot mode
 
-    fig = plt.figure(1)
-    ax = plt3.Axes3D(fig)
-    ax.set_title('Figure 2.3: Motion relative to the inertial frame')
+    if icval == 2:
+        fig = plt.figure(1)
+        plt.title('Figure 2.3: Motion relative to the inertial frame')
 
-    for i in range(n):
-        ax.plot(xgraph[:,i], ygraph[:,i], zgraph[:,i])
-    
-    ax.plot(xgraphG[:], ygraphG[:], zgraphG[:])
+        for i in range(n):
+            plt.plot(gd[:,i,0], gd[:,i,1])
+        
+        plt.plot(gdG[:,0], gdG[:,1])
 
-    plt.show()
+        plt.show()
 
-    fig = plt.figure(2)
-    ax = plt3.Axes3D(fig)
-    ax.set_title('Figure 2.4a: Motion of m2 and G relative to m1')
+        fig = plt.figure(2)
+        plt.title('Figure 2.4a: Motion of m2 and G relative to m1')
 
-    ax.plot(xgraph[:,1] - xgraph[:,0], ygraph[:,1] - ygraph[:,0], zgraph[:,1] - zgraph[:,0])
-    ax.plot(xgraphG[:] - xgraph[:,0], ygraphG[:] - ygraph[:,0], zgraphG[:] - zgraph[:,0])
+        plt.plot(gd[:,1,0] - gd[:,0,0], gd[:,1,1] - gd[:,0,1])
+        plt.plot(gdG[:,0] - gd[:,0,0], gdG[:,1] - gd[:,0,1])
 
-    plt.show()
+        plt.show()
 
-    fig = plt.figure(3)
-    ax = plt3.Axes3D(fig)
-    ax.set_title('Figure 2.4b: Motion of m1 and m2 relative to G')
+        fig = plt.figure(3)
+        plt.title('Figure 2.4b: Motion of m1 and m2 relative to G')
 
-    ax.plot(xgraph[:,0] - xgraphG[:], ygraph[:,0] - ygraphG[:], zgraph[:,0] - zgraphG[:])
-    ax.plot(xgraph[:,1] - xgraphG[:], ygraph[:,1] - ygraphG[:], zgraph[:,1] - zgraphG[:])
+        plt.plot(gd[:,0,0] - gdG[:,0], gd[:,0,1] - gdG[:,1])
+        plt.plot(gd[:,1,0] - gdG[:,0], gd[:,1,1] - gdG[:,1])
 
-    plt.show()
+        plt.show()
+
+    elif icval == 3:
+        fig = plt.figure(1)
+        ax = plt3.Axes3D(fig)
+        ax.set_title('Figure 2.3: Motion relative to the inertial frame')
+
+        for i in range(n):
+            ax.plot(gd[:,i,0], gd[:,i,1], gd[:,i,2])
+        
+        ax.plot(gdG[:,0], gdG[:,1], gdG[:,2])
+
+        plt.show()
+
+        fig = plt.figure(2)
+        ax = plt3.Axes3D(fig)
+        ax.set_title('Figure 2.4a: Motion of m2 and G relative to m1')
+
+        ax.plot(gd[:,1,0] - gd[:,0,0], gd[:,1,1] - gd[:,0,1], gd[:,1,2] - gd[:,0,2])
+        ax.plot(gdG[:,0] - gd[:,0,0], gdG[:,1] - gd[:,0,1], gdG[:,2] - gd[:,0,2])
+
+        plt.show()
+
+        fig = plt.figure(3)
+        ax = plt3.Axes3D(fig)
+        ax.set_title('Figure 2.4b: Motion of m1 and m2 relative to G')
+
+        ax.plot(gd[:,0,0] - gdG[:,0], gd[:,0,1] - gdG[:,1], gd[:,0,2] - gdG[:,2])
+        ax.plot(gd[:,1,0] - gdG[:,0], gd[:,1,1] - gdG[:,1], gd[:,1,2] - gdG[:,2])
+
+        plt.show()
+
 
 
 # do the animation

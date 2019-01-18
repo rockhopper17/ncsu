@@ -1,7 +1,8 @@
 import numpy as np
 
 # 1 = orig inner planets with rocket
-# 2 = ex 2.2
+# 2 = ex 2.2 2D
+# 3 = ex 2.2 3D
 icval = 2
 
 # initial condition swtich; ic value will be set in the main orbits.py file
@@ -13,11 +14,9 @@ if icval == 1:
     runtime = 30  # default num seconds to run each scenario
     #frate = N/(30*numFrameSkip)  # frame rate
 
-    # universal gravitational constant [km^3/kg/s^2]
-    G = 6.67259e-20      
-
-    # n and m values repeated in orbits_state function, along with G
+    G = 6.67259e-20 # universal gravitational constant [km^3/kg/s^2] 
     n = 6  # number of bodies total
+    ndim = 2 # num dimensions (2D: x,y)
 
     m = np.zeros(n)  # masses in [kg]
     m[0] = 1.9885e30  # sun
@@ -60,16 +59,47 @@ if icval == 1:
     pltcolors[5] = [0.3010,0.7450,0.9330] # rocket = light blue
 
 elif icval == 2:
+    # ex 2.2 but in 2D
+
     # initial timing conditions
     runtime = 480  # total time to run sim [s]
     deltaT = 0.025 # step size [s]
     N = int(runtime / deltaT) # total number of iterations to run integration
 
-    # universal gravitational constant [km^3/kg/s^2]
-    G = 6.67259e-20      
-
-    # n and m values repeated in orbits_state function, along with G
+    G = 6.67259e-20 # universal gravitational constant [km^3/kg/s^2] 
     n = 2  # number of bodies total
+    ndim = 2 # num dimensions (2D: x,y)
+
+    m = np.zeros(n)  # masses in [kg]
+    m[0] = 1e26  # planet 1
+    m[1] = 1e26  # planet 2
+
+    #http://hyperphysics.phy-astr.gsu.edu/hbase/Solar/soldata2.html
+    # initial positions [x y z] in [km]
+    r1 = np.array([0,0]) # planet 1
+    r2 = np.array([3000,0]) # planet 2
+
+    # initial velocities [vx, vy, vz] in [km/s]
+    v1 = np.array([10,20])
+    v2 = np.array([0,40])
+
+    # state space array with initial conditions
+    # the x vector holds x y z positions of each body and their velocities (derivatives)
+    # x[0] = x1, x[1] = y1, x[2] = z1, x[3] = x2, x[4] = y2, x[5] = z2, ...
+    # x[3n] = x1 dot, x[3n+1] = y1 dot, x[3n+2] = z1 dot
+    x = np.concatenate([r1,r2,v1,v2]);
+
+elif icval == 3:
+    # ex 2.2 in full 3D
+
+    # initial timing conditions
+    runtime = 480  # total time to run sim [s]
+    deltaT = 0.025 # step size [s]
+    N = int(runtime / deltaT) # total number of iterations to run integration
+
+    G = 6.67259e-20 # universal gravitational constant [km^3/kg/s^2] 
+    n = 2  # number of bodies total
+    ndim = 3 # num dimensions (3D: x,y,z)
 
     m = np.zeros(n)  # masses in [kg]
     m[0] = 1e26  # planet 1
@@ -89,4 +119,5 @@ elif icval == 2:
     # x[0] = x1, x[1] = y1, x[2] = z1, x[3] = x2, x[4] = y2, x[5] = z2, ...
     # x[3n] = x1 dot, x[3n+1] = y1 dot, x[3n+2] = z1 dot
     x = np.concatenate([r1,r2,v1,v2]);
+
 
