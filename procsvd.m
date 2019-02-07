@@ -13,7 +13,8 @@ close all; clear all; clc;
 % 6 = pwelch power spectral density estimates
 % 7 = avg x vel, center x vel by x pos comparison horn to rect (4 subplots)
 % 8 = 2D plot of max x vel at each point
-viewtype = 6
+% 9 = wavefront
+viewtype = 9
 
 % **************************
 % load all workspace vars created from ExportData.m
@@ -64,18 +65,17 @@ movfname = 'procsvdmovie_v4.avi';  % movie file name
 colormap('jet');
 %*****************************************************************************%
 
-if viewtype == 7
-	amp_x1 = amp_x;
-	xyz1 = xyz;
-	load('svddata_rect.mat');
-	N = 1000;  % num time steps
-else
-	N = length(t); 
-end
+% retrieve / calculate sample rate
+%dt = mean(diff(t));
+%Fs = 1 / dt;
+% logic pulled from polytec sample CalculateFFT.m
+Fs = (usd_x.XCount - 1) / (usd_x.XMax - usd_x.XMin);
 
-% num scan points
-numpts = length(xyz);
+% num time data points
+N = length(t); 
 %N = 50;  % for testing
+% num scan data points
+numpts = length(xyz);
 
 % setup movie
 if makemovie == true
@@ -86,7 +86,69 @@ if makemovie == true
 end  % end makemovie
 
 % switch based on view type
-if viewtype == 1
+if viewtype == 9
+	% preallocate array to hold time values for a single data point
+	sigx = zeros(1,N);
+
+	% preallocate array to hold 300 kHz magnitude values for each pt/time
+	sigxt = zeros(numpts,N);
+
+	for ptidx = 1:numpts
+		ptidx
+		% pull out data for the single data point
+		sigx = amp_x(ptidx,:);
+
+		% get the wavelet transform data
+		[wt,f] = cwt(sigx,Fs);
+
+		% pull out the index for our 300 kHz signal
+		idx300 = max(find((round(f) > 290e3 & round(f) < 310e3)));
+
+		% retrieve cwt calculated magnitude of 300 kHz signal at each time step
+		% and load into new array
+		sigxt(ptidx,:) = abs(wt(idx300,:)).^2;
+		%sigxt(ptidx,:) = (abs(wt(idx300,:)).^2 >= 0.5e-3);
+		
+		%sigxt(ptidx,:) = abs(wt(idx300,:));
+		%mag = abs(wt(idx300,:)).^2;
+		%maxmag = max(mag);
+		%sigxt(ptidx,:) = (mag == maxmag);
+
+		%plot(t,sigxt(ptidx,:));
+		%hold on;
+		%drawnow
+	end
+
+	% plot the magnitude value for chosen point
+	subplot(3,1,3);
+	hold on;
+	grid on;
+	plot(t*1e6, sigxt(npos,:));
+	phx = line([0,0],get(gca,'ylim'),'color','red');
+	xlabel('time [\mus]');
+	ylabel('magnitude [?]');
+
+	for tidx = 1:N
+		% plot points with color by 300 kHz magnitude
+		subplot(3,1,[1:2]); hold on;
+		scatter(xyz(:,1)*1e3, xyz(:,2)*1e3, 75, sigxt(:,tidx), 'filled');
+		xlabel('x position [mm]');
+		ylabel('y position [mm]');
+		caxis([0 2.5e-4]);  % sets the range of values for the colorbar
+		%caxis([0 1]);  % sets the range of values for the colorbar
+		colorbar;
+		plot(xyz(npos,1)*1e3, xyz(npos,2)*1e3, 'or', 'MarkerSize', 20);  % highlight a point
+		
+		% update red line on single point plot
+		tt = t(tidx)*1e6;  % new time / x value
+		set(phx,'XData',[tt,tt]);
+		
+		tidx	
+		drawnow
+	end
+
+
+elseif viewtype == 1
 	scatter3(xyz(:,1), xyz(:,2), xyz(:,3),50,'filled');
 
 	% make window full screen
@@ -95,18 +157,19 @@ if viewtype == 1
 	%view([0 20]);  % orient along x-axis tilted down 10 deg
 
 	% plot points as their index number
-	[nrows,ncols] = size(xyz);
-	scatter(xyz(:,1), xyz(:,2), [], 'w');
-	for i = 1:nrows
-		text(xyz(i,1),xyz(i,2),num2str(i))
-	end
+	%[nrows,ncols] = size(xyz);
+	%scatter(xyz(:,1), xyz(:,2), [], 'w');
+	%for i = 1:nrows
+		%text(xyz(i,1),xyz(i,2),num2str(i))
+	%end
 
 elseif viewtype == 2
 	% make window full screen
 	set(gcf,'units','normalized','outerposition',[0 0 1 1]);  
 
 	% plot first position
-	scatter3(xyz(:,1), xyz(:,2), xyz(:,3),50,'filled');
+	scatter(xyz(:,1), xyz(:,2),50,'filled');
+	%scatter3(xyz(:,1), xyz(:,2), xyz(:,3),50,'filled');
 
 	% calculate overall velocity values, conver to mm/s
 	%vel = sqrt(amp_x(:,:).^2 + amp_y(:,:).^2 + amp_z(:,:).^2) * 1e3;
@@ -123,18 +186,19 @@ elseif viewtype == 2
 		%y = xyz(:,2) + (amp_y(:,i) * (t(i) - t(i-1))) * 1e6;
 		%z = xyz(:,3) + (amp_z(:,i) * (t(i) - t(i-1))) * 1e6;
 		y = xyz(:,2);
-		z = xyz(:,3);
+		%z = xyz(:,3);
 		
 		% plot the 3D scatter	
 		%hold on;
-		scatter3(x, y, z, 50, vel(:,i), 'filled');  % main 3D scatter plot
+		%scatter3(x, y, z, 50, vel(:,i), 'filled');  % main 3D scatter plot
+		scatter(x, y, 50, vel(:,i), 'filled');  % main 3D scatter plot
 		%plot3(x(npos), y(npos), z(npos), 'or', 'MarkerSize', 20);  % highlight a point
 		caxis([0 5]);  % sets the range of values for the colorbar
 		grid on;
 		colorbar;  % show the colorbar on plot
 		
 		% set axis and view angle per scenario
-		axis(axval);
+		%axis(axval);
 		%hold off;
 		%view([0 20]);  % orient along x-axis tilted down 10 deg
 
@@ -239,8 +303,8 @@ elseif viewtype == 4
 	for i = 1:N
 		plot(xyz(a,1),vel(a,i),'LineWidth',2)
 		hold on
-		plot(xyz(b,1),vel(b,i)+25,'LineWidth',2)
-		plot(xyz(c,1),vel(c,i)-25,'LineWidth',2)
+		plot(xyz(b,1),vel(b,i),'LineWidth',2)
+		plot(xyz(c,1),vel(c,i),'LineWidth',2)
 		grid on
 		axis([-.005 .04 -50 50]);
 		hold off
@@ -279,7 +343,8 @@ elseif viewtype == 6
 	% points to look at
 	%npos = [100 200 500 800];
 	%npos = [13 27 100 264 500 648 739 1003];
-	npos = [27 264 726 1039];
+	%npos = [27 264 726 1039];
+	npos = [13 256 472 711 846 1039];
 
 	% calculate sampling frequency
 	%dt = mean(diff(t));
@@ -302,6 +367,12 @@ elseif viewtype == 7
 	% make window full screen
 	%set(gcf,'units','normalized','outerposition',[0 0 1 1]);  
 	set(gcf, 'Position',  [100, 100, 800, 600]);
+
+	% load rectangle data for comparison
+	amp_x1 = amp_x;
+	xyz1 = xyz;
+	load('svddata_rect.mat');
+	N = 1000;  % num time steps
 
 	% group points by x value
 	[C,ia,idx] = unique(xyz(:,1));
