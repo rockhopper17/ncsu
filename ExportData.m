@@ -4,9 +4,19 @@
 close all; clear all; clc;
 
 % files to process, assumes time synced, will append all data points together
-svdmatname = 'svddata2.mat';  % data file name for saving tojj
-fnames = ["Scan_time.svd","Scan_time_plate.svd"];
+% fnames = ["Scan_time.svd"];
+% svdmatname = 'svddata.mat';
+% fnames = ["Scan_time.svd","Scan_time_plate.svd"];
+% svdmatname = 'svddata2.mat';
+fnames = ["Scan_time_horn.svd"];
+svdmatname = 'svddata_horn.mat';
+% fnames = ["Scan_time_rect.svd"];
+% svdmatname = 'svddata_rect.mat';
+
 numf = numel(fnames);
+
+% pull out image
+imageData = GetVideoImage(fnames(1));
 
 % init data structures to hold position and velocity values
 xyz = double.empty(0);

@@ -2,38 +2,25 @@
 close all; clear all; clc;
 
 %*****************************************************************************%
-% variables that can be changed
-
-% different views
-% 1 = 3D scatter static view of positions to confirm general shape (can show idx nums)
-% 2 = 3D scatter with animation
-% 3 = 3D scatter with animation and x,y 2D vel plots
-% 4 = points in a line at certain y values (.0099 middle line plus others)
-% 5 = avg x vel by x pos
-% 6 = pwelch power spectral density estimates
-% 7 = avg x vel, center x vel by x pos comparison horn to rect (4 subplots)
-% 8 = 2D plot of max x vel at each point
-% 9 = wavefront
-viewtype = 9
-
-% **************************
 % load all workspace vars created from ExportData.m
 % variables in mat file, note that sizes are particular to test load
 %    but variables will have same names
 	%>> whos
-	  %Name              Size                 Bytes  Class     Attributes
+	  %Name               Size                   Bytes  Class     Attributes
 
-	  %amp_x           505x2500            10100000  double              
-	  %amp_y           505x2500            10100000  double              
-	  %amp_z           505x2500            10100000  double              
-	  %fnames            1x2                    252  string              
-	  %numf              1x1                      8  double              
-	  %svdmatname        1x12                    24  char                
-	  %t                 1x2500               20000  double              
-	  %usd_x             1x1                   4681  struct              
-	  %usd_y             1x1                   4681  struct              
-	  %usd_z             1x1                   4681  struct              
-	  %xyz             505x3                  12120  double
+	  %amp_x           1045x1500              12540000  double              
+	  %amp_y           1045x1500              12540000  double              
+	  %amp_z           1045x1500              12540000  double              
+	  %fnames             1x1                      182  string              
+	  %imageData       1742x3385x3            17690010  uint8               
+	  %numf               1x1                        8  double              
+	  %svdmatname         1x16                      32  char                
+	  %t                  1x1500                 12000  double              
+	  %usd_x              1x1                     4681  struct              
+	  %usd_y              1x1                     4681  struct              
+	  %usd_z              1x1                     4681  struct              
+	  %xyz             1045x3                    25080  double  
+%*****************************************************************************%
 
 % orig x_8cm test data (scan_time.svd)
 %load('svddata.mat');
@@ -45,10 +32,12 @@ viewtype = 9
 %npos = 57;
 
 % horn test data
-load('svddata_horn.mat');
-axval = [-.005 .04 0 .02 -.05 .05];
-vwval = [0 20];
-npos = 500;
+%load('svddata_horn.mat');
+%axval = [-.005 .04 0 .02 -.05 .05];
+%vwval = [0 20];
+%npos = 13;
+%npos = 1039;
+%npos = 500;
 %vwval = 3;  % default 3D view
 
 % rectangle test data
@@ -56,14 +45,13 @@ npos = 500;
 %axval = [-.005 .04 0 .02 -.05 .05];
 %vwval = [0 20];
 %npos = 487;
+
+% alum horns a/b=2, a/b=4, a/b=4 exp
+%load('svddata_2_x.mat');
+%load('svddata_4_y.mat');
+load('svddata_exp4_y.mat');
+npos = 1039;
 % **************************
-
-makemovie = false;  % flag for making a movie (can be slow) or not
-runtime = 90;  % num seconds to run movie
-movfname = 'procsvdmovie_v4.avi';  % movie file name
-
-colormap('jet');
-%*****************************************************************************%
 
 % retrieve / calculate sample rate
 %dt = mean(diff(t));
@@ -73,83 +61,63 @@ Fs = (usd_x.XCount - 1) / (usd_x.XMax - usd_x.XMin);
 
 % num time data points
 N = length(t); 
-%N = 50;  % for testing
-% num scan data points
+%N = 55;  % for testing
+%N = 600;
+
+% pull out positions and scale to mm
+%x = xyz(:,1) * 1e3;
+%y = xyz(:,2) * 1e3;
+y = xyz(:,1) * 1e3; % flip for y oriented horns
+x = xyz(:,2) * 1e3;
+xpts = unique(x);
+ypts = unique(y);
 numpts = length(xyz);
+
+% get video image data for plotting as background
+xImg = linspace(min(x), max(x), size(imageData, 2));
+yImg = linspace(min(y), max(y), size(imageData, 1));
+
+% movie properties
+makemovie = false;  % flag for making a movie (can be slow) or not
+runtime = 60;  % num seconds to run movie
+movfname = 'viewtype_16.avi';  % movie file name
+%frate = N/runtime;  % frame rate for movie file
+frate = 10;
 
 % setup movie
 if makemovie == true
 	writerObj = VideoWriter(movfname);
-	frate = N/runtime;  % frame rate for movie file
 	writerObj.FrameRate = frate;
 	open(writerObj);
-end  % end makemovie
+end
+
+% set window size
+%set(gcf,'units','normalized','outerposition',[0.25 0.25 0.5 0.5]);
+set(gcf,'units','normalized','outerposition',[0.1 0.1 0.8 0.8]);
+colormap('jet');
+
+% different views
+% 1 = scatter static view of positions to confirm general shape (can show idx nums)
+% 2 = removed
+% 3 = scatter with animation and x vel vs time plot
+% 4 = points in a line at certain y values (.0099 middle line plus others)
+% 5 = avg x vel by x pos
+% 6 = pwelch power spectral density estimates
+% 7 = avg x vel, center x vel by x pos comparison horn to rect (4 subplots)
+% 8 = 2D plot of max x vel at each point
+% 9 = magnitudes of 300kHz (attempt to see wavefront)
+% 10 = cwt (or contourf) movie for a chosen row
+% 11 = x vel by x pos for chosen rows
+% 12 = 300 kHz magnitudes by x pos for chosen rows (view 11 for cwt)
+% 13 = x vel by y pos for chosen columns
+% 14 = 300 kHz magnitudes by y pos for chosen columns (view 13 for cwt)
+% 15 = cwt plots ***
+% 16 = cwt with peaks horn animation (didn't show what was hoped for)
+viewtype = 1
 
 % switch based on view type
-if viewtype == 9
-	% preallocate array to hold time values for a single data point
-	sigx = zeros(1,N);
-
-	% preallocate array to hold 300 kHz magnitude values for each pt/time
-	sigxt = zeros(numpts,N);
-
-	for ptidx = 1:numpts
-		ptidx
-		% pull out data for the single data point
-		sigx = amp_x(ptidx,:);
-
-		% get the wavelet transform data
-		[wt,f] = cwt(sigx,Fs);
-
-		% pull out the index for our 300 kHz signal
-		idx300 = max(find((round(f) > 290e3 & round(f) < 310e3)));
-
-		% retrieve cwt calculated magnitude of 300 kHz signal at each time step
-		% and load into new array
-		sigxt(ptidx,:) = abs(wt(idx300,:)).^2;
-		%sigxt(ptidx,:) = (abs(wt(idx300,:)).^2 >= 0.5e-3);
-		
-		%sigxt(ptidx,:) = abs(wt(idx300,:));
-		%mag = abs(wt(idx300,:)).^2;
-		%maxmag = max(mag);
-		%sigxt(ptidx,:) = (mag == maxmag);
-
-		%plot(t,sigxt(ptidx,:));
-		%hold on;
-		%drawnow
-	end
-
-	% plot the magnitude value for chosen point
-	subplot(3,1,3);
-	hold on;
-	grid on;
-	plot(t*1e6, sigxt(npos,:));
-	phx = line([0,0],get(gca,'ylim'),'color','red');
-	xlabel('time [\mus]');
-	ylabel('magnitude [?]');
-
-	for tidx = 1:N
-		% plot points with color by 300 kHz magnitude
-		subplot(3,1,[1:2]); hold on;
-		scatter(xyz(:,1)*1e3, xyz(:,2)*1e3, 75, sigxt(:,tidx), 'filled');
-		xlabel('x position [mm]');
-		ylabel('y position [mm]');
-		caxis([0 2.5e-4]);  % sets the range of values for the colorbar
-		%caxis([0 1]);  % sets the range of values for the colorbar
-		colorbar;
-		plot(xyz(npos,1)*1e3, xyz(npos,2)*1e3, 'or', 'MarkerSize', 20);  % highlight a point
-		
-		% update red line on single point plot
-		tt = t(tidx)*1e6;  % new time / x value
-		set(phx,'XData',[tt,tt]);
-		
-		tidx	
-		drawnow
-	end
-
-
-elseif viewtype == 1
-	scatter3(xyz(:,1), xyz(:,2), xyz(:,3),50,'filled');
+if viewtype == 1
+	%scatter3(xyz(:,1), xyz(:,2), xyz(:,3),50,'filled');
 
 	% make window full screen
 	%set(gcf,'units','normalized','outerposition',[0 0 1 1]);  
@@ -163,126 +131,89 @@ elseif viewtype == 1
 		%text(xyz(i,1),xyz(i,2),num2str(i))
 	%end
 
-elseif viewtype == 2
-	% make window full screen
-	set(gcf,'units','normalized','outerposition',[0 0 1 1]);  
+	% plot points as their index number
+	scatter(x, y, [], 'w');
+	hold on; grid on;
+	%image(xImg, yImg, imageData, 'CDataMapping', 'scaled');
+	image(xImg, yImg, imrotate(flipdim(imageData,1),90), 'CDataMapping', 'scaled'); % ab4y
+	%axis([-1 38 0 20]);
+	set(gca,'Color', [0.7,0.7,0.7]);
+	
+	% get colormap for making all lines different colors
+	cmap = jet(numel(ypts));
 
-	% plot first position
-	scatter(xyz(:,1), xyz(:,2),50,'filled');
-	%scatter3(xyz(:,1), xyz(:,2), xyz(:,3),50,'filled');
+	for ptidx = 1:numpts
+		xidx = find(xpts == x(ptidx)); % column number
+		yidx = find(ypts == y(ptidx)); % row number
 
-	% calculate overall velocity values, conver to mm/s
-	%vel = sqrt(amp_x(:,:).^2 + amp_y(:,:).^2 + amp_z(:,:).^2) * 1e3;
-	vel = amp_x * 1e3;
-
-	% animation loop
-	for i = 2:N
-		% increment the position based on calculating displacement
-		% from the velocity values and the time step
-		% velocity values are in amp_[x,y,z] in m/s
-		% time value is in t in s
-		% displacement is magnified so we can see movement (polytec does this too)
-		x = xyz(:,1) + (amp_x(:,i) * (t(i) - t(i-1))) * 1e6; 
-		%y = xyz(:,2) + (amp_y(:,i) * (t(i) - t(i-1))) * 1e6;
-		%z = xyz(:,3) + (amp_z(:,i) * (t(i) - t(i-1))) * 1e6;
-		y = xyz(:,2);
-		%z = xyz(:,3);
-		
-		% plot the 3D scatter	
-		%hold on;
-		%scatter3(x, y, z, 50, vel(:,i), 'filled');  % main 3D scatter plot
-		scatter(x, y, 50, vel(:,i), 'filled');  % main 3D scatter plot
-		%plot3(x(npos), y(npos), z(npos), 'or', 'MarkerSize', 20);  % highlight a point
-		caxis([0 5]);  % sets the range of values for the colorbar
-		grid on;
-		colorbar;  % show the colorbar on plot
-		
-		% set axis and view angle per scenario
-		%axis(axval);
-		%hold off;
-		%view([0 20]);  % orient along x-axis tilted down 10 deg
-
-		i  % print index value so we can follow progress in the command window
-		drawnow
-
-		if makemovie == true
-			writeVideo(writerObj,getframe(gcf));
-		end
-
-	end  % end time loop
+		%text(x(ptidx),y(ptidx),sprintf('%d\nr%dc%d',ptidx,yidx,xidx),'Color', cmap(yidx,:));
+		text(x(ptidx),y(ptidx),sprintf('%d',ptidx),'Color', cmap(yidx,:), 'HorizontalAlignment','center');
+	end
 
 elseif viewtype == 3
-	% make window full screen
-	set(gcf,'units','normalized','outerposition',[0 0 1 1]);  
+	% create an empty grid at each time step
+	%xy = zeros(numel(y),numel(x),numel(t));  % this was too big for matlab
 
 	% plot the x,y,z velocities [mm/s] vs time [micro-sec]
-	%subplot(3,2,2);
-	%subplot(4,1,3);
-	subplot(4,1,4);
-	hold on;
-	grid on;
-	plot(t*1e6, amp_x(npos,:)*1e3);
+	subplot(3,1,3);
+	hold on; grid on;
+	%plot(t*1e6, amp_x(npos,:)*1e3);
+	plot(t(200:800)*1e6, amp_x(npos,200:800)*1e3);
 	phx = line([0,0],get(gca,'ylim'),'color','red');
 	xlabel('time [\mus]');
 	ylabel('x velocity [mm/s]');
 
-	%subplot(3,2,4);
-	%subplot(4,1,4);
-	%hold on;
-	%grid on;
-	%plot(t*1e6, amp_y(npos,:)*1e3);
-	%phy = line([0,0],get(gca,'ylim'),'color','red');
-	%xlabel('time [\mus]');
-	%ylabel('y velocity [mm/s]');
-
-	%subplot(3,2,6);
-	%subplot(4,1,4);
-	%hold on;
-	%grid on;
-	%plot(t*1e6, amp_z(npos,:)*1e3);
-	%phz = line([0,0],get(gca,'ylim'),'color','red');
-	%xlabel('time [\mus]');
-	%ylabel('z velocity [mm/s]');
-	
-	% calculate overall velocity values, conver to mm/s
+	% calculate overall velocity values, convert to mm/s
 	%vel = sqrt(amp_x(:,:).^2 + amp_y(:,:).^2 + amp_z(:,:).^2) * 1e3;
-	vel = abs(amp_x) * 1e3;
+	%vel = abs(amp_x) * 1e3;  % absolute value of x vel
+	vel = amp_x * 1e3;  % mimic X_acoustic_horn.avi, shows negative values
 
 	% animation loop
-	for i = 2:N
+	%for tidx = 2:N
+	for tidx = 200:800
 		% increment the position based on calculating displacement
 		% from the velocity values and the time step
 		% velocity values are in amp_[x,y,z] in m/s
 		% time value is in t in s
 		% displacement is magnified so we can see movement (polytec does this too)
-		x = xyz(:,1) + (amp_x(:,i) * (t(i) - t(i-1))) * 1e5;
+		%x = xyz(:,1) + (amp_x(:,i) * (t(i) - t(i-1))) * 1e5;
 		%y = xyz(:,2) + (amp_y(:,i) * (t(i) - t(i-1))) * 1e6;
-		%z = xyz(:,3) + (amp_z(:,i) * (t(i) - t(i-1))) * 1e6;
-		y = xyz(:,2);
-		z = xyz(:,3);
-		
-		% plot the 3D scatter	
-		%subplot(4,1,[1,2]);
-		subplot(4,1,[1:3]);
-		hold on;
-		scatter3(x, y, z, 50, vel(:,i), 'filled');  % main 3D scatter plot
-		plot3(x(npos), y(npos), z(npos), 'or', 'MarkerSize', 20);  % highlight a point
-		caxis([0 5]);  % sets the range of values for the colorbar
-		grid on;
-		colorbar;  % show the colorbar on plot
-		
-		% set axis and view angle per scenario
-		axis(axval);
-		view(vwval);
-		%view([0 20]);  % orient along x-axis tilted down 10 deg
 
+		% contour plot stuff
+		% get data into a grid
+		%xy = zeros(numel(ypts),numel(xpts));
+
+		%for xidx = 1:numel(xpts)
+			%for yidx = 1:numel(ypts)
+				%ptidx = find(x == xpts(xidx) & y == ypts(yidx));
+				%if ~isempty(ptidx)
+					%xy(yidx,xidx) = vel(ptidx,tidx);
+				%end
+			%end
+		%end
+		
+		% plot the 2D scatter	
+		subplot(3,1,[1:2]);
+		hold on; grid on;
+		image(xImg, yImg, imageData, 'CDataMapping', 'scaled');
+		scatter(x, y, 100, vel(:,tidx), 's', 'filled');
+		plot(x(npos), y(npos), 'or', 'MarkerSize', 20, 'LineWidth', 5);  % highlight a point
+		caxis([-8 8]);
+		%caxis([0 8]);
+		title('x velocity over time (index 200 - 800)');
+		xlabel('x point num');
+		ylabel('y point num');
+		
+		%contourf(xy);
+		%caxis([-8 8]);
+	
+		colorbar;
+		
 		% update the vertical lines on the velocity plots
-		tt = t(i)*1e6;  % new time / x value
+		tt = t(tidx)*1e6;  % new time / x value
 		set(phx,'XData',[tt,tt]);
-		%set(phy,'XData',[tt,tt]);
-		%set(phz,'XData',[tt,tt]);
 
-		i  % print index value so we can follow progress in the command window
+		tidx
 		drawnow
 
 		if makemovie == true
@@ -300,13 +231,17 @@ elseif viewtype == 4
 
 	vel = amp_x * 1e3; % convert to mm/s
 
-	for i = 1:N
+	%for i = 1:N
+	for i = 201:800
 		plot(xyz(a,1),vel(a,i),'LineWidth',2)
 		hold on
 		plot(xyz(b,1),vel(b,i),'LineWidth',2)
 		plot(xyz(c,1),vel(c,i),'LineWidth',2)
 		grid on
 		axis([-.005 .04 -50 50]);
+		title('x velocity versus x position for every rows .0099/.0191/.008 over time indexes 201 - 800');
+		xlabel('x position [mm]');
+		ylabel('x velocity [mm/s]');
 		hold off
 
 		i
@@ -322,13 +257,17 @@ elseif viewtype == 5
 	% group points by x value
 	[C,ia,idx] = unique(xyz(:,1));
 
-	for i = 1:N
+	%for i = 1:N
+	for i = 201:800
 		% avg vel per x value
 		vel = accumarray(idx,amp_x(:,i),[],@mean);
 		vel = vel * 1e3;
 		plot(1:numel(vel),vel,'LineWidth',2)
 		grid on
 		axis([1 57 -10 10]);
+		title('avg x velocity versus x position by column over time indexes 201 - 800');
+		xlabel('x position [mm]');
+		ylabel('avg x velocity [mm/s]');
 
 		i
 		drawnow
@@ -364,10 +303,6 @@ elseif viewtype == 6
 	end
 
 elseif viewtype == 7
-	% make window full screen
-	%set(gcf,'units','normalized','outerposition',[0 0 1 1]);  
-	set(gcf, 'Position',  [100, 100, 800, 600]);
-
 	% load rectangle data for comparison
 	amp_x1 = amp_x;
 	xyz1 = xyz;
@@ -428,9 +363,613 @@ elseif viewtype == 7
 	end
 elseif viewtype == 8
 	velmax = max(abs(amp_x) * 1e3,[],2);
-	scatter(xyz(:,1),xyz(:,2),50,velmax,'filled');
+	hold on; grid on;
+	image(xImg, yImg, imageData, 'CDataMapping', 'scaled');
+	scatter(x,y,50,velmax,'filled');
+	title('max x vel (mm/s) over all times');
+	ylabel('y position [mm]');
+	xlabel('x position [mm]');
+	axis([-1 38 0 20]);
 	caxis([0 10]);
-	colorbar;
+
+elseif viewtype == 9
+	% preallocate array to hold time values for a single data point
+	sigx = zeros(1,N);
+
+	% preallocate array to hold 300 kHz magnitude values for each pt/time
+	sigxt = zeros(numpts,N);
+
+	for ptidx = 1:numpts
+		% pull out data for the single data point
+		sigx = amp_x(ptidx,:);
+
+		% get the wavelet transform data
+		[wt,f] = cwt(sigx,Fs);
+		%[wt,f] = cwt(sigx,'bump',Fs);
+
+		% pull out the index for our 300 kHz signal
+		%idx300 = max(find((round(f) > 290e3 & round(f) < 310e3)));
+		[~,idx300] = min(abs(f - 300e3)); 
+
+		% retrieve cwt calculated magnitude of 300 kHz signal at each time step
+		% and load into new array
+		sigxt(ptidx,:) = abs(wt(idx300,:));
+		%sigxt(ptidx,:) = abs(wt(idx300,:)).^2;
+		%sigxt(ptidx,:) = (abs(wt(idx300,:)).^2 >= 0.5e-3);
+		
+		%sigxt(ptidx,:) = abs(wt(idx300,:));
+		%mag = abs(wt(idx300,:)).^2;
+		%maxmag = max(mag);
+		%sigxt(ptidx,:) = (mag == maxmag);
+
+		ptidx
+		%plot(t,sigxt(ptidx,:));
+		%hold on;
+		%drawnow
+	end
+
+	% plot the magnitude value for chosen point
+	subplot(3,1,3);
+	hold on;
+	grid on;
+	plot(t*1e6, sigxt(npos,:));
+	phx = line([0,0],get(gca,'ylim'),'color','red');
+	xlabel('time [\mus]');
+	ylabel('magnitude [?]');
+
+	for tidx = 1:N
+		% plot points with color by 300 kHz magnitude
+		subplot(3,1,[1:2]); hold on;
+		image(xImg, yImg, imageData, 'CDataMapping', 'scaled');
+		scatter(x, y, 300, sigxt(:,tidx), 's', 'filled');
+		%xlabel('x position [mm]');
+		%ylabel('y position [mm]');
+		title('Magnitude of 300 kHz over time, default cwt');
+		xlabel('x point num');
+		ylabel('y point num');
+		caxis([0 2.5e-3]);  % sets the range of values for the colorbar
+		%caxis([0 1]);  % sets the range of values for the colorbar
+		colorbar;
+		plot(x(npos), y(npos), 'or', 'MarkerSize', 20, 'LineWidth',5);  % highlight a point
+		
+		% update red line on single point plot
+		tt = t(tidx)*1e6;  % new time / x value
+		set(phx,'XData',[tt,tt]);
+		
+		tidx	
+		drawnow
+		
+		if makemovie == true
+			writeVideo(writerObj,getframe(gcf));
+		end
+	end
+
+elseif viewtype == 10
+	% ypts are rows, 1 - 27 for horn: 13 is center line
+	ptsidx = find(xyz(:,2)*1e3 == ypts(13));
+	d = amp_x(ptsidx,:);
+	for idx = 1:numel(ptsidx)
+		% use this to show cwt plots
+		%cwt(d(idx,:),Fs,'FrequencyLimits',[200e3 500e3]);
+	
+		% use this to show contourf plots	
+		[cfs,f] = cwt(d(idx,:),Fs,'FrequencyLimits',[200e3 500e3]);
+		contourf(t*1e6,f*1e-3,abs(cfs)); 
+		axis tight;
+		grid on;
+		xlabel('Time [\mus]');
+		ylabel('Approximate Frequency (kHz)');
+		title('CWT with Frequency vs Time');
+		caxis([0 10e-3]);
+		colorbar;
+
+		idx
+		drawnow
+		
+		if makemovie == true
+			writeVideo(writerObj,getframe(gcf));
+		end
+	end
+
+
+elseif viewtype == 11
+	% trim the time range
+	tmin = 201;
+	tmax = 800;
+
+	% convert x velocity values to mm/s	
+	vel = amp_x * 1e3;
+
+	% initialize vel max
+	velmax = zeros(numel(ypts), N);
+
+	% get colormap for making all lines different colors
+	cmap = jet(numel(ypts));
+
+	% loop all time steps
+	%for tidx = 1:N
+	for tidx = tmin:tmax
+		for yidx = 1:2:numel(ypts)
+			% get indexes of all points in current row
+			ptsidx = find(y == ypts(yidx));
+
+			% plot the x velocity value versus x position value
+			subplot(3,1,[1:2]);
+			plot(x(ptsidx),vel(ptsidx,tidx), 'Color',cmap(yidx,:),'DisplayName',['row ' num2str(yidx)]);
+			hold on; grid on;
+
+			if yidx == 1
+				title('x velocity versus x position for every other row over time indexes 201 - 800');
+				xlabel('x position [mm]');
+				ylabel('x velocity [mm/s]');
+				axis([-1 45 -75 75]);
+			end
+
+			% calculate max x vel in each row at this time step
+			velmax(yidx,tidx) = max(abs(vel(ptsidx,tidx)));
+			
+			% plot max vel values
+			subplot(3,1,3);
+			plot(t(tmin:tidx)*1e6, velmax(yidx,tmin:tidx), '-', 'Color', cmap(yidx,:));
+			hold on; grid on;
+
+			if yidx == 1
+				xlim([t(tmin)*1e6 t(tmax)*1e6]);
+				ylim([0 150]);
+				title('absolute value of x velocity for each row at each time step');
+				xlabel('time [\mus]');
+				ylabel('abs x velocity [mm/s]');
+			end
+		end
+
+		subplot(3,1,[1:2]);
+		set(gca,'Color', [0.7,0.7,0.7]);
+		legend show;
+		hold off;
+
+		subplot(3,1,3);
+		set(gca,'Color', [0.7,0.7,0.7]);
+		hold off;
+
+		tidx
+		drawnow
+
+		if makemovie == true
+			writeVideo(writerObj,getframe(gcf));
+		end
+
+	end
+
+elseif viewtype == 12
+	% trim the time range
+	tmin = 201;
+	tmax = 800;
+
+	% preallocate array to hold time values for a single data point
+	sigx = zeros(1,N);
+
+	% preallocate array to hold 300 kHz magnitude values for each pt/time
+	sigxt = zeros(numpts,N);
+
+	for ptidx = 1:numpts
+		% pull out data for the single data point
+		sigx = amp_x(ptidx,:);
+
+		% get the wavelet transform data
+		[wt,f] = cwt(sigx,Fs);
+		%[wt,f] = cwt(sigx,'bump',Fs);
+
+		% pull out the index for our 300 kHz signal
+		%idx300 = max(find((round(f) > 290e3 & round(f) < 310e3)));
+		[~,idx300] = min(abs(f - 300e3)); 
+
+		% retrieve cwt calculated magnitude of 300 kHz signal at each time step
+		% and load into new array
+		sigxt(ptidx,tmin:tmax) = abs(wt(idx300,tmin:tmax));
+		%sigxt(ptidx,:) = abs(wt(idx300,:)).^2;
+		%sigxt(ptidx,:) = (abs(wt(idx300,:)).^2 >= 0.5e-3);
+		
+		%sigxt(ptidx,:) = abs(wt(idx300,:));
+		%mag = abs(wt(idx300,:)).^2;
+		%maxmag = max(mag);
+		%sigxt(ptidx,:) = (mag == maxmag);
+
+		ptidx
+		%plot(t,sigxt(ptidx,:));
+		%hold on;
+		%drawnow
+	end
+
+	% initialize sigx max
+	sigxmax = zeros(numel(ypts), N);
+
+	% get colormap for making all lines different colors
+	cmap = jet(numel(ypts));
+
+	% loop all time steps
+	%for tidx = 1:N
+	for tidx = tmin:tmax
+		%for yidx = 1:2:numel(ypts)
+		for yidx = 9:1:18
+			% get indexes of all points in current rwo
+			ptsidx = find(y == ypts(yidx));
+
+			% plot the x velocity value versus x position value
+			subplot(3,1,[1:2]);
+			plot(x(ptsidx),sigxt(ptsidx,tidx), 'Color',cmap(yidx,:),'DisplayName',['row ' num2str(yidx)]);
+			hold on; grid on;
+
+			if yidx == 9
+				title('300 kHz magnitude versus x position for every other row over time indexes 201 - 800');
+				xlabel('x position [mm]');
+				ylabel('magnitude');
+				axis([-1 45 0 0.1]);
+			end
+
+			% calculate max magnitude in each row at this time step
+			sigxmax(yidx,tidx) = max(abs(sigxt(ptsidx,tidx)));
+			
+			% plot max magnitude values
+			subplot(3,1,3);
+			plot(t(tmin:tidx)*1e6, sigxmax(yidx,tmin:tidx), '-', 'Color', cmap(yidx,:));
+			hold on; grid on;
+
+			if yidx == 9
+				xlim([t(tmin)*1e6 t(tmax)*1e6]);
+				ylim([0 0.1]);
+				title('300 kHz magnitude for each row at each time step');
+				xlabel('time [\mus]');
+				ylabel('magnitude');
+			end
+		end
+
+		subplot(3,1,[1:2]);
+		set(gca,'Color', [0.7,0.7,0.7]);
+		legend show;
+		hold off;
+
+		subplot(3,1,3);
+		set(gca,'Color', [0.7,0.7,0.7]);
+		hold off;
+
+		tidx
+		drawnow
+
+		if makemovie == true
+			writeVideo(writerObj,getframe(gcf));
+		end
+
+	end
+
+
+elseif viewtype == 13
+	% trim the time range
+	tmin = 201;
+	tmax = 800;
+
+	% convert x velocity values to mm/s	
+	vel = amp_x * 1e3;
+
+	% initialize vel max
+	velmax = zeros(numel(ypts), N);
+
+	% get colormap for making all lines different colors
+	cmap = jet(numel(xpts));
+
+	% loop all time steps
+	%for tidx = 1:N
+	for tidx = tmin:tmax
+		for xidx = 1:3:numel(xpts)
+			% get indexes of all points in current column
+			ptsidx = find(x == xpts(xidx));
+
+			% plot the x velocity value versus y position value
+			subplot(3,1,[1:2]);
+			plot(y(ptsidx),vel(ptsidx,tidx), 'Color',cmap(xidx,:),'DisplayName',['column ' num2str(xidx)]);
+			hold on; grid on;
+
+			if xidx == 1
+				title('x velocity versus y position for every third column over time indexes 201 - 800');
+				xlabel('y position [mm]');
+				ylabel('x velocity [mm/s]');
+				axis([0 22 -75 75]);
+			end
+
+			% calculate max x vel in each column at this time step
+			velmax(xidx,tidx) = max(abs(vel(ptsidx,tidx)));
+			
+			% plot max vel values
+			subplot(3,1,3);
+			plot(t(tmin:tidx)*1e6, velmax(xidx,tmin:tidx), '-', 'Color', cmap(xidx,:));
+			hold on; grid on;
+
+			if xidx == 1
+				xlim([t(tmin)*1e6 t(tmax)*1e6]);
+				ylim([0 100]);
+				title('absolute value of max x velocity for each column at each time step');
+				xlabel('time [\mus]');
+				ylabel('abs max x velocity [mm/s]');
+			end
+		end
+
+		subplot(3,1,[1:2]);
+		set(gca,'Color', [0.7,0.7,0.7]);
+		legend show;
+		hold off;
+
+		subplot(3,1,3);
+		set(gca,'Color', [0.7,0.7,0.7]);
+		hold off;
+
+		tidx
+		drawnow
+
+		if makemovie == true
+			writeVideo(writerObj,getframe(gcf));
+		end
+
+	end
+
+elseif viewtype == 14
+	% trim the time range
+	tmin = 201;
+	tmax = 800;
+
+	% preallocate array to hold time values for a single data point
+	sigx = zeros(1,N);
+
+	% preallocate array to hold 300 kHz magnitude values for each pt/time
+	sigxt = zeros(numpts,N);
+
+	for ptidx = 1:numpts
+		% pull out data for the single data point
+		sigx = amp_x(ptidx,:);
+
+		% get the wavelet transform data
+		[wt,f] = cwt(sigx,Fs);
+		%[wt,f] = cwt(sigx,'bump',Fs);
+
+		% pull out the index for our 300 kHz signal
+		[~,idx300] = min(abs(f - 300e3)); 
+
+		% retrieve cwt calculated magnitude of 300 kHz signal at each time step
+		% and load into new array
+		sigxt(ptidx,tmin:tmax) = abs(wt(idx300,tmin:tmax));
+
+	%allxt(ptidx,:) = abs(wt(:,:));
+		
+		ptidx
+	end
+
+	% initialize sigx max
+	sigxmax = zeros(numel(xpts), N);
+
+	% get colormap for making all lines different colors
+	cmap = jet(numel(xpts));
+
+	% loop all time steps
+	%for tidx = 1:N
+	for tidx = tmin:tmax
+		for xidx = 1:3:numel(xpts)
+			% get indexes of all points in current column
+			ptsidx = find(x == xpts(xidx));
+
+			% plot the x velocity value versus y position value
+			subplot(3,1,[1:2]);
+			plot(y(ptsidx),sigxt(ptsidx,tidx), 'Color',cmap(xidx,:),'DisplayName',['column ' num2str(xidx)]);
+			hold on; grid on;
+
+			if xidx == 1
+				title('300 kHz magnitude versus y position for every third column over time indexes 201 - 800');
+				xlabel('y position [mm]');
+				ylabel('magnitude');
+				%axis([0 22 0 0.1]);
+				axis([0 22 0 0.1]);
+			end
+
+			% calculate max magnitude in each column at this time step
+			%sigxmax(xidx,tidx) = max(abs(sigxt(ptsidx,tidx)));
+			sigxmax(xidx,tidx) = mean(sigxt(ptsidx,tidx));
+			
+			% plot max magnitude values
+			subplot(3,1,3);
+			plot(t(tmin:tidx)*1e6, sigxmax(xidx,tmin:tidx), '-', 'Color', cmap(xidx,:));
+			hold on; grid on;
+
+			if xidx == 1
+				xlim([t(tmin)*1e6 t(tmax)*1e6]);
+				ylim([0 0.02]);
+				title('300 kHz max magnitude for each column at each time step');
+				xlabel('time [\mus]');
+				ylabel('max magnitude');
+			end
+		end
+
+		subplot(3,1,[1:2]);
+		set(gca,'Color', [0.7,0.7,0.7]);
+		legend show;
+		hold off;
+
+		subplot(3,1,3);
+		set(gca,'Color', [0.7,0.7,0.7]);
+		hold off;
+
+		tidx
+		drawnow
+
+		if makemovie == true
+			writeVideo(writerObj,getframe(gcf));
+		end
+
+	end
+
+
+elseif viewtype == 15
+	% 1 = column plots of mangnitude for all points in column
+	% 2 = heat map with each point showing sum of magnitudes over full time range
+	plottype = 1
+
+	% trim the time range
+	%tmin = 201;
+	%tmax = 800;
+	tmin = 1;
+	tmax = numel(t);
+
+	% preallocate array to hold time values for a single data point
+	sigx = zeros(1,N);
+
+	% preallocate array to hold 300 kHz magnitude values for each pt/time
+	sigxt = zeros(numpts,N);
+	sigxtpks = zeros(numpts,N);
+	sigxtsum = zeros(1,numpts);
+
+	for ptidx = 1:numpts
+		% pull out data for the single data point
+		sigx = amp_x(ptidx,:);
+
+		% get the wavelet transform data
+		%[wt,f] = cwt(sigx,Fs);
+		[wt,f] = cwt(sigx,'bump',Fs);
+
+		% pull out the index for our 300 kHz signal
+		[~,idx300] = min(abs(f - 300e3)); 
+
+		% retrieve cwt calculated magnitude of 300 kHz signal at each time step
+		% and load into new array
+		sigxt(ptidx,tmin:tmax) = abs(wt(idx300,tmin:tmax));
+
+		% get peaks and save only peak magnitudes into sigxtpks
+		[pks,locs] = findpeaks(sigxt(ptidx,tmin:tmax));
+		sigxtpks(ptidx,locs) = sigxt(ptidx,locs);
+
+		% get sum of magnitudes over full time range
+		sigxtsum(ptidx) = sum(abs(wt(idx300,tmin:tmax)));
+
+		ptidx
+	end
+
+	% get colormap for making all lines different colors
+	cmap = jet(numel(ypts));
+
+	if plottype == 2
+
+		scatter(x, y, 300, sigxtsum, 's', 'filled');
+		title(sprintf('300 kHz magnitude sum for each point over time range %d to %d',tmin,tmax));
+		xlabel('x position [mm]');
+		ylabel('y position [mm]');
+		colorbar;
+
+	elseif plottype == 1
+
+		% loop columns
+		for xidx = 1:numel(xpts)
+		%for xidx = [1 29 50]
+			figure;
+			hold on; grid on;
+
+			% get indexes of all points in current column
+			ptsidx = find(x == xpts(xidx));
+
+			% plot time-frequency for each point in this column
+			for ptidx = ptsidx(1):ptsidx(end)
+				% get row of this point so we can keep row colors consistent
+				yidx = find(ypts == y(ptidx));
+
+				% plot
+				plot(t*1e6, sigxt(ptidx,:), 'Color', cmap(yidx,:), 'DisplayName', ['pt ' num2str(ptidx)],...
+					'LineWidth',2);
+			end
+
+			title(sprintf('300 kHz magnitude, bump cwt, column %d, all points',xidx));
+			xlabel('time [\mus]');
+			ylabel('magnitude');
+			set(gca,'Color', [0.7,0.7,0.7]);
+			legend show;
+			hold off;
+
+			if makemovie == true
+				writeVideo(writerObj,getframe(gcf));
+			end
+		end
+
+	end % plottype
+
+elseif viewtype == 16
+	% trim the time range
+	tmin = 201;
+	tmax = 800;
+	%tmin = 1;
+	%tmax = numel(t);
+
+	% preallocate array to hold time values for a single data point
+	sigx = zeros(1,N);
+
+	% preallocate array to hold 300 kHz magnitude values for each pt/time
+	sigxt = zeros(numpts,N);
+	sigxtpks = zeros(numpts,N);
+
+	for ptidx = 1:numpts
+		% pull out data for the single data point
+		sigx = amp_x(ptidx,:);
+
+		% get the wavelet transform data
+		%[wt,f] = cwt(sigx,Fs);
+		[wt,f] = cwt(sigx,'bump',Fs);
+
+		% pull out the index for our 300 kHz signal
+		[~,idx300] = min(abs(f - 300e3)); 
+
+		% retrieve cwt calculated magnitude of 300 kHz signal at each time step
+		% and load into new array
+		sigxt(ptidx,tmin:tmax) = abs(wt(idx300,tmin:tmax));
+
+		% get peaks and save only peak magnitudes into sigxtpks
+		[pks,locs] = findpeaks(sigxt(ptidx,tmin:tmax));
+		sigxtpks(ptidx,locs) = sigxt(ptidx,locs);
+
+		ptidx
+	end
+
+	% plot the magnitude value for chosen point
+	subplot(3,1,3);
+	hold on; grid on;
+	%plot(t*1e6, sigxt(npos,:));
+	%plot(t, sigxt(npos,:));
+	findpeaks(sigxt(npos,:));
+	phx = line([0,0],get(gca,'ylim'),'color','red');
+	xlabel('time [\mus]');
+	ylabel('magnitude');
+
+	for tidx = tmin:tmax
+		% plot points with color by 300 kHz magnitude
+		subplot(3,1,[1:2]); hold on;
+		%image(xImg, yImg, imageData, 'CDataMapping', 'scaled');
+		scatter(x, y, 300, sigxtpks(:,tidx), 's', 'filled');
+		%xlabel('x position [mm]');
+		%ylabel('y position [mm]');
+		title('Magnitude of 300 kHz peak over time, bump cwt');
+		xlabel('x point num');
+		ylabel('y point num');
+		caxis([0 0.02]);  % sets the range of values for the colorbar
+		%caxis([0 1]);  % sets the range of values for the colorbar
+		colorbar;
+		plot(x(npos), y(npos), 'or', 'MarkerSize', 20, 'LineWidth',5);  % highlight a point
+		
+		% update red line on single point plot
+		%tt = t(tidx)*1e6;  % new time / x value
+		%set(phx,'XData',[tt,tt]);
+		set(phx,'XData',[tidx,tidx]);
+		
+		tidx	
+		drawnow
+		
+		if makemovie == true
+			writeVideo(writerObj,getframe(gcf));
+		end
+	end
+
+
+colorbar;
 end
 
 if makemovie == true
