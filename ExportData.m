@@ -1,4 +1,4 @@
-% export data from svd so it can be processed on my mac
+% export data from svd so it can be processed with procsvd
 
 % clear all vars and plots
 close all; clear all; clc;
@@ -8,10 +8,18 @@ close all; clear all; clc;
 % svdmatname = 'svddata.mat';
 % fnames = ["Scan_time.svd","Scan_time_plate.svd"];
 % svdmatname = 'svddata2.mat';
-fnames = ["Scan_time_horn.svd"];
-svdmatname = 'svddata_horn.mat';
+% fnames = ["Scan_time_horn.svd"];
+% svdmatname = 'svddata_horn.mat';
 % fnames = ["Scan_time_rect.svd"];
 % svdmatname = 'svddata_rect.mat';
+% fnames = ["C:\ncsu\mae496research\Scan_time_stepdown_2_x.svd"];
+% svdmatname = 'svddata_2_x.mat';
+% fnames = ["C:\ncsu\mae496research\Scan_time_stepdown_4_y.svd"];
+% svdmatname = 'svddata_4_y.mat';
+% fnames = ["C:\ncsu\mae496research\Scan_time_exponential_4_y.svd"];
+% svdmatname = 'svddata_exp4_y.mat';
+fnames = ["Scan_time.svd","Scan_time_extended fiber.svd"];
+svdmatname = 'svddata_extfiber.mat';
 
 numf = numel(fnames);
 

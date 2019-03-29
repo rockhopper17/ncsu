@@ -2,6 +2,94 @@
 close all; clear all; clc;
 
 %*****************************************************************************%
+% different views
+% 1 = scatter static view of positions to confirm general shape (can show idx nums)
+% 2 = 3D scatter to view general shape and choose orientation for movie
+% 3 = 3D scatter with animation and x vel vs time plot
+% 4 = points in a line at certain y values (.0099 middle line plus others)
+% 5 = avg x vel by x pos
+% 6 = pwelch power spectral density estimates
+% 7 = avg x vel, center x vel by x pos comparison horn to rect (4 subplots)
+% 8 = 2D plot of max x vel at each point
+% 9 = magnitudes of 300kHz (attempt to see wavefront)
+% 10 = cwt (or contourf) movie for a chosen row
+% 11 = x vel by x pos for chosen rows
+% 12 = 300 kHz magnitudes by x pos for chosen rows (view 11 for cwt)
+% 13 = x vel by y pos for chosen columns
+% 14 = 300 kHz magnitudes by y pos for chosen columns (view 13 for cwt)
+% 15 = cwt plots ***
+% 16 = cwt with peaks horn animation (didn't show what was hoped for)
+viewtype = 2
+makemovie = false;  % flag for making a movie (can be slow)
+
+% mat file name for data to import, after processing svd file with ExportData.m
+%svdmatname = 'svddata.mat' % orig x_8cm test data (scan_time.svd)
+%svdmatname = 'svddata2.mat' % orig x_8cm test data with plate data included (+scan_time_plate.svd)
+%svdmatname = 'svddata_horn.mat' % orig horn (plastic)
+%svdmatname = 'svddata_rect.mat' % orig rectangle (plastic)
+%svdmatname = 'svddata_2_x.mat' % alum horn a/b=2
+%svdmatname = 'svddata_4_y.mat' % alum horn a/b=4
+%svdmatname = 'svddata_exp4_y.mat' % alum horn a/b=4 exponential
+svdmatname = 'svddata_extfiber.mat' % fiber bonded directly to plate, extended
+
+% load data from mat file
+load(svdmatname);
+
+% num time data points
+N = length(t); 
+%N = 55;  % for testing
+%N = 600;
+
+% pull out positions and scale to mm
+x = xyz(:,1) * 1e3;
+y = xyz(:,2) * 1e3;
+z = xyz(:,3) * 1e3;
+%x = abs(xyz(:,1)) * 1e3; % reorient negative x vals
+%y = xyz(:,1) * 1e3; % flip for y oriented horns
+%x = xyz(:,2) * 1e3;
+
+
+% variables to change for different svd's
+if strcmp(svdmatname,'svddata2.mat')
+	axval = [-.05 .05 -.03 .03 -.05 .05];
+	vwval = [0 20];
+	caxval = [0 8]; % color bar magnitude values
+	npos = 57;
+	runtime = 60;  % num seconds to run movie
+	movfname = 'animationdef.avi';  % movie file name
+	frate = N/runtime;  % frame rate for movie file
+elseif strcmp(svdmatname,'svddata_horn.mat')
+	axval = [-.005 .04 0 .02 -.05 .05];
+	vwval = [0 20];
+	%npos = 13;
+	%npos = 1039;
+	npos = 500;
+	vwval = 3;  % default 3D view
+elseif strcmp(svdmatname,'svddata_rect.mat')
+	axval = [-.005 .04 0 .02 -.05 .05];
+	vwval = [0 20];
+	npos = 487;
+elseif strcmp(svdmatname,'svddata_extfiber.mat')
+	%axval = [-5 5 -15 7 -.05 .05];
+	axval = [-15 10 -5 15 -0.3 0.3];
+	vwval = [-29.216409612020513,53.633655732220156];
+	%vwval = [-37.5 30];
+	caxval = [0 15]; % color bar magnitude values
+	npos = 4;
+	runtime = 30;  % num seconds to run movie
+	movfname = 'adhesive_extfiber.avi';  % movie file name
+	frate = N/runtime;  % frame rate for movie file
+else
+	% default properties
+	axval = [min(x) max(x) min(y) max(y) -1 1];
+	vwval = [-37.5 30];  % default 3D view
+	npos = 1039;
+	runtime = 60;  % num seconds to run movie
+	movfname = 'animationdef.avi';  % movie file name
+	frate = N/runtime;  % frame rate for movie file
+end
+
+%*****************************************************************************%
 % load all workspace vars created from ExportData.m
 % variables in mat file, note that sizes are particular to test load
 %    but variables will have same names
@@ -22,67 +110,22 @@ close all; clear all; clc;
 	  %xyz             1045x3                    25080  double  
 %*****************************************************************************%
 
-% orig x_8cm test data (scan_time.svd)
-%load('svddata.mat');
-
-% orig x_8cm test data with plate data included (+scan_time_plate.svd)
-%load('svddata2.mat');
-%axval = [-.05 .05 -.003 .003 -.05 .05];
-%vwval = [0 20];
-%npos = 57;
-
-% horn test data
-%load('svddata_horn.mat');
-%axval = [-.005 .04 0 .02 -.05 .05];
-%vwval = [0 20];
-%npos = 13;
-%npos = 1039;
-%npos = 500;
-%vwval = 3;  % default 3D view
-
-% rectangle test data
-%load('svddata_rect.mat');
-%axval = [-.005 .04 0 .02 -.05 .05];
-%vwval = [0 20];
-%npos = 487;
-
-% alum horns a/b=2, a/b=4, a/b=4 exp
-%load('svddata_2_x.mat');
-%load('svddata_4_y.mat');
-load('svddata_exp4_y.mat');
-npos = 1039;
-% **************************
-
 % retrieve / calculate sample rate
 %dt = mean(diff(t));
 %Fs = 1 / dt;
 % logic pulled from polytec sample CalculateFFT.m
 Fs = (usd_x.XCount - 1) / (usd_x.XMax - usd_x.XMin);
 
-% num time data points
-N = length(t); 
-%N = 55;  % for testing
-%N = 600;
-
-% pull out positions and scale to mm
-%x = xyz(:,1) * 1e3;
-%y = xyz(:,2) * 1e3;
-y = xyz(:,1) * 1e3; % flip for y oriented horns
-x = xyz(:,2) * 1e3;
+% get rows and columns
 xpts = unique(x);
 ypts = unique(y);
+%xpts = unique(round(x)); % need to round _2_x since it's misaligned
+%ypts = unique(round(y));
 numpts = length(xyz);
 
 % get video image data for plotting as background
 xImg = linspace(min(x), max(x), size(imageData, 2));
 yImg = linspace(min(y), max(y), size(imageData, 1));
-
-% movie properties
-makemovie = false;  % flag for making a movie (can be slow) or not
-runtime = 60;  % num seconds to run movie
-movfname = 'viewtype_16.avi';  % movie file name
-%frate = N/runtime;  % frame rate for movie file
-frate = 10;
 
 % setup movie
 if makemovie == true
@@ -95,25 +138,6 @@ end
 %set(gcf,'units','normalized','outerposition',[0.25 0.25 0.5 0.5]);
 set(gcf,'units','normalized','outerposition',[0.1 0.1 0.8 0.8]);
 colormap('jet');
-
-% different views
-% 1 = scatter static view of positions to confirm general shape (can show idx nums)
-% 2 = removed
-% 3 = scatter with animation and x vel vs time plot
-% 4 = points in a line at certain y values (.0099 middle line plus others)
-% 5 = avg x vel by x pos
-% 6 = pwelch power spectral density estimates
-% 7 = avg x vel, center x vel by x pos comparison horn to rect (4 subplots)
-% 8 = 2D plot of max x vel at each point
-% 9 = magnitudes of 300kHz (attempt to see wavefront)
-% 10 = cwt (or contourf) movie for a chosen row
-% 11 = x vel by x pos for chosen rows
-% 12 = 300 kHz magnitudes by x pos for chosen rows (view 11 for cwt)
-% 13 = x vel by y pos for chosen columns
-% 14 = 300 kHz magnitudes by y pos for chosen columns (view 13 for cwt)
-% 15 = cwt plots ***
-% 16 = cwt with peaks horn animation (didn't show what was hoped for)
-viewtype = 1
 
 % switch based on view type
 if viewtype == 1
@@ -134,50 +158,84 @@ if viewtype == 1
 	% plot points as their index number
 	scatter(x, y, [], 'w');
 	hold on; grid on;
-	%image(xImg, yImg, imageData, 'CDataMapping', 'scaled');
-	image(xImg, yImg, imrotate(flipdim(imageData,1),90), 'CDataMapping', 'scaled'); % ab4y
+	image(xImg, yImg, imageData, 'CDataMapping', 'scaled');
+	%image(xImg, yImg, imrotate(imageData,180), 'CDataMapping', 'scaled'); % ab2x
+	%image(xImg, yImg, imrotate(flipdim(imageData,1),90), 'CDataMapping', 'scaled'); % ab4y
 	%axis([-1 38 0 20]);
 	set(gca,'Color', [0.7,0.7,0.7]);
-	
+	%set(gca, 'XDir','reverse');
+
 	% get colormap for making all lines different colors
-	cmap = jet(numel(ypts));
+	%cmap = jet(numel(ypts));
+	cmap = jet(numel(xpts));
 
 	for ptidx = 1:numpts
 		xidx = find(xpts == x(ptidx)); % column number
 		yidx = find(ypts == y(ptidx)); % row number
+		%xidx = find(xpts == round(x(ptidx))); % column number
+		%yidx = find(ypts == round(y(ptidx))); % row number
 
-		%text(x(ptidx),y(ptidx),sprintf('%d\nr%dc%d',ptidx,yidx,xidx),'Color', cmap(yidx,:));
-		text(x(ptidx),y(ptidx),sprintf('%d',ptidx),'Color', cmap(yidx,:), 'HorizontalAlignment','center');
+		%if (yidx == 15)
+		if (yidx == 13)
+			text(x(ptidx),y(ptidx),sprintf('%d\nc%d',ptidx,xidx),...
+				'Color', cmap(xidx,:), 'HorizontalAlignment','center');
+		elseif (xidx == 1)
+		%elseif (xidx == 39)
+			text(x(ptidx),y(ptidx),sprintf('%d\nr%d',ptidx,yidx),...
+				'Color', cmap(xidx,:), 'HorizontalAlignment','center');
+		else
+			text(x(ptidx),y(ptidx),sprintf('%d',ptidx),'Color', cmap(xidx,:), 'HorizontalAlignment','center');
+		end
 	end
 
+elseif viewtype == 2
+	scatter3(x, y, z, 100, 's', 'filled');
+	xlabel('x axis');
+	ylabel('y axis');
+	zlabel('z axis');
+
+	% set axis and view angle per scenario
+	axis(axval);
+	view(vwval);
+
 elseif viewtype == 3
+	% trim the time range if desired
+	tmin = 2; tmax = numel(t);
+	%tmin = 201;	tmax = 800;
+
 	% create an empty grid at each time step
 	%xy = zeros(numel(y),numel(x),numel(t));  % this was too big for matlab
 
 	% plot the x,y,z velocities [mm/s] vs time [micro-sec]
 	subplot(3,1,3);
 	hold on; grid on;
-	%plot(t*1e6, amp_x(npos,:)*1e3);
-	plot(t(200:800)*1e6, amp_x(npos,200:800)*1e3);
+	plot(t(tmin:tmax)*1e6, amp_x(npos,tmin:tmax)*1e3,'DisplayName','x vel');
+	plot(t(tmin:tmax)*1e6, amp_y(npos,tmin:tmax)*1e3,'DisplayName','y vel');
+	plot(t(tmin:tmax)*1e6, amp_z(npos,tmin:tmax)*1e3,'DisplayName','z vel');
 	phx = line([0,0],get(gca,'ylim'),'color','red');
 	xlabel('time [\mus]');
 	ylabel('x velocity [mm/s]');
+	legend;
 
 	% calculate overall velocity values, convert to mm/s
-	%vel = sqrt(amp_x(:,:).^2 + amp_y(:,:).^2 + amp_z(:,:).^2) * 1e3;
+	velx = amp_x * 1e3;
+	vely = amp_y * 1e3;
+	velz = amp_z * 1e3;
+	vel = sqrt(velx.^2 + vely.^2 + velz.^2);
 	%vel = abs(amp_x) * 1e3;  % absolute value of x vel
-	vel = amp_x * 1e3;  % mimic X_acoustic_horn.avi, shows negative values
+	%vel = amp_x * 1e3;  % mimic X_acoustic_horn.avi, shows negative values
 
 	% animation loop
-	%for tidx = 2:N
-	for tidx = 200:800
+	for tidx = tmin:tmax
 		% increment the position based on calculating displacement
 		% from the velocity values and the time step
 		% velocity values are in amp_[x,y,z] in m/s
 		% time value is in t in s
 		% displacement is magnified so we can see movement (polytec does this too)
-		%x = xyz(:,1) + (amp_x(:,i) * (t(i) - t(i-1))) * 1e5;
-		%y = xyz(:,2) + (amp_y(:,i) * (t(i) - t(i-1))) * 1e6;
+		dt = t(tidx) - t(tidx-1);
+		xi = x + (velx(:,tidx) * dt) * 1e5;
+		yi = y + (vely(:,tidx) * dt) * 1e5;
+		zi = z + (velz(:,tidx) * dt) * 1e5;
 
 		% contour plot stuff
 		% get data into a grid
@@ -192,23 +250,26 @@ elseif viewtype == 3
 			%end
 		%end
 		
-		% plot the 2D scatter	
+		% plot the 3D scatter	
 		subplot(3,1,[1:2]);
 		hold on; grid on;
-		image(xImg, yImg, imageData, 'CDataMapping', 'scaled');
-		scatter(x, y, 100, vel(:,tidx), 's', 'filled');
-		plot(x(npos), y(npos), 'or', 'MarkerSize', 20, 'LineWidth', 5);  % highlight a point
-		caxis([-8 8]);
-		%caxis([0 8]);
-		title('x velocity over time (index 200 - 800)');
-		xlabel('x point num');
-		ylabel('y point num');
-		
-		%contourf(xy);
+		%image(xImg, yImg, imageData, 'CDataMapping', 'scaled');
+		scatter3(xi, yi, zi, 100, vel(:,tidx), 's', 'filled');
+		plot3(xi(npos), yi(npos), zi(npos), 'or', 'MarkerSize', 20, 'LineWidth', 5);  % highlight a point
+		caxis(caxval);
 		%caxis([-8 8]);
-	
+		%title('velocity over time');
+		%xlabel('x point num');
+		%ylabel('y point num');
 		colorbar;
 		
+		%contourf(xy);
+		
+		% set axis and view angle per scenario
+		axis(axval);
+		view(vwval);
+		%view([0 20]);  % orient along x-axis tilted down 10 deg
+
 		% update the vertical lines on the velocity plots
 		tt = t(tidx)*1e6;  % new time / x value
 		set(phx,'XData',[tt,tt]);
