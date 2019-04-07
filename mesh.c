@@ -4,18 +4,19 @@
 #include <stdlib.h>
 #include <math.h>
 #include <stdio.h>
+#include <ctype.h>
 /*#include "mex.h"*/
 
 /*****************************************************************************/
 /* constants */
 /*****************************************************************************/
 static	const char	*fname = "grid-poisson-2015.txt";  /* physical mesh file name */
+static	const int	imx = 81; /* max i value / num columns */
+static	const int	jmx = 81; /* max j value / num rows */
 
 /*****************************************************************************/
 /* function: metrics */
 /* inputs:
- * 	imx = max i value - num columns (int)
- * 	jmx = max j value - num rows (int)
  *  x = physical mesh x coordinates for computational mesh (2D array i,j)
  *  y = physical mesh y coordinates for computational mesh (2D array i,j)
  * */
@@ -26,182 +27,109 @@ static	const char	*fname = "grid-poisson-2015.txt";  /* physical mesh file name 
  * 	ey = metric derivative (deta/dy)/J = dx/dxsi (2D array i,j)
  * 	xj = inverse Jacobian 1/J (2D array i,j)
  * 	*/
-/* recall 2d array pointer arithmetic: access x[j=row][i=col] like x[j*imx + i] */
-/* note: C array is row major order, Fortran is column major order (first index is col) */
+/* note: C array is row major order, Fortran is column major order */
 /*****************************************************************************/
-static void metrics(double *zx, double *zy, double *ex, double *ey, double *xj,
-		int imx, int jmx, double *x, double *y) {
-	/* locals */
-	int i,j;
-
+static void metrics(double x[jmx][imx], double y[jmx][imx],
+		double zx[jmx][imx], double zy[jmx][imx], double ex[jmx][imx], double ey[jmx][imx], double xj[jmx][imx]) {
 	/* loop comp grid */
-	for (j = 0; j < jmx; j++) {
-		for (i = 0; i < imx; i++) {
+	for (int j = 0; j < jmx; j++) {
+		for (int i = 0; i < imx; i++) {
 			/* xsi */
 			if (j == 0) {
 				/* boundary: row 1, all cols */
-				zx[0 + i] = -1.5*y[0 + i] + 2.0*y[1*imx + i] - 0.5*y[2*imx + i];
-				zy[0 + i] = -(-1.5*x[0 + i] + 2.0*x[1*imx + i] - 0.5*x[2*imx + i]);
+				zx[j][i] = -1.5*y[j][i] + 2.0*y[j+1][i] - 0.5*y[j+2][i];
+				zy[j][i] = -(-1.5*x[j][i] + 2.0*x[j+1][i] - 0.5*x[j+2][i]);
 			}
 			else if (j == (jmx-1)) {
 				/* boundary: row jmx, all cols */
-				zx[j*imx + i] = -1.5*y[j*imx + i] + 2.0*y[(j-1)*imx + i] - 0.5*y[(j-2)*imx + i];
-				zy[j*imx + i] = -(-1.5*x[j*imx + i] + 2.0*x[(j-1)*imx + i] - 0.5*x[(j-2)*imx + i]);
+				zx[j][i] = 1.5*y[j][i] - 2.0*y[j-1][i] + 0.5*y[j-2][i];
+				zy[j][i] = -(1.5*x[j][i] - 2.0*x[j-1][i] + 0.5*x[j-2][i]);
 			}
 			else {
 				/* interior points */
-				zx[j*imx + i] = 0.5*(y[(j+1)*imx + i] - y[(j-1)*imx + i]);
-				zy[j*imx + i] = -0.5*(x[(j+1)*imx + i] - x[(j-1)*imx + i]);
+				zx[j][i] = 0.5*(y[j+1][i] - y[j-1][i]);
+				zy[j][i] = -0.5*(x[j+1][i] - x[j-1][i]);
 			}
 
 			/* eta */
 			if (i == 0) {
 				/* boundary: col 1, all rows */
-				ex[j*imx + 0] = -(-1.5*y[j*imx + 0] + 2.0*y[j*imx + 1] - 0.5*y[j*imx + 2]);
-				ey[j*imx + 0] = -1.5*x[j*imx + 0] + 2.0*x[j*imx + 1] - 0.5*x[j*imx + 2];
+				ex[j][i] = -(-1.5*y[j][i] + 2.0*y[j][i+1] - 0.5*y[j][i+2]);
+				ey[j][i] = -1.5*x[j][i] + 2.0*x[j][i+1] - 0.5*x[j][i+2];
 			}
 			else if (i == (imx-1)) {
 				/* boundary: col imx, all rows */
-				ex[j*imx + i] = -(-1.5*y[j*imx + i] + 2.0*y[j*imx + i-1] - 0.5*y[j*imx + i-2]);
-				ey[j*imx + i] = -1.5*x[j*imx + i] + 2.0*x[j*imx + i-1] - 0.5*x[j*imx + i-2];
+				ex[j][i] = -(1.5*y[j][i] - 2.0*y[j][i-1] + 0.5*y[j][i-2]);
+				ey[j][i] = 1.5*x[j][i] - 2.0*x[j][i-1] + 0.5*x[j][i-2];
 			}
 			else {
 				/* interior points */
-				ex[j*imx + i] = -0.5*(y[j*imx + i+1] - y[j*imx + i-1]);
-				ey[j*imx + i] = 0.5*(x[j*imx + i+1] - x[j*imx + i-1]);
+				ex[j][i] = -0.5*(y[j][i+1] - y[j][i-1]);
+				ey[j][i] = 0.5*(x[j][i+1] - x[j][i-1]);
 			}
 
 			/* Jacobian */
-			xj[j*imx + i] = zx[j*imx + i]*ey[j*imx + i] - ex[j*imx + i]*zy[j*imx + i];
+			xj[j][i] = zx[j][i]*ey[j][i] - ex[j][i]*zy[j][i];
 		}
 	}	
 }
 
 /*****************************************************************************/
-/* main */
-/* simulate matlab code calling c functions */
+/* function: tecplot */
+/* inputs:
+ *  x = physical mesh x coordinates for computational mesh (2D array i,j)
+ *  y = physical mesh y coordinates for computational mesh (2D array i,j)
+ *  m = metric derivative to plot
+ *  mname = name of metric, used in plot and file name
+ * */
+/* outputs:
+ * 	plt file for use in Tecplot, saved to filesystem
+ * 	*/
 /*****************************************************************************/
-int main()
-{
-	int imx, jmx;
-	FILE *fp = fopen(fname,"r");
-	fscanf(fp,"%d %d", &imx, &jmx);
+static void tecplot(double x[jmx][imx], double y[jmx][imx], double m[jmx][imx], char *mname) {
+	char fname[10];
+	snprintf(fname, sizeof(fname), "%s.plt", mname);
+	
+	FILE *fout = fopen(fname, "w+t");
 
-	double *x = (double *) malloc(imx * jmx * sizeof(double));
-	double *y = (double *) malloc(imx * jmx * sizeof(double));
-	double *zx = (double *) malloc(imx * jmx * sizeof(double));
-	double *zy = (double *) malloc(imx * jmx * sizeof(double));
-	double *ex = (double *) malloc(imx * jmx * sizeof(double));
-	double *ey = (double *) malloc(imx * jmx * sizeof(double));
-	double *xj = (double *) malloc(imx * jmx * sizeof(double));
-
-	for (int j=0; j < jmx; j++)
-		for (int i=0; i < imx; i++)
-			fscanf(fp,"%lf %lf", &x[j*imx + i], &y[j*imx + i]);
-
-	fclose(fp);
-
-	metrics(zx, zy, ex, ey, xj, imx, jmx, x, y);
-
-	/* output for tecplot */
-	FILE *fout = fopen("ex.plt","w+t");
-	fprintf(fout, "VARIABLES=\"X\",\"Y\",\"EX\"\n");
+	fprintf(fout, "VARIABLES=\"X\",\"Y\",\"%c%c\"\n", toupper(mname[0]), toupper(mname[1]));
 	fprintf(fout, "ZONE	 F=POINT\n");
 	fprintf(fout, "I=%d, J=%d\n", imx, jmx);
 
 	for (int j=0; j < jmx; j++)
 		for (int i=0; i < imx; i++)
-			fprintf(fout,"%lf\t%lf\t%lf\n", x[j*imx + i], y[j*imx + i], ex[j*imx + i]);
+			fprintf(fout,"%.15lf\t%.15lf\t%.15lf\n", x[j][i], y[j][i], m[j][i]);
 
 	fclose(fout);
+}
 
-	free(x);
-	free(y);
-	free(ex);
-	free(ey);
-	free(zx);
-	free(zy);
-	free(xj);
+/*****************************************************************************/
+/* main */
+/*****************************************************************************/
+int main()
+{
+	int timx, tjmx;
+	FILE *fp = fopen(fname,"r");
+	fscanf(fp,"%d %d", &timx, &tjmx); /* not using - size hard coded for performance */
+
+	double x[jmx][imx], y[jmx][imx];
+	double zx[jmx][imx], zy[jmx][imx], ex[jmx][imx], ey[jmx][imx], xj[jmx][imx];
+
+	for (int j=0; j < jmx; j++)
+		for (int i=0; i < imx; i++)
+			fscanf(fp,"%lf %lf", &x[j][i], &y[j][i]);
+
+	fclose(fp);
+
+	/* get metric derivatives */
+	metrics(x, y, zx, zy, ex, ey, xj);
+
+	/* output for tecplot */
+	tecplot(x, y, zx, "zx");
+	tecplot(x, y, zy, "zy");
+	tecplot(x, y, ex, "ex");
+	tecplot(x, y, ey, "ey");
+	tecplot(x, y, xj, "xj");
 
 	return 0;
 }
-
-/* gateway function for matlab, build with mex and call mesh
- * build in matlab: mex -g mesh.c -r2018a
- * call like this: [ex,ey,zx,zy,xj,u,v] = mesh();
- * nlhs = num outputs, nrhs = num inputs
- * plhs = array of ptrs to outputs, prhs = array of ptrs to inputs */
-/*void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {*/
-	/*[> grid data <]*/
-	/*int imx, jmx, *imxo, *jmxo; */
-	/*double *x, *y;*/
-
-	/*[> metric derivative data <]*/
-	/*double *ex, *ey, *zx, *zy, *xj;*/
-
-	/*[> vpe data <]*/
-	/*double *u, *v;*/
-
-	/*[> check for proper number of arguments <]*/
-	/*if (nrhs != 0) {*/
-		/*mexErrMsgIdAndTxt( "MATLAB:cfd:invalidNumInputs", "Invalid number of input arguments.");*/
-	/*} else if (nlhs > 11) {*/
-		/*mexErrMsgIdAndTxt( "MATLAB:cfd:maxlhs","Too many output arguments.");*/
-	/*}*/
-
-	/*[> open physical mesh file, has coordinates <]*/
-	/*FILE *fp = fopen(fname,"r");*/
-	/*fscanf(fp,"%d %d", &imx, &jmx);*/
-
-	/*[> initialize x,y coordinate arrays <]*/
-	/*[>*x = (double *) malloc(imx * jmx * sizeof(double));<]*/
-	/*[>*y = (double *) malloc(imx * jmx * sizeof(double));<]*/
-
-	/*[> initialize outputs <]*/
-	/*plhs[0] = mxCreateNumericMatrix( 1, 1, mxINT32_CLASS, mxREAL);*/
-	/*plhs[1] = mxCreateNumericMatrix( 1, 1, mxINT32_CLASS, mxREAL);*/
-	/*plhs[2] = mxCreateDoubleMatrix( jmx, imx, mxREAL);*/
-	/*plhs[3] = mxCreateDoubleMatrix( jmx, imx, mxREAL);*/
-	/*plhs[4] = mxCreateDoubleMatrix( jmx, imx, mxREAL);*/
-	/*plhs[5] = mxCreateDoubleMatrix( jmx, imx, mxREAL);*/
-	/*plhs[6] = mxCreateDoubleMatrix( jmx, imx, mxREAL);*/
-	/*plhs[7] = mxCreateDoubleMatrix( jmx, imx, mxREAL);*/
-	/*plhs[8] = mxCreateDoubleMatrix( jmx, imx, mxREAL);*/
-	/*plhs[9] = mxCreateDoubleMatrix( jmx, imx, mxREAL);*/
-	/*plhs[10] = mxCreateDoubleMatrix( jmx, imx, mxREAL);*/
-
-	/*imxo = (int *)mxGetData(plhs[0]);*/
-	/*jmxo = (int *)mxGetData(plhs[1]);*/
-	/*imxo[0] = imx;*/
-	/*jmxo[0] = jmx;*/
-
-	/*x = mxGetDoubles(plhs[2]);*/
-	/*y = mxGetDoubles(plhs[3]);*/
-	/*ex = mxGetDoubles(plhs[4]);*/
-	/*ey = mxGetDoubles(plhs[5]);*/
-	/*zx = mxGetDoubles(plhs[6]);*/
-	/*zy = mxGetDoubles(plhs[7]);*/
-	/*xj = mxGetDoubles(plhs[8]);*/
-	/*u = mxGetDoubles(plhs[9]);*/
-	/*v = mxGetDoubles(plhs[10]);*/
-
-	/*[> read physical mesh from file <]*/
-	/*for (int j=0; j < jmx; j++)*/
-		/*for (int i=0; i < imx; i++)*/
-			/*fscanf(fp,"%lf %lf", &x[j*imx + i], &y[j*imx+i]);*/
-
-	/*fclose(fp);*/
-
-	/*[> call metrics function <]*/
-	/*metrics(zx, zy, ex, ey, xj, imx, jmx, x, y);*/
-
-	/*[> call vpe_solve <]*/
-	/*[>vpe_solve(u, v);<]*/
-
-	/*[>free(x);<]*/
-	/*[>free(u);<]*/
-	/*[> do we need to free up any of the mex created arrays here? <]*/
-	/*[> call mxDestroyArray somehow on this output variable? <]*/
-
-	/*return;*/
-/*}*/
