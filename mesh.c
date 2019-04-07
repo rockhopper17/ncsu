@@ -4,7 +4,12 @@
 #include <stdlib.h>
 #include <math.h>
 #include <stdio.h>
-#include "mex.h"
+/*#include "mex.h"*/
+
+/*****************************************************************************/
+/* constants */
+/*****************************************************************************/
+static	const char	*fname = "grid-poisson-2015.txt";  /* physical mesh file name */
 
 /*****************************************************************************/
 /* function: metrics */
@@ -22,8 +27,9 @@
  * 	xj = inverse Jacobian 1/J (2D array i,j)
  * 	*/
 /* recall 2d array pointer arithmetic: access x[j=row][i=col] like x[j*imx + i] */
+/* note: C array is row major order, Fortran is column major order (first index is col) */
 /*****************************************************************************/
-static void mesh(double *zx, double *zy, double *ex, double *ey, double *xj,
+static void metrics(double *zx, double *zy, double *ex, double *ey, double *xj,
 		int imx, int jmx, double *x, double *y) {
 	/* locals */
 	int i,j;
@@ -75,85 +81,127 @@ static void mesh(double *zx, double *zy, double *ex, double *ey, double *xj,
 /* main */
 /* simulate matlab code calling c functions */
 /*****************************************************************************/
-/*int main()*/
-/*{*/
-	/*int imx = 81;*/
-	/*int jmx = 81;*/
-	/*FILE *fp = fopen("grid-poisson-2015.txt","r");*/
+int main()
+{
+	int imx, jmx;
+	FILE *fp = fopen(fname,"r");
+	fscanf(fp,"%d %d", &imx, &jmx);
+
+	double *x = (double *) malloc(imx * jmx * sizeof(double));
+	double *y = (double *) malloc(imx * jmx * sizeof(double));
+	double *zx = (double *) malloc(imx * jmx * sizeof(double));
+	double *zy = (double *) malloc(imx * jmx * sizeof(double));
+	double *ex = (double *) malloc(imx * jmx * sizeof(double));
+	double *ey = (double *) malloc(imx * jmx * sizeof(double));
+	double *xj = (double *) malloc(imx * jmx * sizeof(double));
+
+	for (int j=0; j < jmx; j++)
+		for (int i=0; i < imx; i++)
+			fscanf(fp,"%lf %lf", &x[j*imx + i], &y[j*imx + i]);
+
+	fclose(fp);
+
+	metrics(zx, zy, ex, ey, xj, imx, jmx, x, y);
+
+	/* output for tecplot */
+	FILE *fout = fopen("ex.plt","w+t");
+	fprintf(fout, "VARIABLES=\"X\",\"Y\",\"EX\"\n");
+	fprintf(fout, "ZONE	 F=POINT\n");
+	fprintf(fout, "I=%d, J=%d\n", imx, jmx);
+
+	for (int j=0; j < jmx; j++)
+		for (int i=0; i < imx; i++)
+			fprintf(fout,"%lf\t%lf\t%lf\n", x[j*imx + i], y[j*imx + i], ex[j*imx + i]);
+
+	fclose(fout);
+
+	free(x);
+	free(y);
+	free(ex);
+	free(ey);
+	free(zx);
+	free(zy);
+	free(xj);
+
+	return 0;
+}
+
+/* gateway function for matlab, build with mex and call mesh
+ * build in matlab: mex -g mesh.c -r2018a
+ * call like this: [ex,ey,zx,zy,xj,u,v] = mesh();
+ * nlhs = num outputs, nrhs = num inputs
+ * plhs = array of ptrs to outputs, prhs = array of ptrs to inputs */
+/*void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {*/
+	/*[> grid data <]*/
+	/*int imx, jmx, *imxo, *jmxo; */
+	/*double *x, *y;*/
+
+	/*[> metric derivative data <]*/
+	/*double *ex, *ey, *zx, *zy, *xj;*/
+
+	/*[> vpe data <]*/
+	/*double *u, *v;*/
+
+	/*[> check for proper number of arguments <]*/
+	/*if (nrhs != 0) {*/
+		/*mexErrMsgIdAndTxt( "MATLAB:cfd:invalidNumInputs", "Invalid number of input arguments.");*/
+	/*} else if (nlhs > 11) {*/
+		/*mexErrMsgIdAndTxt( "MATLAB:cfd:maxlhs","Too many output arguments.");*/
+	/*}*/
+
+	/*[> open physical mesh file, has coordinates <]*/
+	/*FILE *fp = fopen(fname,"r");*/
 	/*fscanf(fp,"%d %d", &imx, &jmx);*/
 
-	/*double *x = (double *) malloc(imx * jmx * sizeof(double));*/
-	/*double *y = (double *) malloc(imx * jmx * sizeof(double));*/
-	/*double *zx = (double *) malloc(imx * jmx * sizeof(double));*/
-	/*double *zy = (double *) malloc(imx * jmx * sizeof(double));*/
-	/*double *ex = (double *) malloc(imx * jmx * sizeof(double));*/
-	/*double *ey = (double *) malloc(imx * jmx * sizeof(double));*/
-	/*double *xj = (double *) malloc(imx * jmx * sizeof(double));*/
+	/*[> initialize x,y coordinate arrays <]*/
+	/*[>*x = (double *) malloc(imx * jmx * sizeof(double));<]*/
+	/*[>*y = (double *) malloc(imx * jmx * sizeof(double));<]*/
 
+	/*[> initialize outputs <]*/
+	/*plhs[0] = mxCreateNumericMatrix( 1, 1, mxINT32_CLASS, mxREAL);*/
+	/*plhs[1] = mxCreateNumericMatrix( 1, 1, mxINT32_CLASS, mxREAL);*/
+	/*plhs[2] = mxCreateDoubleMatrix( jmx, imx, mxREAL);*/
+	/*plhs[3] = mxCreateDoubleMatrix( jmx, imx, mxREAL);*/
+	/*plhs[4] = mxCreateDoubleMatrix( jmx, imx, mxREAL);*/
+	/*plhs[5] = mxCreateDoubleMatrix( jmx, imx, mxREAL);*/
+	/*plhs[6] = mxCreateDoubleMatrix( jmx, imx, mxREAL);*/
+	/*plhs[7] = mxCreateDoubleMatrix( jmx, imx, mxREAL);*/
+	/*plhs[8] = mxCreateDoubleMatrix( jmx, imx, mxREAL);*/
+	/*plhs[9] = mxCreateDoubleMatrix( jmx, imx, mxREAL);*/
+	/*plhs[10] = mxCreateDoubleMatrix( jmx, imx, mxREAL);*/
+
+	/*imxo = (int *)mxGetData(plhs[0]);*/
+	/*jmxo = (int *)mxGetData(plhs[1]);*/
+	/*imxo[0] = imx;*/
+	/*jmxo[0] = jmx;*/
+
+	/*x = mxGetDoubles(plhs[2]);*/
+	/*y = mxGetDoubles(plhs[3]);*/
+	/*ex = mxGetDoubles(plhs[4]);*/
+	/*ey = mxGetDoubles(plhs[5]);*/
+	/*zx = mxGetDoubles(plhs[6]);*/
+	/*zy = mxGetDoubles(plhs[7]);*/
+	/*xj = mxGetDoubles(plhs[8]);*/
+	/*u = mxGetDoubles(plhs[9]);*/
+	/*v = mxGetDoubles(plhs[10]);*/
+
+	/*[> read physical mesh from file <]*/
 	/*for (int j=0; j < jmx; j++)*/
 		/*for (int i=0; i < imx; i++)*/
 			/*fscanf(fp,"%lf %lf", &x[j*imx + i], &y[j*imx+i]);*/
 
 	/*fclose(fp);*/
 
+	/*[> call metrics function <]*/
 	/*metrics(zx, zy, ex, ey, xj, imx, jmx, x, y);*/
 
-	/*free(x);*/
-	/*free(y);*/
-	/*free(ex);*/
-	/*free(ey);*/
-	/*free(zx);*/
-	/*free(zy);*/
-	/*free(xj);*/
+	/*[> call vpe_solve <]*/
+	/*[>vpe_solve(u, v);<]*/
 
-	/*return 0;*/
+	/*[>free(x);<]*/
+	/*[>free(u);<]*/
+	/*[> do we need to free up any of the mex created arrays here? <]*/
+	/*[> call mxDestroyArray somehow on this output variable? <]*/
+
+	/*return;*/
 /*}*/
-
-/* gateway function for matlab, build with mex and call cfd
- * build in matlab: mex -g cfd.c -r2018a
- * call like this: [x, u] = cfd(nu, cn);
- * nlhs = num outputs, nrhs = num inputs
- * plhs = array of ptrs to outputs, prhs = array of ptrs to inputs */
-void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
-	/* input variables from matlab */
-	int imx, jmx;
-	double *x, *y;
-	
-	/* output variables for matlab */
-	double *ex, *ey, *zx, *zy, *xj;
-
-	/* check for proper number of arguments */
-	if (nrhs != 4) {
-		mexErrMsgIdAndTxt( "MATLAB:cfd:invalidNumInputs", "Invalid number of input arguments.");
-	} else if (nlhs > 5) {
-		mexErrMsgIdAndTxt( "MATLAB:cfd:maxlhs","Too many output arguments.");
-	}
-
-	/* get inputs */
-	imx = mxGetScalar(prhs[0]);
-	jmx = mxGetScalar(prhs[1]);
-	x = mxGetDoubles(prhs[2]);
-	y = mxGetDoubles(prhs[3]);
-
-	/* create outputs */
-	plhs[0] = mxCreateDoubleMatrix( (mwSize)jmx, (mwSize)imx, mxREAL);
-	plhs[1] = mxCreateDoubleMatrix( (mwSize)jmx, (mwSize)imx, mxREAL);
-	plhs[2] = mxCreateDoubleMatrix( (mwSize)jmx, (mwSize)imx, mxREAL);
-	plhs[3] = mxCreateDoubleMatrix( (mwSize)jmx, (mwSize)imx, mxREAL);
-	plhs[4] = mxCreateDoubleMatrix( (mwSize)jmx, (mwSize)imx, mxREAL);
-	ex = mxGetDoubles(plhs[0]);
-	ey = mxGetDoubles(plhs[1]);
-	zx = mxGetDoubles(plhs[2]);
-	zy = mxGetDoubles(plhs[3]);
-	xj = mxGetDoubles(plhs[4]);
-
-	/* call metrics function */
-	mesh(zx, zy, ex, ey, xj, imx, jmx, x, y);
-
-	/*free(x);*/
-	/*free(u);*/
-	/* do we need to free up any of the mex created arrays here? */
-	/* call mxDestroyArray somehow on this output variable? */
-
-	return;
-}
