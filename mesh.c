@@ -20,9 +20,9 @@ static	const char	*fname = "grid-poisson-2015.txt";  /* physical mesh file name 
  *  y = physical mesh y coordinates for computational mesh (2D array i,j)
  * */
 /* outputs:
- * 	zx = metric derivative (dxsi/dx)/J = dy/deta (2D array i,j)  (xsi -> x/i dir)
+ * 	zx = metric derivative (dxsi/dx)/J = dy/deta (2D array i,j)  (xsi -> x/i/col dir)
  * 	zy = metric derivative (dxsi/dy)/J = -dx/deta (2D array i,j)
- * 	ex = metric derivative (deta/dx)/J = -dy/dxsi (2D array i,j)  (eta -> y/j dir)
+ * 	ex = metric derivative (deta/dx)/J = -dy/dxsi (2D array i,j)  (eta -> y/j/row dir)
  * 	ey = metric derivative (deta/dy)/J = dx/dxsi (2D array i,j)
  * 	xj = inverse Jacobian 1/J (2D array i,j)
  * 	*/
