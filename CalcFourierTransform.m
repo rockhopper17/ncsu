@@ -41,8 +41,8 @@ ftform = [freqrange; zeros(1,numfreqs)]'; % fourier transform frequencies and ma
 fpeaks = zeros(numpeaks,2); % peak frequencies and magnitudes for numpeaks
 
 % compute fourier transform	
-% perform summation using exponential form
 for m = 0:numfreqs-1
+	% perform summation using exponential form
 	for n = 0:numt-1
 		ftform(m+1,2) = ftform(m+1,2) + (sigx(n+1) * exp(-j*2*pi*n*m/numt) );
 	end
@@ -52,19 +52,8 @@ end
 ftform(:,2) = abs(ftform(:,2)/numt); % note: if value is complex, abs returns magnitude
 
 % find magnitude peaks - corresponds to distinct frequencies in signal
-%minm = 1; % min number of freq buckets for calculating max around, will be set to 0
-%fmax = ftform; % tmp copy of ftform for doing max
-%fmax(1,2) = 0; % ignore DC term (0Hz term, the average of all samples) set mag to 0
-%for n = 1:numpeaks
-	%[mag,m] = max(fmax(:,2)); % find the max magnitude value
-	%fpeaks(n,1) = fmax(m,1); % store the frequency at that max magnitude value
-	%fpeaks(n,2) = mag; % store the magnitude value
-
-	%% clear the max value for the next iteration so we can use max again
-	%fmax(max(1,m-minm):max(numfreqs,m+minm),2) = 0; 
-%end
+% ignore DC term (0Hz term, the average of all samples) start at 2nd index
 for m = 2:numfreqs
-%for m = 2:49
 	cur = ftform(m,2); % current mag
 	prev = ftform(max(1,m-1),2); % previous mag
 	next = ftform(min(numfreqs,m+1),2); % next mag
@@ -86,3 +75,4 @@ for m = 2:numfreqs
 		end
 	end
 end
+
