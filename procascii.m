@@ -10,12 +10,16 @@
 % clear all vars and plots
 close all; clear all; clc;
 
+% folder containing the ascii files
+%fldr = '2019-04-11 coating thickness test'; % google drive
+fldr = 'coatingthickness'; % Drew's dev computer
+
 % files with ascii exported data from polytec
 % drew 1
-%fnames{1} = '190411 bare surface.txt';
-%fnames{2} = '190411 one sweep 1.txt';
-%fnames{3} = '190411 five sec 1.txt';
-%fnames{4} = '190411 thirty sec 1.txt';
+fnames{1} = '190411 bare surface.txt';
+fnames{2} = '190411 one sweep 1.txt';
+fnames{3} = '190411 five sec 1.txt';
+fnames{4} = '190411 thirty sec 1.txt';
 
 % drew 2
 %fnames{1} = '190411 bare surface.txt';
@@ -24,16 +28,14 @@ close all; clear all; clc;
 %fnames{4} = '190411 thirty sec 2.txt';
 
 % kevin
-fnames{1} = 'no_spray.txt';
-fnames{2} = 'low_spray.txt';
-fnames{3} = 'medium_spray.txt';
-fnames{4} = 'high_spray.txt';
+%fnames{1} = 'no_spray.txt';
+%fnames{2} = 'low_spray.txt';
+%fnames{3} = 'medium_spray.txt';
+%fnames{4} = 'high_spray.txt';
 
-set(gcf,'position',[200 200 1400 1000],'InvertHardCopy','off');
-colormap('jet');
 
 for idx = 1:4
-	d = importdata(['coatingthickness/' fnames{idx}],'\t',5); % load data
+	d = importdata([fldr '/' fnames{idx}],'\t',5); % load data
 
 	t = d.data(:,1); % time values
 	amp_x = d.data(:,2); % x vel
@@ -41,21 +43,52 @@ for idx = 1:4
 	amp_z = d.data(:,4); % z vel
 
 	% call function to calculate fourier transform
-	[ftform, fpeaks] = CalcFourierTransform(t,amp_x);
+	[ftformx, fpeaksx] = CalcFourierTransform(t,amp_x);
+	[ftformy, fpeaksy] = CalcFourierTransform(t,amp_y);
+	[ftformz, fpeaksz] = CalcFourierTransform(t,amp_z);
 
 	% convert frequencies to kHz and magnitues to mm/s
-	ftform(:,1) = ftform(:,1) * 1e-3; % Hz to kHz
-	ftform(:,2) = ftform(:,2) * 1e3; % m/s to mm/s
-	fpeaks(:,1) = fpeaks(:,1) * 1e-3; % Hz to kHz
-	fpeaks(:,2) = fpeaks(:,2) * 1e3; % m/s to mm/s
+	ftformx(:,1) = ftformx(:,1) * 1e-3; % Hz to kHz
+	ftformx(:,2) = ftformx(:,2) * 1e3; % m/s to mm/s
+	fpeaksx(:,1) = fpeaksx(:,1) * 1e-3; % Hz to kHz
+	fpeaksx(:,2) = fpeaksx(:,2) * 1e3; % m/s to mm/s
+	ftformy(:,1) = ftformy(:,1) * 1e-3; % Hz to kHz
+	ftformy(:,2) = ftformy(:,2) * 1e3; % m/s to mm/s
+	fpeaksy(:,1) = fpeaksy(:,1) * 1e-3; % Hz to kHz
+	fpeaksy(:,2) = fpeaksy(:,2) * 1e3; % m/s to mm/s
+	ftformz(:,1) = ftformz(:,1) * 1e-3; % Hz to kHz
+	ftformz(:,2) = ftformz(:,2) * 1e3; % m/s to mm/s
+	fpeaksz(:,1) = fpeaksz(:,1) * 1e-3; % Hz to kHz
+	fpeaksz(:,2) = fpeaksz(:,2) * 1e3; % m/s to mm/s
 
-	% plot
+	% plot fourier transform
+	figure(1);
+	set(gcf,'position',[200 200 1400 1000],'InvertHardCopy','off');
 	subplot(4,1,idx);
-	plot(ftform(:,1),ftform(:,2));
 	hold on; grid on;
-	text(fpeaks(:,1),fpeaks(:,2), num2str(fpeaks(:,1)));
+	plot(ftformx(:,1),ftformx(:,2),'DisplayName','x dir');
+	plot(ftformy(:,1),ftformy(:,2),'DisplayName','y dir');
+	plot(ftformz(:,1),ftformz(:,2),'DisplayName','z dir');
+	text(fpeaksx(1,1),fpeaksx(1,2), num2str(fpeaksx(1,1)));
+	text(fpeaksy(1,1),fpeaksy(1,2), num2str(fpeaksy(1,1)));
+	text(fpeaksz(1,1),fpeaksz(1,2), num2str(fpeaksz(1,1)));
 	title(fnames{idx});
 	ylabel('magnitude [mm/s]');
 	xlabel('frequency [kHz]');
 	set(gca,'FontSize',14);
+	legend show;
+
+	% plot raw velocities
+	figure(2);
+	set(gcf,'position',[200 200 1400 1000],'InvertHardCopy','off');
+	subplot(4,1,idx);
+	hold on; grid on;
+	plot(t*1e6,amp_x*1e3,'DisplayName','x vel');
+	plot(t*1e6,amp_y*1e3,'DisplayName','y vel');
+	plot(t*1e6,amp_z*1e3,'DisplayName','z vel');
+	title([fnames{idx} ' time-domain']);
+	ylabel('velocity [mm/s]');
+	xlabel('time [\mus]');
+	set(gca,'FontSize',14);
+	legend show;
 end
