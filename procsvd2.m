@@ -34,7 +34,8 @@ close all; clear all; clc;
 %load('svddata_horn2.mat'); % test horn with cwt data
 %load('svddata_rect2.mat'); % test rectangle with cwt data
 
-load('svddata_4_y_CWT.mat'); % alum horn a/b=4 y
+load('svddata_4_y_ft.mat'); % alum horn a/b=4 y
+%load('svddata_4_y_CWT.mat'); % alum horn a/b=4 y
 %load('svddata_2_x_CWT.mat'); % alum horn a/b=2 x
 %load('svddata_exp4_y_CWT.mat'); % alum horn a/b= exp 4 y
 
@@ -45,45 +46,20 @@ svdtype = 'aaaa';
 npos = 349; % pt idx to highlight
 %dt = mean(diff(t));
 %Fs = 1 / dt;
-Fs = (usd_x.XCount - 1) / (usd_x.XMax - usd_x.XMin); % sample rate
-numt = length(t); % num time data points
-numpts = length(xyz); % num location points
-
-% pull out positions and scale to mm
-%x = xyz(:,1) * 1e3;
-%x = abs(xyz(:,1)) * 1e3; % flip the _2_x
-%y = xyz(:,2) * 1e3;
-y = xyz(:,1) * 1e3; % swap for y oriented horns
-x = xyz(:,2) * 1e3;
-%xpts = unique(round(x)); % need to round _2_x since it's misaligned
-%ypts = unique(round(y));
-xpts = unique(x);
-ypts = unique(y);
+%Fs = (usd_x.XCount - 1) / (usd_x.XMax - usd_x.XMin); % sample rate
+%numt = length(t); % num time data points
+%numpts = length(xyz); % num location points
 
 % get video image data for plotting as background
 xImg = linspace(min(x), max(x), size(imageData, 2));
 yImg = linspace(min(y), max(y), size(imageData, 1));
 
-% movie properties
-makemovie = false;  % flag for making a movie (can be slow)
+% movie/ppt properties
 runtime = 55;  % num seconds to run movie
 movfname = 'procsvdmovie_300kHz_bycolumn.avi';  % movie file name
-%frate = N/runtime;  % frame rate for movie file
-frate = 1;
-
-% setup movie
-if makemovie == true
-	writerObj = VideoWriter(movfname);
-	writerObj.FrameRate = frate;
-	open(writerObj);
-end
-
-% powerpoint
-makeppt = true;
-if makeppt == true
-	import mlreportgen.ppt.*;
-	slides = Presentation('alumhorn_4_y_allrows');
-end
+pptfname = 'alumhorn_4_y_allrows';  % powerpoint file name
+frate = numt/runtime;  % frame rate for movie file
+%frate = 1;
 
 % set window size
 %set(gcf,'units','inches','position',[1 1 13.33 7.5],'InvertHardCopy','off');
@@ -99,7 +75,22 @@ colormap('jet');
 % 5 = presentation plots: time-domain, freq-domain, and time-freq domains
 % 6 = fourier transform with 3 peaks
 plottype = 6
+makemovie = false;  % flag for making a movie (can be slow)
+makeppt = false; % flag for making a powerpoint
 %*****************************************************************************%
+
+% setup movie
+if makemovie == true
+	writerObj = VideoWriter(movfname);
+	writerObj.FrameRate = frate;
+	open(writerObj);
+end
+
+% powerpoint
+if makeppt == true
+	import mlreportgen.ppt.*;
+	slides = Presentation(pptfname);
+end
 
 if plottype == 6
 
@@ -156,10 +147,18 @@ if plottype == 6
 	for mpkidx = 1:3
 		% get num per peak
 		upeaks = unique(magpeaks(:,mpkidx));
-		numpeaks = zeros(length(upeaks),mpkidx);
+		numpeaks = zeros(length(upeaks),1);
 		for pkidx = 1:length(upeaks)
-			numpeaks(pkidx) = sum(find(magpeaks(:,mpkidx) == upeaks(pkidx)));
+			numpeaks(pkidx) = sum(magpeaks(:,mpkidx) == upeaks(pkidx));
 		end
+
+		% set zero's to nan
+		%magpeaks((magpeaks(:,mpkidx)==0),mpkidx) = NaN;
+		%upeaks(1) = [];
+		%numpeaks(1) = [];
+		%magpeaks((magpeaks(:,mpkidx)<=100e3),mpkidx) = NaN;
+		%upeaks(1:2) = []; % ab2x
+		%numpeaks(1:2) = []; % ab2x
 
 		figure;
 		set(gcf,'position',[200 200 1400 1000],'InvertHardCopy','off');
@@ -169,8 +168,9 @@ if plottype == 6
 		subplot(3,1,[1:2]);
 		hold on; grid on;
 		set(gca,'Color', [0.7,0.7,0.7], 'FontSize',24);
-		%image(xImg, yImg, imageData, 'CDataMapping', 'scaled');
-		image(xImg, yImg, imrotate(flipdim(imageData,1),90), 'CDataMapping', 'scaled'); % ab4y
+		%image(xImg, yImg, imrotate(flipdim(imageData,1),90), 'CDataMapping', 'scaled'); % ab4y
+		image(xImg, yImg, imrotate(imageData,180), 'CDataMapping', 'scaled'); % ab2x
+		%image(xImg, yImg, imageData, 'CDataMapping', 'scaled'); % abexp4y
 		scatter(x, y, 100, magpeaks(:,mpkidx)*1e-3, 's','filled');
 		title([svdmatname([9,11]) ' fourier transform frequency peaks (peak ' num2str(mpkidx) ')']);
 		ylabel('y position [mm]');
@@ -187,6 +187,7 @@ if plottype == 6
 		ylabel('count of points');
 		xlabel('frequency [kHz]');
 		
+		saveas(gca,[svdmatname(1:end-4) '_freqpeaks_' num2str(mpkidx) '.jpg']);
 		drawnow
 	end
 
@@ -200,6 +201,7 @@ elseif plottype == 5
 	%npos = 412; % 4exp_y
 	sigx = amp_x(npos,:);
 
+	% time-domain
 	plot(t*1e6, sigx*1e3);
 	grid on;
 	title([svdmatname([9,11]) ' time-domain for x velocity at point ' num2str(npos) ' (raw data)']);
@@ -210,13 +212,24 @@ elseif plottype == 5
 	saveas(gca,[svdmatname(1:end-4) '_xvel_' num2str(npos) '.jpg']);
 	drawnow
 
+	% frequency-domain
 	figure;
 	set(gcf,'position',[200 200 1400 1000],'InvertHardCopy','off');
+
+	subplot(2,1,1);
+	plot(freqrange*1e-3,ftform(npos,:)*1e3);
+	title([svdmatname([9,11]) ' manual fourier transform at point ' num2str(npos) ', fres=' num2str(fres*1e-3) ' kHz']);
+	ylabel('magnitude [mm/s]');
+	xlabel('frequency [kHz]');
+	set(gca,'FontSize',24);
+	
+	subplot(2,1,2);
 	pwelch(sigx,[],[],[],Fs);
 	title([svdmatname([9,11]) ' Welch Power Spectral Density Estimate: Point ' num2str(npos)]);
 	set(gca,'FontSize',24);
 	%set(gca,'Color', [0.7,0.7,0.7], 'FontSize',24);
-	saveas(gca,[svdmatname(1:end-4) '_pwelch_' num2str(npos) '.jpg']);
+
+	saveas(gca,[svdmatname(1:end-4) '_freq_' num2str(npos) '.jpg']);
 	drawnow
 
 	% STFT
@@ -340,7 +353,7 @@ elseif plottype == 4
 			%plot(t*1e6, sigxt(rowpts(xidx),:), 'Color', cmap(sigxtcol(rowpts(xidx)),:),'LineWidth',2);
 			plot(t*1e6, sigxtrow(xidx,:), 'Color', cmap(sigxtcol(ptsidxrow(xidx)),:),'LineWidth',2);
 			%title([svdmatname([9,11]) ' 300 kHz magnitude, bump cwt, all columns, row ' num2str(rownum)]);
-			title([svdmatname([9,11]) ' 300 kHz magnitude, Morlet cwt, all columns, row ' num2str(rownum)]);
+			title([svdmatname([9,11]) ' peak 1 magnitude, Morlet cwt, all columns, row ' num2str(rownum)]);
 
 			hold on;
 		end
@@ -443,19 +456,19 @@ elseif plottype == 3
 			if ptype == 1
 				plot(t*1e6, sigtavg,'-k','LineWidth',2);
 				%title([svdmatname([9,11]) ' 300 kHz magnitude, bump cwt, all points, avg']);
-				title([svdmatname([9,11]) ' 300 kHz magnitude, Morlet cwt, all points, avg']);
+				title([svdmatname([9,11]) ' peak 1 magnitude, Morlet cwt, all points, avg']);
 			elseif ptype == 2
 				plot(t*1e6, sigtmax,'-k','LineWidth',2);
 				%title([svdmatname([9,11]) ' 300 kHz magnitude, bump cwt, all points, max']);
-				title([svdmatname([9,11]) ' 300 kHz magnitude, Morlet cwt, all points, max']);
+				title([svdmatname([9,11]) ' peak 1 magnitude, Morlet cwt, all points, max']);
 			elseif ptype == 3
 				plot(t*1e6, sigxtavg(xidx,:), 'Color', cmap(xidx,:),'LineWidth',2);
 				%title([svdmatname([9,11]) ' 300 kHz magnitude, bump cwt, all columns, avg']);
-				title([svdmatname([9,11]) ' 300 kHz magnitude, Morlet cwt, all columns, avg']);
+				title([svdmatname([9,11]) ' peak 1 magnitude, Morlet cwt, all columns, avg']);
 			elseif ptype == 4
 				plot(t*1e6, sigxtmax(xidx,:), 'Color', cmap(xidx,:),'LineWidth',2);
 				%title([svdmatname([9,11]) ' 300 kHz magnitude, bump cwt, all columns, max']);
-				title([svdmatname([9,11]) ' 300 kHz magnitude, Morlet cwt, all columns, max']);
+				title([svdmatname([9,11]) ' peak 1 magnitude, Morlet cwt, all columns, max']);
 			end
 
 			hold on;
