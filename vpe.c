@@ -127,14 +127,7 @@ static void metrics(void) {
 			if (j == 0) {
 				/* boundary: row 1, all cols */
 				zx[j][i] = -1.5*y[j][i] + 2.0*y[j+1][i] - 0.5*y[j+2][i];
-				
-				/* kutta condition for this grid */
-				if (i == (imx-4))
-					zy[j][i] = (x[j][i] - x[j][i-1]);
-				else if (i == (imx-5))
-					zy[j][i] = (x[j][i+1] - x[j][i]);
-				else
-					zy[j][i] = -(-1.5*x[j][i] + 2.0*x[j+1][i] - 0.5*x[j+2][i]);
+				zy[j][i] = -(-1.5*x[j][i] + 2.0*x[j+1][i] - 0.5*x[j+2][i]);
 			}
 			else if (j == (jmx-1)) {
 				/* boundary: row jmx, all cols */
@@ -161,14 +154,7 @@ static void metrics(void) {
 			else {
 				/* interior points */
 				ex[j][i] = -0.5*(y[j][i+1] - y[j][i-1]);
-				
-				/* kutta condition for this grid */
-				if (i == (imx-4))
-					ey[j][i] = (y[j][i] - y[j][i-1]);
-				else if (i == (imx-5))
-					ey[j][i] = (y[j][i+1] - y[j][i]);
-				else
-					ey[j][i] = 0.5*(x[j][i+1] - x[j][i-1]);
+				ey[j][i] = 0.5*(x[j][i+1] - x[j][i-1]);
 			}
 
 			/* Jacobian */
@@ -205,7 +191,6 @@ static void phideriv(void) {
 			else {
 				/* interior points */
 				phie[j][i] = 0.5*(phi[j+1][i] - phi[j-1][i]);
-				/*phie[j][i] = (phi[j][i] - phi[j-1][i]);*/
 			}
 
 			/* dphi/dxsi (x/i/col dir) */
@@ -213,22 +198,13 @@ static void phideriv(void) {
 				/* boundary: col 1, all rows */
 				phiz[j][i] = -1.5*phi[j][i] + 2.0*phi[j][i+1] - 0.5*phi[j][i+2];
 			}
-			else if (i == (imx-1)) {
+			else if (i == (imx-1) || ( (i == (imx-4) || i == (imx-5)) && j==0)) {
 				/* boundary: col imx, all rows */
 				phiz[j][i] = 1.5*phi[j][i] - 2.0*phi[j][i-1] + 0.5*phi[j][i-2];
-			}
-			/* kutta condition for this grid */
-			else if (i == (imx-4) && j == 0) {
-				phiz[j][i] = (phi[j][i] - phi[j][i-1]);
-			}
-			/* kutta condition for this grid */
-			else if (i == (imx-5) && j == 0) {
-				phiz[j][i] = (phi[j][i+1] - phi[j][i]);
 			}
 			else {
 				/* interior points */
 				phiz[j][i] = 0.5*(phi[j][i+1] - phi[j][i-1]);
-				/*phiz[j][i] = (phi[j][i] - phi[j][i-1]);*/
 			}
 		}
 	}	
@@ -350,11 +326,12 @@ static void applyboundary(int btype) {
 	/* locals */
 	int i, j;
 	double dphidz[imx];
-	double b12, b22, t1, t2;
+	double b11, b12, b22;
+	double cx, cy, dx, dy, fx, fy;
 
 	/* wall */
 	if (btype == 1) {
-		/* boundary: row 0, all cols */
+		/* boundary: row 1, all cols */
 		j = 0;
 
 		for (i = 1; i < (imx-1); i++) {
@@ -362,16 +339,26 @@ static void applyboundary(int btype) {
 		}
 
 		for (i = 1; i < (imx-1); i++) {
+			b11 = (pow(zx[j][i],2) + pow(zy[j][i],2));
 			b12 = (zx[j][i] * ex[j][i] + zy[j][i] * ey[j][i]);
 			b22 = (pow(ex[j][i],2) + pow(ey[j][i],2));
-			phi[j][i] = (-b12 * dphidz[i] - (2.0*phi[j+1][i] - 0.5*phi[j+2][i])*b22) / (-1.5*b22);
-			/*printf("bdry %lf\n",phi[j][i]);*/
+
+			if (i != (imx-4) && i != (imx-5)) {
+				phi[j][i] = (-b12 * dphidz[i] - (2.0*phi[j+1][i] - 0.5*phi[j+2][i])*b22) / (-1.5*b22);
+				/*printf("bdry %lf\n",phi[j][i]);*/
+			}
+			else {
+				/* kutta condition */
+				cx = zx[j][i]*(2*phi[j][i-1] - 0.5*phi[j][i-2]);
+				dx = ex[j][i]*(-2*phi[j+1][i] + 0.5*phi[j+2][i]);
+				phi[j][i] = (cx + dx) / (1.5*(zx[j][i] - ex[j][i]));
+			}	
 		}
 
-		/* boundary: row jmx-1, all cols */
-		j = jmx-1;
+		/* boundary: row jmx, all cols */
 		if (meshtype == 1) {
-			/* wall condition */
+			j = jmx-1;
+
 			for (i = 1; i < (imx-1); i++) {
 				dphidz[i] = 0.5*(phi[j][i+1] - phi[j][i-1]); /* lagged derivative!! */
 			}
@@ -383,60 +370,24 @@ static void applyboundary(int btype) {
 				/*printf("bdry 2 %lf\n",phi[j][i]);*/
 			}
 		}
+		/* apply farfield boundary */
 		else if (meshtype == 2) {
-			/* farfield boundary */
+			j = jmx-1;
+
 			for (i = 1; i < (imx-1); i++) {
 				phi[j][i] = uinf * x[j][i];
 			}
 		}
-
-		/* airfoil 0-type wakecut boundary conditions */
-		if (meshtype == 2) {
-			/* move the first column back and last column forward */
-			for (j = 0; j < jmx; j++) {
-				/*phi[j][0] = phi[j][imx-3];*/
-				/*phi[j][imx-1] = phi[j][2];*/
-				phi[j][0] = phi[j][imx-2];
-				phi[j][imx-1] = phi[j][1];
-			}
-
-			/* kutta condition */
-			/* apply at point 1,1 and 1,imx */
-			/* want v=0 => dphi/dy = (dxsi/dy * dphi/dxsi + deta/dy*dphi/deta) = 0 */
-			/*	  v[j][i] = (zy[j][i]*phiz[j][i] + ey[j][i]*phie[j][i]) / xj[j][i];*/
-			/*    phie[j][i] = -1.5*phi[j][i] + 2.0*phi[j+1][i] - 0.5*phi[j+2][i];*/
-				
-				/*phiz[j][i] = (phi[j][i] - phi[j][i-1]);*/
-			j = 0;
-			i = imx-4;
-			t1 = zy[j][i] * phi[j][i-1];
-			t2 = ey[j][i] * (-2.0*phi[j+1][i] + 0.5*phi[j+2][i]);
-			phi[j][i] = (t1 + t2) / (zy[j][i] - 1.5*ey[j][i]);
-		
-				/*phiz[j][i] = (phi[j][i+1] - phi[j][i]);*/
-			j = 0;
-			i = imx-5;
-			t1 = zy[j][i] * phi[j][i+1];
-			t2 = ey[j][i] * (2.0*phi[j+1][i] - 0.5*phi[j+2][i]);
-			phi[j][i] = (t1 + t2) / (zy[j][i] + 1.5*ey[j][i]);
-			/* ensure phi derivs come out to zero in TE cell */	
-			/*phi[0][imx-3] = (2.0*phi[j+1][imx-3] - 0.5*phi[j+2][imx-3]) / 1.5;*/
-		}
 	}
-	/*wake cut phi*/
-	/*else if (btype == 2) {*/
-		/*for (j = 0; j < jmx; j++) {*/
-		/*for (j = 1; j < jmx; j++) {*/
+	/* wake cut phi */
+	else if (btype == 2) {
+		for (j = 0; j < jmx; j++) {
 			/*phi[j][0] = phi[j][imx-3];*/
 			/*phi[j][imx-1] = phi[j][2];*/
-			/*phi[j][0] = phi[j][imx-2];*/
-			/*phi[j][imx-1] = phi[j][1];*/
-		/*}*/
-		/*phi[0][0] = 0;*/
-		/*phi[0][imx-1] = 0;*/
-
-
-	/*}*/
+			phi[j][0] = phi[j][imx-2];
+			phi[j][imx-1] = phi[j][1];
+		}
+	}
 	/*wake cut u,v,rho*/
 	else if (btype == 3) {
 		for (j = 0; j < jmx; j++) {
@@ -689,58 +640,16 @@ int main()
 
 	/* if doing airfoil and o-type mesh, need to renumber mesh for boundaries */
 	if (meshtype == 2) {
-		/* now move the old i=1,imx boundaries */
 		for (j=0; j < jmx; j++) {
-			/*printf("x0=%lf,ximx-3=%lf,ximx-1=%lf,x2=%lf\n",x[j][0],x[j][imx-3],x[j][imx-1],x[j][2]);*/
 			/*x[j][0] = x[j][imx-3];*/
 			/*y[j][0] = y[j][imx-3];*/
 			/*x[j][imx-1] = x[j][2];*/
 			/*y[j][imx-1] = y[j][2];*/
-			/*x[j][0] = x[j][imx-2];*/
-			/*y[j][0] = y[j][imx-2];*/
-			/*x[j][imx-1] = x[j][1];*/
-			/*y[j][imx-1] = y[j][1];*/
+			x[j][0] = x[j][imx-2];
+			y[j][0] = y[j][imx-2];
+			x[j][imx-1] = x[j][1];
+			y[j][imx-1] = y[j][1];
 		}
-		/*for (j=0; j < jmx; j++) {*/
-			/*for (i=0; i < imx; i++) {*/
-				/*if (i == 0) {*/
-					/*x[j][i] = x[j][imx-3];*/
-					/*y[j][i] = y[j][imx-3];*/
-				/*}*/
-				/*else if (i == (imx-1)) {*/
-					/*x[j][i] = x[j][2];*/
-					/*y[j][i] = y[j][2];*/
-				/*}*/
-				/*else {*/
-					/*x[j][i] = x[j][i-1];*/
-					/*y[j][i] = y[j][i-1];*/
-				/*}*/
-			/*}*/
-		/*}*/
-
-		/* rotate to put TE at end */
-		/*double xnew[jmx][imx], ynew[jmx][imx];*/
-		/*for (j=0; j < jmx; j++) {*/
-			/*for (i = 0; i < 4; i++) {*/
-				/*xnew[j][i] = x[j][imx-4+i];*/
-				/*ynew[j][i] = y[j][imx-4+i];*/
-			/*}*/
-		/*}*/
-		/*for (j=0; j < jmx; j++) {*/
-			/*for (i=4; i < imx; i++) {*/
-				/*xnew[j][i] = x[j][i-4];*/
-				/*ynew[j][i] = y[j][i-4];*/
-			/*}*/
-		/*}*/
-
-		/*for (j=0; j < jmx; j++) {*/
-			/*for (i=0; i < imx; i++) {*/
-				/*x[j][i] = xnew[j][i];*/
-				/*y[j][i] = ynew[j][i];*/
-			/*}*/
-		/*}*/
-
-
 	}
 
 	/* initialize phi (horiz veloc only, so vinf=0) */
@@ -765,7 +674,7 @@ int main()
 		}
 
 	/* apply boundary conditions: 1=wall/farfield, 2=wakecut phi, 3=wakecut u,v,rho */
-	/*if (meshtype == 2) applyboundary(2);*/
+	if (meshtype == 2) applyboundary(2);
 	applyboundary(1);
 
 	/* recalculate u,v,rho */
@@ -781,7 +690,7 @@ int main()
 	/* iterate on residual error until converged or maxsteps reached */
 	/******************************************************/
 	for (n = 0; n < maxsteps; n++) {
-	/*for (n = 0; n < 5; n++) {*/
+	/*for (i = 0; i < 501; i++) {*/
 		/* calculate residual and get L2 norm */
 		resnorm = rescalcall();
 
@@ -790,28 +699,31 @@ int main()
 
 		resnormratio = resnorm / resnorminit;
 		if(n % convshow == 0) {
-		/*if (1) {*/
-			/* calculate total velocity and mach num for plots */
-			/*for (j = 0; j < jmx; j++) {*/
-				/*for (i = 0; i < imx; i++) {*/
-					/*vel[j][i] = sqrt(pow(u[j][i],2) + pow(v[j][i],2));*/
-					/*m[j][i] = vel[j][i] / ainf;*/
-				/*}*/
-			/*}*/
-	
 			printf("iteration %d, residual norm ratio %.8lf\n",n,resnormratio);
-			/*for (i=0;i<imx;i++) {*/
-				/*printf("i=%d,phi=%.8lf, u=%.8lf, v=%.8lf\n",i,phi[0][i],u[0][i],v[0][i]);*/
-			/*}*/
-			/*printf("phi=%.8lf, u=%.8lf, v=%.8lf\n",phi[0][0],u[0][0],v[0][0]);*/
+			
+			/* calculate total velocity and mach num for plots */
+			for (j = 0; j < jmx; j++) {
+				for (i = 0; i < imx; i++) {
+					vel[j][i] = sqrt(pow(u[j][i],2) + pow(v[j][i],2));
+					m[j][i] = vel[j][i] / ainf;
+				}
+			}
+
 			printf("phi=%.8lf, u=%.8lf, v=%.8lf\n",phi[0][imx-5],u[0][imx-5],v[0][imx-5]);
 			printf("phi=%.8lf, u=%.8lf, v=%.8lf\n",phi[0][imx-4],u[0][imx-4],v[0][imx-4]);
+			for (i=150;i<imx;i++) {
+				printf("u=%.8lf, v=%.8lf, vel=%.8lf\n",u[0][i],v[0][i],vel[0][i]);
+			}
+			/*printf("phi=%.8lf, u=%.8lf, v=%.8lf\n",phi[0][imx-5],u[0][imx-5],v[0][imx-5]);*/
+			/*printf("phi=%.8lf, u=%.8lf, v=%.8lf\n",phi[0][imx-4],u[0][imx-4],v[0][imx-4]);*/
 			conviter[cv++] = n;  /* save current iteration and resnormratio for */
 			convresrat[cv] = resnormratio;  /* plotting convergence history */
 		}
 		
 		if (resnormratio < resnormratiomin) {
 			printf("final iteration %d, residual norm ratio %.8lf\n",n,resnormratio);
+			printf("phi=%.8lf, u=%.8lf, v=%.8lf\n",phi[0][imx-5],u[0][imx-5],v[0][imx-5]);
+			printf("phi=%.8lf, u=%.8lf, v=%.8lf\n",phi[0][imx-4],u[0][imx-4],v[0][imx-4]);
 			printf("phi(0=%.8lf, u=%.8lf, v=%.8lf\n",phi[0][0],u[0][0],v[0][0]);
 			printf("phi(0=%.8lf, u=%.8lf, v=%.8lf\n",phi[0][imx-1],u[0][imx-1],v[0][imx-1]);
 			conviter[cv++] = n;  
@@ -825,7 +737,7 @@ int main()
 		relax();
 
 		/* reapply boundary conditions */
-		/*if (meshtype == 2) applyboundary(2);*/
+		if (meshtype == 2) applyboundary(2);
 		applyboundary(1);
 
 		/* recalculate u,v,rho */
@@ -839,12 +751,11 @@ int main()
 	}
 
 	/* calculate total velocity and mach num for plots */
-	for (j = 0; j < jmx; j++) {
+	for (j = 0; j < jmx; j++)
 		for (i = 0; i < imx; i++) {
 			vel[j][i] = sqrt(pow(u[j][i],2) + pow(v[j][i],2));
 			m[j][i] = vel[j][i] / ainf;
 		}
-	}
 	
 
 	/* calculate Cp on slip surface */
