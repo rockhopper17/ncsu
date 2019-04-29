@@ -198,7 +198,7 @@ static void phideriv(void) {
 				/* boundary: col 1, all rows */
 				phiz[j][i] = -1.5*phi[j][i] + 2.0*phi[j][i+1] - 0.5*phi[j][i+2];
 			}
-			else if (i == (imx-1) || i == (imx-5)) {
+			else if (i == (imx-1) || (i == (imx-5) && j==0)) {
 				/* boundary: col imx, all rows */
 				phiz[j][i] = 1.5*phi[j][i] - 2.0*phi[j][i-1] + 0.5*phi[j][i-2];
 			}
@@ -327,7 +327,8 @@ static void applyboundary(int btype) {
 	int i, j;
 	double dphidz[imx];
 	double b12, b22;
-	double czx, cex;
+	/*double czx, cex;*/
+	double czy, cey;
 
 	/* wall */
 	if (btype == 1) {
@@ -335,15 +336,19 @@ static void applyboundary(int btype) {
 		j = 0;
 
 		for (i = 1; i < (imx-1); i++) {
-			dphidz[i] = 0.5*(phi[j][i+1] - phi[j][i-1]); /* lagged derivative!! */
+			/*dphidz[i] = 0.5*(phi[j][i+1] - phi[j][i-1]); [> lagged derivative!! <]*/
+			dphidz[i] = phi[j][i+1] - phi[j][i]; 
 		}
 
 		for (i = 1; i < (imx-1); i++) {
 			/* kutta condition */
 			if (i == (imx-5)) {
-				czx = zx[j][i]*(-2*phi[j][i-1] + 0.5*phi[j][i-2]);
-				cex = ex[j][i]*(2*phi[j+1][i] - 0.5*phi[j+2][i]);
-				phi[j][i] = (czx + cex) / (1.5*(ex[j][i] - zx[j][i]));
+				/*czx = zx[j][i]*(-2*phi[j][i-1] + 0.5*phi[j][i-2]);*/
+				/*cex = ex[j][i]*(2*phi[j+1][i] - 0.5*phi[j+2][i]);*/
+				/*phi[j][i] = (czx + cex) / (1.5*(ex[j][i] - zx[j][i]));*/
+				czy = zy[j][i]*(-2*phi[j][i-1] + 0.5*phi[j][i-2]);
+				cey = ey[j][i]*(2*phi[j+1][i] - 0.5*phi[j+2][i]);
+				phi[j][i] = (czy + cey) / (1.5*(ey[j][i] - zy[j][i]));
 			}
 			else {			
 				b12 = (zx[j][i] * ex[j][i] + zy[j][i] * ey[j][i]);
@@ -688,7 +693,7 @@ int main()
 	/* iterate on residual error until converged or maxsteps reached */
 	/******************************************************/
 	/*for (n = 0; n < maxsteps; n++) {*/
-	for (n = 0; n < 100; n++) {
+	for (n = 0; n < 500; n++) {
 		/* calculate residual and get L2 norm */
 		resnorm = rescalcall();
 
@@ -707,8 +712,9 @@ int main()
 			}
 
 			printf("iteration %d, residual norm ratio %.8lf\n",n,resnormratio);
-			for (i=150;i<imx;i++) {
-				printf("u=%.8lf, v=%.8lf, vel=%.8lf, phi=%.8lf\n",u[0][i],v[0][i],vel[0][i],phi[0][i]);
+			for (i=190;i<imx;i++) {
+				printf("u=%.8lf, v=%.8lf, vel=%.8lf, phi=%.8lf, phiz=%.8lf, phie=%.8lf\n",
+						u[0][i],v[0][i],vel[0][i],phi[0][i],phiz[0][i],phie[0][i]);
 			}
 			/*printf("phi=%.8lf, u=%.8lf, v=%.8lf\n",phi[0][imx-5],u[0][imx-5],v[0][imx-5]);*/
 			/*printf("phi=%.8lf, u=%.8lf, v=%.8lf\n",phi[0][imx-4],u[0][imx-4],v[0][imx-4]);*/
