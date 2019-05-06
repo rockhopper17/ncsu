@@ -1,6 +1,6 @@
 /* Andrew Navratil */
 /* MAE 456 CFD */
-/* Final Project: VPE (2D steady compressible adiabatic irrotational (=> isentropic)) sln */
+/* Final Project: VPE (2D steady compressible adiabatic irrotational (isentropic)) */
 
 #include <stdlib.h>
 #include <math.h>
@@ -28,7 +28,7 @@ static	const int	meshtype = 1; /* rectangular mesh */
 
 /* mach numbers to analyze */
 
-static	const double	mach = 0.01;
+/*static	const double	mach = 0.01;*/
 /*static	const double	mach = 0.1;*/
 /*static	const double	mach = 0.12;*/
 /*static	const double	mach = 0.16;*/
@@ -36,14 +36,15 @@ static	const double	mach = 0.01;
 /*static	const double	mach = 0.5;*/
 /*static	const double	mach = 0.56;*/
 /*static	const double	mach = 0.57;*/
+static	const double	mach = 0.6;
 /*static	const double	mach = 0.75;*/
 /*static	const double	mach = 0.85;*/
 
 /* relaxation factor for SOR (successive overelaxation) */
-static	const double	omega = 1.0;
+/*static	const double	omega = 1.0;*/
 /*static	const double	omega = 1.25;*/
 /*static	const double	omega = 1.5;*/
-/*static	const double	omega = 1.75;*/
+static	const double	omega = 1.75;
 /*static	const double	omega = 1.99;*/
 
 static	const int	maxsteps = 1e7; /* max number of iteration steps */
@@ -744,29 +745,12 @@ int main()
 		if(n % convshow == 0) {
 			printf("iteration %d, residual norm ratio %.8lf\n",n,resnormratio);
 			
-			/* calculate total velocity and mach num for plots */
-			/*for (j = 0; j < jmx; j++) {*/
-				/*for (i = 0; i < imx; i++) {*/
-					/*vel[j][i] = sqrt(pow(u[j][i],2) + pow(v[j][i],2));*/
-					/*m[j][i] = vel[j][i] / ainf;*/
-				/*}*/
-			/*}*/
-			/*for (i=150;i<imx;i++) {*/
-				/*printf("u=%.8lf, v=%.8lf, vel=%.8lf, phi=%.8lf\n",u[0][i],v[0][i],vel[0][i],phi[0][i]);*/
-			/*}*/
-			/*printf("phi=%.8lf, u=%.8lf, v=%.8lf\n",phi[0][imx-5],u[0][imx-5],v[0][imx-5]);*/
-			/*printf("phi=%.8lf, u=%.8lf, v=%.8lf\n",phi[0][imx-4],u[0][imx-4],v[0][imx-4]);*/
-
 			conviter[cv++] = n;  /* save current iteration and resnormratio for */
 			convresrat[cv] = resnormratio;  /* plotting convergence history */
 		}
 		
 		if (resnormratio < resnormratiomin) {
 			printf("final iteration %d, residual norm ratio %.8lf\n",n,resnormratio);
-			/*printf("phi=%.8lf, u=%.8lf, v=%.8lf\n",phi[0][imx-5],u[0][imx-5],v[0][imx-5]);*/
-			/*printf("phi=%.8lf, u=%.8lf, v=%.8lf\n",phi[0][imx-4],u[0][imx-4],v[0][imx-4]);*/
-			/*printf("phi(0=%.8lf, u=%.8lf, v=%.8lf\n",phi[0][0],u[0][0],v[0][0]);*/
-			/*printf("phi(0=%.8lf, u=%.8lf, v=%.8lf\n",phi[0][imx-1],u[0][imx-1],v[0][imx-1]);*/
 
 			conviter[cv++] = n;  
 			convresrat[cv] = resnormratio;  
@@ -804,7 +788,8 @@ int main()
 			/* Cp along slip surfaces */
 			if (j == 0 || (j == (jmx-1) && meshtype == 1)) {
 				plocal = rho[j][i] * R * Tlocal; 
-				cplocal = (plocal - pinf) / (0.5 * rho[j][i] * pow(vel[j][i],2));
+				/* alt form good for compressible flow, from Anderson book */
+				cplocal = (2.0/(gmma*pow(mach,2)))*(plocal/pinf - 1.0); 
 
 				if (j == 0)
 					cp[i] = cplocal;
@@ -814,28 +799,6 @@ int main()
 		}
 	}
 	
-
-	/* calculate Cp on slip surfaces */
-	/* bottom wall of duct and around airfoil */
-	/* value in velocity field on slip surface should be tangential already */
-	/*    as enforced by the boundary condition */
-	/*j = 0;*/
-	/*for (i = 0; i < imx; i++) {*/
-		/*p = rho[j][i] * R * Tinf; [> local pressure <]*/
-		/*[>cp[i] = (p - pinf) / (0.5 * rho[j][i] * pow(vel[j][i],2));<]*/
-		/*cp[i] = 1.0 - pow(vel[j][i],2) / pow(uinf,2);*/
-	/*}*/
-
-	/*if (meshtype == 1) {*/
-		/*[> top wall in duct <]*/
-		/*j = jmx-1;*/
-		/*for (i = 0; i < imx; i++) {*/
-			/*p = rho[j][i] * R * Tinf; [> local pressure <]*/
-			/*[>cp2[i] = (p - pinf) / (0.5 * rho[j][i] * pow(vel[j][i],2));<]*/
-			/*cp2[i] = 1.0 - pow(vel[j][i],2) / pow(uinf,2);*/
-		/*}*/
-	/*}*/
-
 	/* call tecplot to save data out to plt file, conv history and Cp to txt file */
 	tecplot();
 
