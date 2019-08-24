@@ -6,7 +6,7 @@ clear all; clc; close all;
 %fldr = '20190719_RemoteSinglePoint2/'
 %fldr = '20190801_RemoteSinglePoint4/'
 %fldr = '20190801_RemoteSinglePoint3/'
-fldr = '20190808_LDVOnlyRemote/'
+fldr = '20190808_LDVOnlyRemote/' % best data for paper
 freqvals = (300:50:1000);
 filecount=15
 fnum = 1;
@@ -24,8 +24,8 @@ for i=1:filecount
 	p2pldv(fnum,i) = max(sig) - min(sig);
 
 	% get fourier transform data
-	[ftformy_t, fpeaksy_t] = CalcFourierTransform(t,sig);
-	freqvals(i) = fpeaksy_t(1,1)*1e-3; % replace the orig freq
+	%[ftformy_t, fpeaksy_t] = CalcFourierTransform(t,sig);
+	%freqvals(i) = fpeaksy_t(1,1)*1e-3; % replace the orig freq
 	%p2pldv(fnum,i) = fpeaksy_t(1,2);
 end % end ldv txt file loop
 
@@ -45,7 +45,7 @@ for fnum=1:2
 		%fldr='20190619_Remote/'
 		%fldr='20190719_RemoteSinglePoint2/'
 		fldr='20190801_RemoteSinglePoint3/'
-		%FBGcurve=strcat(fldr,'scope_0.csv'); % remote2
+		%FBGcurve=strcat(fldr,'scope_0.csv'); % remote, remote2
 		FBGcurve=strcat(fldr,'scope_0_1.csv'); % remote3
 	else
 		fldr='20190626_Direct/'
@@ -65,6 +65,7 @@ for fnum=1:2
 	for i=1:filecount
 		%s=file(i).name;                           
 		if fnum==1
+			%s=strcat(fldr,'scope_',num2str(i),'.csv'); % remote, remote2
 			s=strcat(fldr,'scope_',num2str(i),'_1.csv'); % remote3
 		else
 			s=strcat(fldr,'scope_',num2str(i),'.csv'); % remote2, direct
@@ -115,47 +116,6 @@ for fnum=1:2
 end % end fnum (direct or remote) loop
 
 %*************************************************************%
-% LDV - Remote Line Scan MAT File %
-%*************************************************************%
-%fldr = '20190619_Remote/'
-%freqvals = (300:50:1000);
-%fnum = 1;
-%pos = 61; 
-
-%for i=1:filecount
-	%fname = string(sprintf('%04d',freqvals(i)));
-	%matfile = strcat(fldr,fname,'.mat');
-	%load(matfile);
-
-	%sig = amp_y(pos,:);
-
-	%% save peak to peak value for ldv
-	%p2pldv(fnum,i) = max(sig) - min(sig);
-
-%end % end ldv frequency loop
-
-
-%*************************************************************%
-% LDV - Direct %
-%*************************************************************%
-%fldr = '20190626_Direct/'
-%freqvals = (300:50:1000);
-%fnum = 2;
-%pos = 12; 
-
-%for i=1:filecount
-	%fname = string(sprintf('%04d',freqvals(i)));
-	%matfile = strcat(fldr,fname,'.mat');
-	%load(matfile);
-
-	%sig = amp_y(pos,:);
-
-	%% save peak to peak value for ldv
-	%p2pldv(fnum,i) = max(sig) - min(sig);
-
-%end % end ldv txt file loop
-
-%*************************************************************%
 % Plot %
 %*************************************************************%
 
@@ -177,13 +137,13 @@ plotvalsdir = p2pfbg(2,:) ./ p2pldvremnorm; % using remote ldv
 %plotvalsdir =  p2pldvremnorm ./ p2pfbg(2,:); % using remote ldv
 
 % plot
-plot(lambdavals,plotvalsrem,'r.-','MarkerSize',25,'DisplayName','Remote','LineWidth',1.5);
-%semilogx(lambdavals,plotvalsrem,'r.-','MarkerSize',25,'DisplayName','Remote','LineWidth',1.5);
+%plot(lambdavals,plotvalsrem,'r.-','MarkerSize',25,'DisplayName','Remote','LineWidth',1.5);
+semilogx(lambdavals,plotvalsrem,'r.-','MarkerSize',25,'DisplayName','Remote','LineWidth',1.5);
 hold on; grid on;
-plot(lambdavals,plotvalsdir,'b.-','MarkerSize',25,'DisplayName','Direct','LineWidth',1.5);
-%semilogx(lambdavals,plotvalsdir,'b.-','MarkerSize',25,'DisplayName','Direct','LineWidth',1.5);
+%plot(lambdavals,plotvalsdir,'b.-','MarkerSize',25,'DisplayName','Direct','LineWidth',1.5);
+semilogx(lambdavals,plotvalsdir,'b.-','MarkerSize',25,'DisplayName','Direct','LineWidth',1.5);
 
-%xlim([0.1 10]);
+xlim([0.1 10]);
 
 ylabel('Normalized FBG [\mu\epsilon]');
 %ylabel('reflectivity normalized by input');
@@ -193,8 +153,8 @@ xlabel('\lambda / L');
 % label point where curve starts to go down
 %text(lambdavals(9),plotvalsrem(9)+.01,strcat(num2str(freqvals(9)),' kHz'),'FontSize',16);
 
-%title('Remote FBG and Direct FBG normalized with LDV (Input)');
-title('Remote FBG and Direct FBG normalized with LDV (Input): DFT Peaks');
+title('Remote FBG and Direct FBG normalized with LDV (Input)');
+%title('Remote FBG and Direct FBG normalized with LDV (Input): DFT Peaks');
 %title('Remote FBG and Direct FBG normalized with LDV (Input): DFT Match');
 %title('Reflectivity vs Wavelength / FBG length ratio: Remote2 Before Bond');
 %title('Reflectivity vs Wavelength / FBG length ratio: Remote2 After Bond');
