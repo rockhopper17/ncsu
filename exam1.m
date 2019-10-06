@@ -39,7 +39,9 @@ tc = pc.^((gamma-1)/gamma); % temp ratio
 f = (cp*T0/(hR*1e-3)) * (tl - tr*tc); % fuel-air mass ratio
 efft = 1 - 1./(tr*tc); % thermal efficiency
 
-% turbojet
+%*****************************************************************************%
+% TURBOJET
+%*****************************************************************************%
 tt = 1 - (tr/tl)*(tc-1); % temp ratio turbine (turbojet)
 v9a0 = sqrt( (2/(gamma-1)) * (tl./(tr*tc)) .* (tr*tc.*tt - 1) ); % vel ratio
 spttj = a0 * (v9a0 - M0); % specific thrust
@@ -53,29 +55,120 @@ pctjopt = tctjopt^(gamma/(gamma-1)) % optimum compressor pressure ratio
 %fopt = (cp * T0 / (hR*1000)) * (tl - sqrt(tl));
 %tsfcopt = fopt/sptopt;
 
-% turbofan
+% plot
+figure(1);
+yyaxis left;
+plot(pc,spttj);
+hold on;
+plot(pctjopt,spttj(find(abs(pc-round(pctjopt,1))<1e-6)),'*');
+ylabel('Specific Thrust [N/(kg/sec)]');
+xlabel('\pi_{c}');
+yyaxis right;
+plot(pc,tsfctj);
+plot(pctjopt,tsfctj(find(abs(pc-round(pctjopt,1))<1e-6)),'*');
+ylabel('TSFC [mg/(N*sec)]');
+%legend('location','northeast');
+
+figure(2);
+yyaxis left;
+plot(pc,efftj*100);
+hold on;
+ylabel('\eta_{O}');
+xlabel('\pi_{c}');
+yyaxis right;
+plot(pc,effptj*100);
+ylabel('\eta_{P}');
+%legend('location','southeast');
+
+%*****************************************************************************%
+% TURBOFAN
+%*****************************************************************************%
 tf = pf^((gamma-1)/gamma); % temp ratio fan (turbofan)
-%alpha = 5; % why is this giving greater propulsive efficiency??
-alpha = (1/(tr*(tf-1))) * ( (tl-tr*(tc-1)-tl./(tr*tc))...
-	- 0.25*( sqrt((tr*tf-1)/(tr-1)) + 1)^2); % optimal bypass ratio at each tc
-alpha(alpha<0.001) = 0.001;
-v9a0 = sqrt( (2/(gamma-1)) * ( tl - tr.*(tc - 1 + alpha*(tf-1)) - (tl./(tr*tc)) ) );
-v19a0 = sqrt( (2/(gamma-1)) * (tr*tf - 1));
-spttf = a0 * (1./(1+alpha)) .* (v9a0 - M0 + alpha.*(v19a0 - M0));
-tsfctf = f./((1+alpha).*spttf);
-effptf = 2*M0*(v9a0-M0+alpha*(v19a0-M0))./(v9a0.^2-M0^2+alpha*(v19a0^2-M0^2));
-efftf = efft.*effptf;
 
-alpha = 5; % why is this giving greater propulsive efficiency??
-v9a0 = sqrt( (2/(gamma-1)) * ( tl - tr.*(tc - 1 + alpha*(tf-1)) - (tl./(tr*tc)) ) );
-v19a0 = sqrt( (2/(gamma-1)) * (tr*tf - 1));
-spttf2 = a0 * (1./(1+alpha)) .* (v9a0 - M0 + alpha.*(v19a0 - M0));
-tsfctf2 = f./((1+alpha).*spttf2);
-effptf2 = 2*M0*(v9a0-M0+alpha*(v19a0-M0))./(v9a0.^2-M0^2+alpha*(v19a0^2-M0^2));
-efftf2 = efft.*effptf2;
+% alpha=12 showed greater than 100% efficiencies, don't use
+% alpha=8 also appeared to show invalid effiency greater than optimum
+alphavals = [0 0.5 1 1.5 2 3 4 5];
+
+for alpha = alphavals
+	if alpha == 0
+		% optimal bypass ratio at each tc
+		alpha = (1/(tr*(tf-1))) * ( tl - tr*(tc-1) - tl./(tr*tc)...
+			- 0.25*( sqrt((tr*tf-1)) + sqrt(tr-1))^2); 
+		alpha(alpha<0.001) = 0.001; % don't use negative values
+
+		figure(3);
+		plot(pc,alpha,'k-');
+		ylabel('optimum bypass ratio');
+		xlabel('\pi_{c}');
+	end
+	v9a0 = sqrt( (2/(gamma-1)) * ( tl - tr.*(tc - 1 + alpha*(tf-1)) - (tl./(tr*tc)) ) );
+	v19a0 = sqrt( (2/(gamma-1)) * (tr*tf - 1));
+	spttf = a0 * (1./(1+alpha)) .* (v9a0 - M0 + alpha.*(v19a0 - M0));
+	tsfctf = f./((1+alpha).*spttf);
+	effptf = 2*M0*(v9a0-M0+alpha*(v19a0-M0))./(v9a0.^2-M0^2+alpha*(v19a0^2-M0^2));
+	efftf = efft.*effptf;
+	
+	if numel(alpha) > 1
+		figure(4);
+		hold on;
+		plot(pc,spttf,'k-','DisplayName','\alpha*');
+		figure(5);
+		hold on;
+		plot(pc,tsfctf,'k-','DisplayName','\alpha*');
+		figure(6);
+		hold on;
+		plot(pc,effptf,'k-','DisplayName','\alpha*');
+		figure(7);
+		hold on;
+		plot(pc,efftf,'k-','DisplayName','\alpha*');
+	else
+		figure(4);
+		hold on;
+		plot(pc,spttf,'DisplayName',['\alpha = ' num2str(alpha)]);
+		figure(5);
+		hold on;
+		plot(pc,tsfctf,'DisplayName',['\alpha = ' num2str(alpha)]);
+		figure(6);
+		hold on;
+		plot(pc,effptf,'DisplayName',['\alpha = ' num2str(alpha)]);
+		figure(7);
+		hold on;
+		plot(pc,efftf,'DisplayName',['\alpha = ' num2str(alpha)]);
+	end
+	
+	figure(4);
+	ylabel('Specific Thrust [N/(kg/sec)]');
+	xlabel('\pi_{c}');
+	legend show;
+
+	figure(5);
+	ylabel('TSFC [mg/(N*sec)]');
+	xlabel('\pi_{c}');
+	legend show;
+
+	figure(6);
+	ylabel('\eta_{P}');
+	xlabel('\pi_{c}');
+	legend show;
+	figure(7);
+	ylabel('\eta_{O}');
+	xlabel('\pi_{c}');
+	legend show;
+end
 
 
-% turboprop
+%alpha = 5;
+%v9a0 = sqrt( (2/(gamma-1)) * ( tl - tr.*(tc - 1 + alpha*(tf-1)) - (tl./(tr*tc)) ) );
+%v19a0 = sqrt( (2/(gamma-1)) * (tr*tf - 1));
+%spttf2 = a0 * (1./(1+alpha)) .* (v9a0 - M0 + alpha.*(v19a0 - M0));
+%tsfctf2 = f./((1+alpha).*spttf2);
+%effptf2 = 2*M0*(v9a0-M0+alpha*(v19a0-M0))./(v9a0.^2-M0^2+alpha*(v19a0^2-M0^2));
+%efftf2 = efft.*effptf2;
+
+
+%*****************************************************************************%
+% TURBOPROP
+%*****************************************************************************%
 effprop = 0.5; % assume ideal propellar efficiency
 %Mattingly book had error for tt*: should be 1/tr*tc not tl/tr*tc
 tt = (1./(tr*tc)) + (((gamma-1)/2)*M0^2)/(tl*effprop^2); % optimal turbine temp
@@ -90,47 +183,4 @@ tsfctp = f./spttp;
 efftp = ctot./(tl-tr*tc);
 effptp = efftp./efft;
 
-% plot
-figure;
-yyaxis left;
-plot(pc,spttj,'DisplayName','Turbojet','LineWidth',2);
-hold on;
-plot(pc,spttf,'DisplayName','Turbofan','LineWidth',2);
-plot(pc,spttf2,'DisplayName','Turbofan2','LineWidth',2);
-%plot(pc,spttp,'DisplayName','Turboprop','LineWidth',2);
-plot(pctjopt,spttj(find(abs(pc-round(pctjopt,1))<1e-6)),'*','LineWidth',2);
-%ylim([0 inf]); % ignore the negative values at low tc
-ylabel('Specific Thrust [N/(kg/sec)]');
-xlabel('\pi_{c}');
-yyaxis right;
-plot(pc,tsfctj,'DisplayName','Turbojet','LineWidth',2);
-plot(pc,tsfctf,'DisplayName','Turbofan','LineWidth',2);
-plot(pc,tsfctf2,'DisplayName','Turbofan2','LineWidth',2);
-%plot(pc,tsfctp,'DisplayName','Turboprop','LineWidth',2);
-plot(pctjopt,tsfctj(find(abs(pc-round(pctjopt,1))<1e-6)),'*','LineWidth',2);
-%ylim([0 inf]);
-ylabel('TSFC [mg/(N*sec)]');
-legend('location','northeast');
-
-figure;
-yyaxis left;
-plot(pc,efftj*100,'DisplayName','Turbojet','LineWidth',2);
-hold on;
-plot(pc,efftf*100,'DisplayName','Turbofan','LineWidth',2);
-%plot(pc,efftf2*100,'DisplayName','Turbofan2','LineWidth',2);
-%plot(pc,efftp*100,'DisplayName','Turboprop','LineWidth',2);
-ylabel('\eta_{O}');
-xlabel('\pi_{c}');
-yyaxis right;
-plot(pc,effptj*100,'DisplayName','Turbojet','LineWidth',2);
-plot(pc,effptf*100,'DisplayName','Turbofan','LineWidth',2);
-%plot(pc,effptf2*100,'DisplayName','Turbofan2','LineWidth',2);
-%plot(pc,effptp*100,'DisplayName','Turboprop','LineWidth',2);
-ylabel('\eta_{P}');
-legend('location','southeast');
-
-figure;
-plot(pc,alpha);
-ylabel('optimum bypass ratio');
-xlabel('\pi_{c}');
 
