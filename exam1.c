@@ -58,17 +58,23 @@ double *symmatvec(int n, double a[], double x[])
 		for (j = idiag; j < n; j++)
 		{
 			/* do mult once to get bval on stack since a,x on heap */
-			bval = a[i++]*x[j]; /* increment i here, only place */
-			if (j != idiag) b[idiag] += bval;
-			b[j] += bval; 
+			/*bval = a[i++]*x[j]; [> increment i here, only place <]*/
+			/*if (j != idiag) b[idiag] += bval;*/
+			/*b[j] += bval;*/
+			if (j != idiag) b[idiag] += a[i]*x[j];
+			b[j] += a[i++]*x[idiag];
 		}
 	}
+
+	/*for (i = 0; i < n; i++)*/
+		/*for (j = 0; j < n; j++)*/
+			/*b[i] += a[i*n+j]*x[j];*/
 
 	return b;
 }
 
 /* conjugate gradient method to solve Ax=b */
-/* using algorithm version from Atkinson p567 */
+/* see Luo lecture 9 slide 5 */
 double *solcg(int n, double a[], double b[])
 {
 	double *x, *r, *p, *ap;
@@ -88,42 +94,34 @@ double *solcg(int n, double a[], double b[])
 	for (k = 0; k < n; k++)
 	{
 		x[k] = 0.0; /* init guess: x = 0 */
-		r[k] = b[k]; /* Ax=0 so r=Ax-b=-b */
-		/*p[k] = r[k];*/
-		p[k] = 0.0;
+		r[k] = -b[k]; /* Ax=0 so r=Ax-b=-b */
+		p[k] = -r[k];
 	}
-
-	/* init r(k-1)T * r(k-1) */
-	/*rr = vecTvecmult(n,r,r);*/
 
 	/* set baseline err tolerance */
 	r0eps = eps * norm(n,r);
 
 	/* perform cg loop */
-	for (k = 0; k < maxit; k++)
+	for (k = 1; k < maxit; k++)
 	{
-		if (k == 0)
-			beta = 0.0;
-		else
-			beta = vecTvecmult(n,r,r) / rr;
-
-		for (i = 0; i < n; i++)
-			p[i] = r[i] + beta * p[i];
-		
 		rr = vecTvecmult(n,r,r);
 		ap = symmatvec(n,a,p);
+		
 		alpha = rr / vecTvecmult(n,p,ap);
-		free(ap);
 		
 		for (i = 0; i < n; i++)
 			x[i] += alpha * p[i];
 
-		ap = symmatvec(n,a,x); /* really Ax */
 		for (i = 0; i < n; i++)
-			/*r[i] += alpha * ap[i];*/
-			r[i] += b[i] - ap[i];
+			r[i] += alpha * ap[i];
+
 		free(ap);
 
+		beta = vecTvecmult(n,r,r) / rr;
+
+		for (i = 0; i < n; i++)
+			p[i] = beta * p[i] - r[i];
+		
 		if (norm(n,r) < r0eps)
 			break;
 	}
@@ -148,18 +146,28 @@ int main()
 	{
 		n = 3;
 
-		/* get num elements for a (num elements in upper tri) */
-		int N = (n * (n + 1)) / 2;
-
-		a = (double *) malloc (N * sizeof(double));
 		x = (double *) malloc (n * sizeof(double));
 		b = (double *) malloc (n * sizeof(double));
 
 		/* construct the test A mat */
+		int N = (n * (n + 1)) / 2; /* num elements in upper tri */
+		a = (double *) malloc (N * sizeof(double));
 		i = 0;
 		for (idiag = 0; idiag < n; idiag++)
 			for (j = idiag; j < n; j++)
 				a[i++] = 2 - (j - idiag);
+
+		/*a = (double *) malloc (n*n * sizeof(double));*/
+		/*for (i = 0; i < n; i++)*/
+			/*for (j = 0; j < n; j++)*/
+			/*{*/
+				/*if (i == j)*/
+					/*a[i*n+j] = 2;*/
+				/*else if (i == (j-1) || i == (j+1))*/
+					/*a[i*n+j] = 1;*/
+				/*else*/
+					/*a[i*n+j] = 0;*/
+			/*}*/
 
 		/* construct the test b vec */
 		for (i = 0; i < n; i++)
