@@ -68,7 +68,7 @@ double *symmatvec(int n, double a[], double x[])
 }
 
 /* conjugate gradient method to solve Ax=b */
-/* see Luo lecture 9 slide 5 */
+/* using algorithm version from Atkinson p567 */
 double *solcg(int n, double a[], double b[])
 {
 	double *x, *r, *p, *ap;
@@ -88,34 +88,42 @@ double *solcg(int n, double a[], double b[])
 	for (k = 0; k < n; k++)
 	{
 		x[k] = 0.0; /* init guess: x = 0 */
-		r[k] = -b[k]; /* Ax=0 so r=Ax-b=-b */
-		p[k] = -r[k];
+		r[k] = b[k]; /* Ax=0 so r=Ax-b=-b */
+		/*p[k] = r[k];*/
+		p[k] = 0.0;
 	}
+
+	/* init r(k-1)T * r(k-1) */
+	/*rr = vecTvecmult(n,r,r);*/
 
 	/* set baseline err tolerance */
 	r0eps = eps * norm(n,r);
 
 	/* perform cg loop */
-	for (k = 1; k < maxit; k++)
+	for (k = 0; k < maxit; k++)
 	{
+		if (k == 0)
+			beta = 0.0;
+		else
+			beta = vecTvecmult(n,r,r) / rr;
+
+		for (i = 0; i < n; i++)
+			p[i] = r[i] + beta * p[i];
+		
 		rr = vecTvecmult(n,r,r);
 		ap = symmatvec(n,a,p);
-		
 		alpha = rr / vecTvecmult(n,p,ap);
+		free(ap);
 		
 		for (i = 0; i < n; i++)
 			x[i] += alpha * p[i];
 
+		ap = symmatvec(n,a,x); /* really Ax */
 		for (i = 0; i < n; i++)
-			r[i] += alpha * ap[i];
-
+			/*r[i] += alpha * ap[i];*/
+			r[i] += b[i] - ap[i];
 		free(ap);
 
-		beta = vecTvecmult(n,r,r) / rr;
-
-		for (i = 0; i < n; i++)
-			p[i] = beta * p[i] - r[i];
-		
 		if (norm(n,r) < r0eps)
 			break;
 	}
