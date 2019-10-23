@@ -8,6 +8,8 @@
 #include <math.h>
 #include <time.h>
 
+int numiter;
+
 /* vector norm (L2 norm) */
 double norm(int n, double xv[])
 {
@@ -39,6 +41,8 @@ double vecTvecmult(int n, double vecT[], double vec[])
 /* *  a5 a6 a7 */
 /* *  *  a8 a9 */
 /* *  *  *  a10*/
+/* doing this for general SPD case */
+/* can optmize further for tridiag or even single value in diags */
 double *symmatvec(int n, double a[], double x[])
 {
 	double *b, bval;
@@ -49,26 +53,45 @@ double *symmatvec(int n, double a[], double x[])
 	for (i = 0; i < n; i++)
 		b[i] = 0.0;
 
-	/* walk upper diag only accessing each a element once */
-	/* but do the corresponding mult/sum as if full symm mat */
+	/* walk upper diag only accessing each element once */
+	/* but do the corresponding mult/sum as if full matrix */
 	/* add the item for the row then the col (see whiteboard pic) */
 	i = 0;
 	for (idiag = 0; idiag < n; idiag++)
 	{
 		for (j = idiag; j < n; j++)
 		{
-			/* do mult once to get bval on stack since a,x on heap */
-			/*bval = a[i++]*x[j]; [> increment i here, only place <]*/
-			/*if (j != idiag) b[idiag] += bval;*/
-			/*b[j] += bval;*/
 			if (j != idiag) b[idiag] += a[i]*x[j];
-			b[j] += a[i++]*x[idiag];
+			b[j] += a[i++]*x[idiag]; /* increment i here only */
 		}
 	}
 
-	/*for (i = 0; i < n; i++)*/
-		/*for (j = 0; j < n; j++)*/
-			/*b[i] += a[i*n+j]*x[j];*/
+	return b;
+}
+
+/* tridiagonal with single value matrix vector multiplication */
+/* hard coded values for exam */
+double *trimatvec(int n, double x[])
+{
+	double *b, bval;
+	int i, j, idiag;
+
+	b = (double *) malloc (n * sizeof(double));
+
+	for (i = 0; i < n; i++)
+		b[i] = 0.0;
+
+	for (idiag = 0; idiag < n; idiag++)
+	{
+		b[idiag] += 2 * x[idiag];
+
+		if (idiag == 0)
+			b[idiag] += -1 * x[idiag+1];
+		else if (idiag == (n-1))
+			b[idiag] += -1 * x[idiag-1];
+		else
+			b[idiag] += ((-1 * x[idiag-1]) + (-1 * x[idiag+1]));
+	}
 
 	return b;
 }
@@ -89,6 +112,7 @@ double *solcg(int n, double a[], double b[])
 	/* max iterations and convergence tolerence */
 	maxit = 1e6;
 	eps = 1e-6;
+	/*eps = 1e-5;*/
 
 	/* initialize x, r, p (for k=0) */
 	for (k = 0; k < n; k++)
@@ -104,8 +128,12 @@ double *solcg(int n, double a[], double b[])
 	/* perform cg loop */
 	for (k = 1; k < maxit; k++)
 	{
-		rr = vecTvecmult(n,r,r);
-		ap = symmatvec(n,a,p);
+		/* save r(k-1) product since we need it after r(k+1) */
+		rr = vecTvecmult(n,r,r); 
+		if (n < 2000)
+			ap = symmatvec(n,a,p); /* only save matrix-vector product */
+		else
+			ap = trimatvec(n,p); /* optimized for exam */
 		
 		alpha = rr / vecTvecmult(n,p,ap);
 		
@@ -122,9 +150,13 @@ double *solcg(int n, double a[], double b[])
 		for (i = 0; i < n; i++)
 			p[i] = beta * p[i] - r[i];
 		
+		printf("iteration %d\n",k);
+
 		if (norm(n,r) < r0eps)
 			break;
 	}
+
+	numiter = k;
 
 	free(r);
 	free(p);
@@ -135,50 +167,107 @@ double *solcg(int n, double a[], double b[])
 /* main */
 int main()
 {
-	int n, i, j, idiag, pblm;
-	double *a, *x, *b;
+	int n, N, i, j, idiag, pblm;
+	double *a, *x, *b, *ih;
 	clock_t t;
+	double time_taken, h;
+	FILE *fout;
+	char fname[50];
 
-	pblm = 2; /* exam problem number: 2-2 = 2, 2-3 = 3 */
+	/* exam problem number: 2-2 = 2, 2-3 = 3 */
+	pblm = 3; 
 
 	/* exam problem 2-2 */
 	if (pblm == 2)
 	{
 		n = 3;
 
-		x = (double *) malloc (n * sizeof(double));
-		b = (double *) malloc (n * sizeof(double));
-
-		/* construct the test A mat */
-		int N = (n * (n + 1)) / 2; /* num elements in upper tri */
+		/* construct the test A mat in upper tri form only */
+		N = (n * (n + 1)) / 2; /* num elements in upper tri */
 		a = (double *) malloc (N * sizeof(double));
 		i = 0;
 		for (idiag = 0; idiag < n; idiag++)
 			for (j = idiag; j < n; j++)
 				a[i++] = 2 - (j - idiag);
 
-		/*a = (double *) malloc (n*n * sizeof(double));*/
-		/*for (i = 0; i < n; i++)*/
-			/*for (j = 0; j < n; j++)*/
-			/*{*/
-				/*if (i == j)*/
-					/*a[i*n+j] = 2;*/
-				/*else if (i == (j-1) || i == (j+1))*/
-					/*a[i*n+j] = 1;*/
-				/*else*/
-					/*a[i*n+j] = 0;*/
-			/*}*/
-
 		/* construct the test b vec */
+		b = (double *) malloc (n * sizeof(double));
 		for (i = 0; i < n; i++)
 			b[i] = 1;
 
 		/* perform congjuage gradient to solve Ax=b */
+		x = (double *) malloc (n * sizeof(double));
 		t = clock();
 		x = solcg(n, a, b);
 		t = clock() - t;
 		
-		double time_taken = ((double)t)/CLOCKS_PER_SEC; // in seconds 
+		time_taken = ((double)t)/CLOCKS_PER_SEC; // in seconds 
+
+		free(a);
+		free(x);
+		free(b);
+	}
+	else if (pblm == 3)
+	{
+		/*n = 20;*/
+		/*n = 200;*/
+		/*n = 2e3;*/
+		/*n = 2e4;*/
+		/*n = 2e5;*/
+		n = 2e6; /* takes long time */
+
+		/* construct the test A mat in upper tri form only */
+		if (n < 2000)
+		{
+			N = (n * (n + 1)) / 2; /* num elements in upper tri */
+			a = (double *) malloc (N * sizeof(double));
+			i = 0;
+			for (idiag = 0; idiag < n; idiag++)
+				for (j = idiag; j < n; j++)
+				{
+					if (j == idiag)
+						a[i++] = 2;
+					else if (j == idiag+1)
+						a[i++] = -1;
+					else
+						a[i++] = 0.0;
+				}
+		}
+		else
+		{
+			/* not used for tridiag (large n) */
+		   	/* pass empty value for function, refactor later */
+			a = (double *) malloc (1 * sizeof(double)); 
+		}
+
+		/* construct the test b vec */
+		b = (double *) malloc (n * sizeof(double));
+		ih = (double *) malloc (n * sizeof(double));
+		h = (2 * M_PI) / (n + 1);
+		for (i = 0; i < n; i++)
+		{
+			ih[i] = (i+1)*h; /* save for plot */
+			b[i] = h*h * sin((i+1)*h);
+		}
+
+		/* perform congjuage gradient to solve Ax=b */
+		x = (double *) malloc (n * sizeof(double));
+		t = clock();
+		x = solcg(n, a, b);
+		t = clock() - t;
+		
+		time_taken = ((double)t)/CLOCKS_PER_SEC; // in seconds 
+		printf("n = %d: num iterations = %d, time taken =  %lf sec\n",n,numiter,time_taken);
+
+		/* save x vs ih to file for plot in matlab */
+		if (n < 2000)
+		{
+			snprintf(fname, sizeof(fname), "pblm3n%d.txt",n);
+			fout = fopen(fname, "w+t");
+			for (i = 0; i < n; i++)
+				fprintf(fout, "%f,%f\n",ih[i],x[i]);
+			fclose(fout);
+		}
 
 		free(a);
 		free(x);
