@@ -8,19 +8,74 @@
 #include <float.h>
 #include <math.h>
 #include <time.h>
-#include <gsl/gsl_linalg.h>
 
-int numiter;
+/* debug flag - comment out to turn off debug printf's */
+#define DEBUG
 
-/* vector norm (L2 norm) */
-double norm(int n, double xv[])
+const int numopts = 4; /* num of different num of points to try */
+
+/* linear least squares fit */
+/* inputs: y = L2 norm of errors, x = interval spacing */
+/* outputs: writes log10 of x,y, and linear polynomial coeffs to file for plotting */
+void leastsq(double y[numopts], double x[numopts])
 {
-	double retval = 0;
+	double a, b; /* polynomial coeffs 0,1 */
+	double xi, yi, xyi, xi2; /* sums for least squares min calc */
+	double lx, ly; /* hold value of log10 x and y */
+	FILE *fout; /* used for saving values to file for plotting */
+	int i;
 
-	for (int i = 0; i < n; i++)
-		retval += xv[i]*xv[i];
+	xi = 0;
+	yi = 0;
+	xyi = 0;
+	xi2 = 0;
 
-	return sqrt(retval);
+	fout = fopen("err.txt", "w+t");
+
+	for (i = 0; i < numopts; i++)
+	{
+		lx = log10(x[i]);
+		ly = log10(y[i]);
+
+		xi += lx; /* sum of x values */
+		yi += ly; /* sum of y values */
+		xyi = lx*ly; /* sum of x*y values */
+		xi2 = lx*lx; /* sum of x^2 values */
+
+		fprintf(fout,"%lf,%lf\n",ly,lx); 
+	}
+
+	a = (xi2*yi - xyi*xi) / (numopts*xi2 - (xi*xi)); /* 0 (const) coeff */
+	b = (numopts*xyi - xi*yi) / (numopts*xi2 - (xi*xi)); /* 1st order coeff */
+
+	fprintf(fout,"%lf,%lf\n",b,a); 
+	fclose(fout);
+}
+
+
+/* numerical integration: gauss quadrature */
+double numintgauss(double xa, double xb, double d, double c, double b, double a)
+{
+	double x, v, intval; /* transformed x value, dx value (v), ret val */
+	double p, r; /* polynomial and runge results */
+	int i;
+	
+	/* Gauss points and weights: 4 point quadrature */
+	double t[numopts] = {-0.86113631, -0.33998104, 0.33998104, 0.86113631};
+	double w[numopts] = {0.3478548, 0.6521452, 0.6521452, 0.3478548};
+
+	intval = 0;
+
+	for (i = 0; i < numopts; i++)
+	{
+		x = 0.5*(t[i]*(xb-xa)+xa+xb); /* transform x using gauss pt */
+		v = 0.5*(xb-xa)*w[i]; /* transform dx and multiply by weight */
+		p = d*pow(x,3) + c*pow(x,2) + b*x + a; /* polynomial eval w new x */
+		r = 1/(1+25*pow(x,2)); /* runge eval w new x */
+		intval += pow((p-r),2) * v; /* putting it all together */
+	}
+
+	return intval;
 }
 
 /* tridiagonal Ax=b solver using Thomas algorithm */
@@ -85,21 +140,27 @@ double *soltri(int n, double *h, double *fx)
 	c[0] = ( (h[1]+h[0])*c[1] - h[0]*c[2] ) / h[1];
 	c[n] = ( (h[n-1]+h[n-2])*c[n-1] - h[n-1]*c[n-2] ) / h[n-2];
 
+	free(a);
+	free(b);
+	free(d);
+	free(r);
+
 	return c;
 }
 
-/* cubic spline interpolation using not-a-knot, equally spaced points */
+/* cubic spline interpolation using not-a-knot */
 /* inputs: n = num data pts - 1, x = knots (sample points), fx = values for f(x) */
-/*         nint = num pts to eval, xint = x pts to eval (for plots) */
-double *spline(int n, double x[], double fx[], int nint, double xint[])
+/* outputs: L2 error norm and writes coeffs to data file for plotting */
+double spline(int n, double x[], double fx[])
 {
-	double *fxint; /* ret val: evaluation of spline at xint points */
 	double *a, *b, *c, *d; /* cubic polynomial coeffecients 0,1,2,3 */
 	double *h; /* interval spacing (x[i+1] - x[i]) */
-	double xdiff; /* used to hold x-xi */
-	int i, iint;
-
-	fxint = (double *) malloc (nint * sizeof(double));
+	FILE *fout; /* used for saving coefficients to file for plotting */
+	char fname[50]; /* filename */
+	double aval,bval,cval,dval; /* calculated coeffecients */
+	double intsum; /* sum of gauss quadrature integrals */
+	double sival; /* used to check cubic evaluated at end points */
+	int i;
 
 	a = (double *) malloc (n * sizeof(double));
 	b = (double *) malloc (n * sizeof(double));
@@ -122,33 +183,50 @@ double *spline(int n, double x[], double fx[], int nint, double xint[])
 		d[i] = (c[i+1]-c[i])/(3*h[i]);
 	}
 
-/* debugging */
-double bnext = b[0] + 2*h[0]*c[0] + 3*h[0]*h[0]*d[0];
-printf("first derivative continuity: b1=%f, bnext=%f\n",b[1],bnext);
-double cnext = c[0] + 3*h[0]*d[0];
-printf("second derivative continuity: c1=%f, cnext=%f\n",c[1],cnext);
-printf("third derivative continuity: d0=%f, d1=%f,dn-1=%f,dn-2=%f\n",
-		d[0],d[1],d[n-1],d[n-2]);
+#ifdef DEBUG
+	printf("n = %d\n",n);
+	double bnext = b[0] + 2*h[0]*c[0] + 3*h[0]*h[0]*d[0];
+	printf("first derivative continuity: b1=%lf, bnext=%lf\n",b[1],bnext);
+	double cnext = c[0] + 3*h[0]*d[0];
+	printf("second derivative continuity: c1=%lf, cnext=%lf\n",c[1],cnext);
+	printf("third derivative continuity: d0=%lf, d1=%lf\n\t\t\tdn-1=%lf,dn-2=%lf\n",
+			d[0],d[1],d[n-1],d[n-2]);
+#endif
 
-	/* interpolate using cubic polynomials */
-	i = 0; /* interval / cubic index into a,b,c,d */
-	for (iint = 0; iint < nint; iint++)
+	/* save x, fx, and calculated coeffs to file */
+	/* calculate L2-norm of error using gauss quadrature for integral */
+	snprintf(fname, sizeof(fname), "spline%d.txt",n);
+	fout = fopen(fname, "w+t");
+	intsum = 0;
+	for (i = 0; i < n; i++)
 	{
-		/* increment i if we are into the next interval */
-		if (xint[iint] > x[i+1])
-		{
-			i++;
+		dval = d[i];
+		cval = c[i] - 3*d[i]*x[i];
+		bval = b[i] - 2*c[i]*x[i] + 3*d[i]*pow(x[i],2);
+		aval = a[i] - b[i]*x[i] + c[i]*pow(x[i],2) - d[i]*pow(x[i],3);
+		fprintf(fout, "%lf,%lf,%lf,%lf,%lf,%lf\n",x[i],fx[i],dval,cval,bval,aval);
 
-			/* bounds check in case xint goes beyond x */
-			if (i > n+1)
-				break; 
-		}
+		/* call guass quadrature to perform integral for error calc */
+		intsum += numintgauss(x[i],x[i+1],dval,cval,bval,aval);
 
-		/* interpolating spline */
-	   	/* si(x) = ai + bi(x-xi) + ci(x-xi)^2 + di(x-xi)^3 */ 
-		xdiff = xint[iint]-x[i];
-		fxint[iint] = a[i] + b[i]*xdiff + c[i]*pow(xdiff,2) + d[i]*pow(xdiff,3);
+#ifdef DEBUG
+		printf("xi=%lf,fx(xi)=%lf,d=%lf,c=%lf,b=%lf,a=%lf\n",x[i],fx[i],dval,cval,bval,aval);
+		sival = dval*pow(x[i],3) + cval*pow(x[i],2) + bval*x[i] + aval;
+		printf("fx(xi)=%lf, si(xi)=%lf\n",fx[i],sival);
+		sival = dval*pow(x[i+1],3) + cval*pow(x[i+1],2) + bval*x[i+1] + aval;
+		printf("fx(xi+1)=%lf, si(xi+1)=%lf\n",fx[i+1],sival);
+#endif
 	}
+
+	/* save last pt x and fx, and l2 error norm in 3rd column */
+	/* todo: look at saving more sig figs in mantissa, currently 6 */
+	intsum = sqrt(intsum);
+	fprintf(fout,"%lf,%lf,%lf,%lf,%lf,%lf\n",x[i],fx[i],intsum,0.0,0.0,0.0); 
+	fclose(fout);
+
+#ifdef DEBUG
+	printf("L2 error norm = %lf\n",intsum);
+#endif
 
 	free(a);
 	free(b);
@@ -156,83 +234,64 @@ printf("third derivative continuity: d0=%f, d1=%f,dn-1=%f,dn-2=%f\n",
 	free(d);
 	free(h);
 
-	return fxint;
+	return intsum;
 }
 
 /* main */
 int main()
 {
 	int i, j;
-	int n; /* num data pts = n+1 */
+	int n; /* num data pts = n+1, num intervals = n */
 	double *x; /* knot x values (data points) */
 	double *fx; /* f(x) known values for knots */
-	int nint; /* num data pts to interpolate at (finer than n) */
-	double *xint; /* x values for interpolation */
-	double *fxint; /* interpolated values for plotting */
-	FILE *fout; /* used for saving data to file for plotting */
-	char fname[50]; /* filename */
-	int tc; /* test case */
+	double l2norm[numopts]; /* L2 error norms */
+	double h[numopts]; /* interval spacing for each n */
 	
-	/* 1=sin, 2=runge */
-	tc = 2;
+	/* num intervals(num data pts): 4(5), 8(9), 16(17), 32(33) */
+	double nvals[numopts] = {4,8,16,32}; /* num data pts = n + 1 */
 
-	/* test input: using sin curve from 0 to 2pi */
-	if (tc == 1)
+	/* unit circle x and f(x) values */
+	double l2normc;
+	double sq2 = sqrt(2)/2;
+	double xc[9] = {1, sq2, 0, -sq2, -1, -sq2, 0, sq2, 1};
+	double fxc[9] = {0, sq2, 1, sq2, 0, -sq2, -1, -sq2, 0};
+	/*double xc[5] = {1, sq2, 0, -sq2, -1};*/
+	/*double fxc[5] = {0, sq2, 1, sq2, 0};*/
+
+	if (0)
 	{
-		n = 8; /* 9 data pts */
-		x = (double *) malloc ((n+1) * sizeof(double));
-		fx = (double *) malloc ((n+1) * sizeof(double));
-		for (i = 0; i < n+1; i++)
-		{
-			x[i] = i*M_PI/4;
-			fx[i] = sin(x[i]);
-		}
-		nint = 33; /* actual num of points to interpolate at */
-		xint = (double *) malloc (nint * sizeof(double));
-		for (i = 0; i < nint; i++)
-		{
-			xint[i] = i*M_PI/16;
-		}
-
-		/* call spline method to perform cubic not-a-knot spline */
-		fxint = (double *) malloc (nint * sizeof(double));
-		fxint = spline(n, x, fx, nint, xint);
-
-	}
-	/* runge project pblm 2 */
-	else if (tc == 2)
+	for (j = 0; j < numopts; j++)
 	{
-		n = 4; /* num data pts - 1: 4(5), 9(10), 16(17), 32(33) */
+		n = nvals[j]; 
+
+		/* build x and fx for runge func on interval -1 to 1 */
+		/* could optimize this better for loop */
+		/* maybe allocate largest possible one time */
 		x = (double *) malloc ((n+1) * sizeof(double));
 		fx = (double *) malloc ((n+1) * sizeof(double));
 		for (i = 0; i < n+1; i++)
 		{
 			x[i] = -1 + (2*(double)i/(double)n);
-			fx[i] = 1/(1+25*x[i]*x[i]);
-		}
-		nint = n*10; /* num of points to interpolate at */
-		xint = (double *) malloc (nint * sizeof(double));
-		for (i = 0; i < nint; i++)
-		{
-			xint[i] = -1 + (2*(double)i/((double)nint));
+			fx[i] = 1/(1+25*x[i]*x[i]); /* runge */
 		}
 
-		/* call spline method to perform cubic not-a-knot spline */
-		fxint = (double *) malloc (nint * sizeof(double));
-		fxint = spline(n, x, fx, nint, xint);
+		/* call cubic spline not-a-knot function */
+		/* it will write coeffs to data file for plotting */
+		l2norm[j] = spline(n, x, fx);
+		h[j] = x[1] - x[0]; /* assume equal spacing for runge */
+
+		free(x);
+		free(fx);
 	}
 
-	/* save xint and fxint to file for plotting */
-	snprintf(fname, sizeof(fname), "spline%d.txt",n);
-	fout = fopen(fname, "w+t");
-	for (i = 0; i < nint; i++)
-		fprintf(fout, "%f,%f\n",xint[i],fxint[i]);
-	fclose(fout);
-
-	free(x);
-	free(fx);
-	free(xint);
-	free(fxint);
+	/* run linear least squares fit on log base 10 values */
+	/* log10(error) vs log10(interval spacing) */
+	/* func will write data to file for plotting */
+	leastsq(l2norm,h);
+	}
+	/* unit circle */
+	n = 8;
+	l2normc = spline(n, xc, fxc);
 
 	return 0;
 }

@@ -36,7 +36,8 @@ elseif tc==2
 	%a = [0.038461538461538464, 0.13793103448275862, 1,0.13793103448275862];
 	%b = [-0.15819678897280715, -0.070836073644406916,  -3.998391343601253,-1.0353541809455684];
 
-	n = 16;
+if false
+	n = 8;
 
 	x = -1:2/n:1;
 	v = 1./(1+25*x.^2);
@@ -50,10 +51,65 @@ elseif tc==2
 	grid on;
 
 	% now plot from c code output
-	d=load(['spline' num2str(n) '.txt']);
-	figure;
-	plot(x,v,'o',d(:,1),d(:,2),'-');
-	grid on;
+	C = {'r','g','c','b'};
+	nvals = [4 8 16 32];
 
+	figure(2);
+	x = -1:0.01:1;
+	fr = 1./(1+25*x.^2);
+	ph(5) = plot(x,fr,'k-','DisplayName','Runge');
+	hold on;
+
+	derr = load('err.txt');
+
+	for idx=1:4
+		n = nvals(idx);
+
+		d=load(['spline' num2str(n) '.txt']);
+
+		for i=1:n
+			x = d(i,1):0.01:d(i+1,1);
+			p = d(i,3:6); % coeffs d,c,b,a
+			f = polyval(p,x);
+			figure(2);
+			plot(d(i,1),d(i,2),'o',x,f,'-','color',C{idx});
+			hold on;
+		end
+		ph(idx) = plot(d(n+1,1),d(n+1,2),'o',...
+			'color',C{idx},'DisplayName',['n=' num2str(n)]);
+		hold on;
+		
+		%h = d(2,1) - d(1,1); % equal spacing for runge
+		figure(3);
+		plot(derr(idx,2),derr(idx,1),'o',...
+			'color',C{idx},'LineWidth',2,'DisplayName',['n=' num2str(n)]);
+		hold on;
+	end
+
+	figure(2);
+	legend(ph,'location','northwest');
+
+	figure(3);
+	x = -1.5:0.01:0;
+	p = derr(5,1:2); % coeffs b,a
+	f = polyval(p,x);
+	plot(x,f,'k-','DisplayName','least sq');
+	grid on;
+	legend('location','northwest');
+end
+	% unit circle
+	n = 5;
+	d=load(['spline' num2str(n) '.txt']);
+	figure(4);
+	for i=1:n
+		x = d(i,1):-0.01:d(i+1,1);
+		p = d(i,3:6); % coeffs d,c,b,a
+		f = polyval(p,x);
+		plot(d(i,1),d(i,2),'ob',x,f,'-b');
+		hold on;
+	end
+	%plot(d(n+1,1),d(n+1,2),'ob');
+	hold on;
+	
 end
 
