@@ -98,17 +98,41 @@ if false
 	legend('location','northwest');
 end
 	% unit circle
-	n = 5;
-	d=load(['spline' num2str(n) '.txt']);
+	n = 8;
+	dxc = load(['spline' num2str(n) 'ucx.txt']);
+	dyc = load(['spline' num2str(n) 'ucy.txt']);
 	figure(4);
 	for i=1:n
-		x = d(i,1):-0.01:d(i+1,1);
-		p = d(i,3:6); % coeffs d,c,b,a
-		f = polyval(p,x);
-		plot(d(i,1),d(i,2),'ob',x,f,'-b');
+		%x1 = dxc(i,2);
+		%x2 = dxc(i+1,2);
+		%t = linspace(x1,x2,100);
+		%t = dxc(i,2):-0.01:dxc(i+1,2);
+		p = dxc(i,3:6); % coeffs d,c,b,a
+		%x = polyval(p,t);
+		x = polyval(p,[i-1:.01:i]);
+
+		%y1 = dyc(i,2);
+		%y2 = dyc(i+1,2);
+		%if y1 > y2
+			%t = linspace(y1,y2,100);
+		%else
+			%t = y1:0.01:y2;
+		%end
+
+		p = dyc(i,3:6); % coeffs d,c,b,a
+		%y = polyval(p,t);
+		y = polyval(p,[i-1:.01:i]);
+
+		plot(dxc(i,2),dyc(i,2),'ob',x,y,'-b');
 		hold on;
 	end
-	%plot(d(n+1,1),d(n+1,2),'ob');
+	plot(dxc(n+1,2),dyc(n+1,2),'ob');
+
+	% plot true circle
+	t = linspace(0,2*pi,100);
+	x = cos(t);
+	y = sin(t);
+	plot(x,y,'-k');
 	hold on;
 	
 end
