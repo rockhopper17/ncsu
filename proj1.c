@@ -48,6 +48,10 @@ void leastsq(double y[numopts], double x[numopts])
 	a = (xi2*yi - xyi*xi) / (numopts*xi2 - (xi*xi)); /* 0 (const) coeff */
 	b = (numopts*xyi - xi*yi) / (numopts*xi2 - (xi*xi)); /* 1st order coeff */
 
+#ifdef DEBUG
+	printf("slope of log error = %lf\n",b);
+#endif
+
 	fprintf(fout,"%lf,%lf\n",b,a); 
 	fclose(fout);
 }
@@ -151,12 +155,11 @@ double *soltri(int n, double *h, double *fx)
 /* cubic spline interpolation using not-a-knot */
 /* inputs: n = num data pts - 1, x = knots (sample points), fx = values for f(x) */
 /* outputs: L2 error norm and writes coeffs to data file for plotting */
-double spline(int n, double x[], double fx[])
+double spline(int n, double x[], double fx[], char fname[50])
 {
 	double *a, *b, *c, *d; /* cubic polynomial coeffecients 0,1,2,3 */
 	double *h; /* interval spacing (x[i+1] - x[i]) */
 	FILE *fout; /* used for saving coefficients to file for plotting */
-	char fname[50]; /* filename */
 	double aval,bval,cval,dval; /* calculated coeffecients */
 	double intsum; /* sum of gauss quadrature integrals */
 	double sival; /* used to check cubic evaluated at end points */
@@ -195,7 +198,6 @@ double spline(int n, double x[], double fx[])
 
 	/* save x, fx, and calculated coeffs to file */
 	/* calculate L2-norm of error using gauss quadrature for integral */
-	snprintf(fname, sizeof(fname), "spline%d.txt",n);
 	fout = fopen(fname, "w+t");
 	intsum = 0;
 	for (i = 0; i < n; i++)
@@ -246,6 +248,7 @@ int main()
 	double *fx; /* f(x) known values for knots */
 	double l2norm[numopts]; /* L2 error norms */
 	double h[numopts]; /* interval spacing for each n */
+	char fname[50]; /* filename */
 	
 	/* num intervals(num data pts): 4(5), 8(9), 16(17), 32(33) */
 	double nvals[numopts] = {4,8,16,32}; /* num data pts = n + 1 */
@@ -255,14 +258,15 @@ int main()
 	double sq2 = sqrt(2)/2;
 	double xc[9] = {1, sq2, 0, -sq2, -1, -sq2, 0, sq2, 1};
 	double fxc[9] = {0, sq2, 1, sq2, 0, -sq2, -1, -sq2, 0};
+	double tc[9] = {0,1,2,3,4,5,6,7,8};
 	/*double xc[5] = {1, sq2, 0, -sq2, -1};*/
 	/*double fxc[5] = {0, sq2, 1, sq2, 0};*/
+	/*double tc[5] = {0,1,2,3,4};*/
 
-	if (0)
-	{
 	for (j = 0; j < numopts; j++)
 	{
 		n = nvals[j]; 
+		snprintf(fname, sizeof(fname), "spline%d.txt",n);
 
 		/* build x and fx for runge func on interval -1 to 1 */
 		/* could optimize this better for loop */
@@ -277,7 +281,7 @@ int main()
 
 		/* call cubic spline not-a-knot function */
 		/* it will write coeffs to data file for plotting */
-		l2norm[j] = spline(n, x, fx);
+		l2norm[j] = spline(n, x, fx, fname);
 		h[j] = x[1] - x[0]; /* assume equal spacing for runge */
 
 		free(x);
@@ -288,10 +292,16 @@ int main()
 	/* log10(error) vs log10(interval spacing) */
 	/* func will write data to file for plotting */
 	leastsq(l2norm,h);
-	}
+	
 	/* unit circle */
+	/* see dd_splines.pdf: 7. a nonparametri version */
 	n = 8;
-	l2normc = spline(n, xc, fxc);
+
+	snprintf(fname, sizeof(fname), "spline%ducx.txt",n);
+	l2normc = spline(n, tc, xc, fname);
+
+	snprintf(fname, sizeof(fname), "spline%ducy.txt",n);
+	l2normc = spline(n, tc, fxc, fname);
 
 	return 0;
 }
