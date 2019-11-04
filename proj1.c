@@ -39,8 +39,8 @@ void leastsq(double y[numopts], double x[numopts])
 
 		xi += lx; /* sum of x values */
 		yi += ly; /* sum of y values */
-		xyi = lx*ly; /* sum of x*y values */
-		xi2 = lx*lx; /* sum of x^2 values */
+		xyi += lx*ly; /* sum of x*y values */
+		xi2 += lx*lx; /* sum of x^2 values */
 
 		fprintf(fout,"%lf,%lf\n",ly,lx); 
 	}
@@ -49,7 +49,7 @@ void leastsq(double y[numopts], double x[numopts])
 	b = (numopts*xyi - xi*yi) / (numopts*xi2 - (xi*xi)); /* 1st order coeff */
 
 #ifdef DEBUG
-	printf("slope of log error = %lf\n",b);
+	printf("\nslope of log error = %lf\n",b);
 #endif
 
 	fprintf(fout,"%lf,%lf\n",b,a); 
@@ -65,12 +65,12 @@ double numintgauss(double xa, double xb, double d, double c, double b, double a)
 	int i;
 	
 	/* Gauss points and weights: 4 point quadrature */
-	double t[numopts] = {-0.86113631, -0.33998104, 0.33998104, 0.86113631};
-	double w[numopts] = {0.3478548, 0.6521452, 0.6521452, 0.3478548};
+	double t[4] = {-0.86113631, -0.33998104, 0.33998104, 0.86113631};
+	double w[4] = {0.3478548, 0.6521452, 0.6521452, 0.3478548};
 
 	intval = 0;
 
-	for (i = 0; i < numopts; i++)
+	for (i = 0; i < 4; i++)
 	{
 		x = 0.5*(t[i]*(xb-xa)+xa+xb); /* transform x using gauss pt */
 		v = 0.5*(xb-xa)*w[i]; /* transform dx and multiply by weight */
@@ -187,7 +187,7 @@ double spline(int n, double x[], double fx[], char fname[50])
 	}
 
 #ifdef DEBUG
-	printf("n = %d\n",n);
+	printf("\nfname = %s, n = %d\n",fname,n);
 	double bnext = b[0] + 2*h[0]*c[0] + 3*h[0]*h[0]*d[0];
 	printf("first derivative continuity: b1=%lf, bnext=%lf\n",b[1],bnext);
 	double cnext = c[0] + 3*h[0]*d[0];
@@ -210,14 +210,6 @@ double spline(int n, double x[], double fx[], char fname[50])
 
 		/* call guass quadrature to perform integral for error calc */
 		intsum += numintgauss(x[i],x[i+1],dval,cval,bval,aval);
-
-#ifdef DEBUG
-		printf("xi=%lf,fx(xi)=%lf,d=%lf,c=%lf,b=%lf,a=%lf\n",x[i],fx[i],dval,cval,bval,aval);
-		sival = dval*pow(x[i],3) + cval*pow(x[i],2) + bval*x[i] + aval;
-		printf("fx(xi)=%lf, si(xi)=%lf\n",fx[i],sival);
-		sival = dval*pow(x[i+1],3) + cval*pow(x[i+1],2) + bval*x[i+1] + aval;
-		printf("fx(xi+1)=%lf, si(xi+1)=%lf\n",fx[i+1],sival);
-#endif
 	}
 
 	/* save last pt x and fx, and l2 error norm in 3rd column */
@@ -259,9 +251,6 @@ int main()
 	double xc[9] = {1, sq2, 0, -sq2, -1, -sq2, 0, sq2, 1};
 	double fxc[9] = {0, sq2, 1, sq2, 0, -sq2, -1, -sq2, 0};
 	double tc[9] = {0,1,2,3,4,5,6,7,8};
-	/*double xc[5] = {1, sq2, 0, -sq2, -1};*/
-	/*double fxc[5] = {0, sq2, 1, sq2, 0};*/
-	/*double tc[5] = {0,1,2,3,4};*/
 
 	for (j = 0; j < numopts; j++)
 	{

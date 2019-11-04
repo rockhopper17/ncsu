@@ -1,139 +1,81 @@
 close all; clear all; clc;
 
-% test case: 1=sin, 2=runge
-tc=2;
+% runge function
+C = {'r','g','c','b'};
+nvals = [4 8 16 32];
 
-if tc==1
-	% test cubic spline in general
-	% see matlab doc for interp1 function
-	% https://www.mathworks.com/help/matlab/ref/interp1.html#btwp6lt-1-xq
-	x = 0:pi/4:2*pi; 
-	v = sin(x);
-	xq = 0:pi/16:2*pi;
+figure(2);
+x = -1:0.01:1;
+fr = 1./(1+25*x.^2);
+ph(5) = plot(x,fr,'k-','DisplayName','Runge');
+hold on;
 
-	figure;
-	vq2 = interp1(x,v,xq,'spline');
-	plot(x,v,'o',xq,vq2,':.');
-	xlim([0 2*pi]);
-	title('Spline Interpolation');
-	grid on;
+derr = load('err.txt');
 
-	% now plot from c code output
-	d=load('spline8.txt');
-	figure;
-	plot(x,v,'o',d(:,1),d(:,2),':.');
-	grid on;
-	xlim([0 2*pi]);
+for idx=1:4
+	n = nvals(idx);
 
-elseif tc==2
-	% test trimatvec for A*p and final Ax=b sln for solcg
-	%a=[3 0 0;.5 2 .5;0 0 3];
-	%b=[7.885941644562334;13.655172413793103;7.885941644562334];
-	%a*b % this is what A*p result from trimatvec should show
-	%a\b % this is what Ax=b result from solcg for ctmp should show
+	d=load(['spline' num2str(n) '.txt']);
 
-	% build coeff vectors
-	%a = [0.038461538461538464, 0.13793103448275862, 1,0.13793103448275862];
-	%b = [-0.15819678897280715, -0.070836073644406916,  -3.998391343601253,-1.0353541809455684];
-
-if false
-	n = 8;
-
-	x = -1:2/n:1;
-	v = 1./(1+25*x.^2);
-	xq = -1:2/(n*7):1;
-
-	% run spline with matlab
-	figure;
-	vq2 = interp1(x,v,xq,'spline');
-	plot(x,v,'o',xq,vq2,':.');
-	title('Spline Interpolation');
-	grid on;
-
-	% now plot from c code output
-	C = {'r','g','c','b'};
-	nvals = [4 8 16 32];
-
-	figure(2);
-	x = -1:0.01:1;
-	fr = 1./(1+25*x.^2);
-	ph(5) = plot(x,fr,'k-','DisplayName','Runge');
-	hold on;
-
-	derr = load('err.txt');
-
-	for idx=1:4
-		n = nvals(idx);
-
-		d=load(['spline' num2str(n) '.txt']);
-
-		for i=1:n
-			x = d(i,1):0.01:d(i+1,1);
-			p = d(i,3:6); % coeffs d,c,b,a
-			f = polyval(p,x);
-			figure(2);
-			plot(d(i,1),d(i,2),'o',x,f,'-','color',C{idx});
-			hold on;
-		end
-		ph(idx) = plot(d(n+1,1),d(n+1,2),'o',...
-			'color',C{idx},'DisplayName',['n=' num2str(n)]);
-		hold on;
-		
-		%h = d(2,1) - d(1,1); % equal spacing for runge
-		figure(3);
-		plot(derr(idx,2),derr(idx,1),'o',...
-			'color',C{idx},'LineWidth',2,'DisplayName',['n=' num2str(n)]);
-		hold on;
-	end
-
-	figure(2);
-	legend(ph,'location','northwest');
-
-	figure(3);
-	x = -1.5:0.01:0;
-	p = derr(5,1:2); % coeffs b,a
-	f = polyval(p,x);
-	plot(x,f,'k-','DisplayName','least sq');
-	grid on;
-	legend('location','northwest');
-end
-	% unit circle
-	n = 8;
-	dxc = load(['spline' num2str(n) 'ucx.txt']);
-	dyc = load(['spline' num2str(n) 'ucy.txt']);
-	figure(4);
 	for i=1:n
-		%x1 = dxc(i,2);
-		%x2 = dxc(i+1,2);
-		%t = linspace(x1,x2,100);
-		%t = dxc(i,2):-0.01:dxc(i+1,2);
-		p = dxc(i,3:6); % coeffs d,c,b,a
-		%x = polyval(p,t);
-		x = polyval(p,[i-1:.01:i]);
-
-		%y1 = dyc(i,2);
-		%y2 = dyc(i+1,2);
-		%if y1 > y2
-			%t = linspace(y1,y2,100);
-		%else
-			%t = y1:0.01:y2;
-		%end
-
-		p = dyc(i,3:6); % coeffs d,c,b,a
-		%y = polyval(p,t);
-		y = polyval(p,[i-1:.01:i]);
-
-		plot(dxc(i,2),dyc(i,2),'ob',x,y,'-b');
+		x = d(i,1):0.01:d(i+1,1);
+		p = d(i,3:6); % coeffs d,c,b,a
+		f = polyval(p,x);
+		figure(2);
+		plot(d(i,1),d(i,2),'o',x,f,'-','color',C{idx});
 		hold on;
 	end
-	plot(dxc(n+1,2),dyc(n+1,2),'ob');
-
-	% plot true circle
-	t = linspace(0,2*pi,100);
-	x = cos(t);
-	y = sin(t);
-	plot(x,y,'-k');
+	ph(idx) = plot(d(n+1,1),d(n+1,2),'o',...
+		'color',C{idx},'DisplayName',['n=' num2str(n)]);
 	hold on;
 	
+	figure(3);
+	plot(derr(idx,2),derr(idx,1),'o',...
+		'color',C{idx},'LineWidth',2,'DisplayName',['n=' num2str(n)]);
+	hold on;
 end
+
+figure(2);
+ylabel('f(x)');
+xlabel('x');
+legend(ph,'location','northwest');
+set(gca,'FontSize',14);
+
+figure(3);
+x = -1.5:0.01:0;
+p = derr(5,1:2); % coeffs b,a
+f = polyval(p,x);
+plot(x,f,'k-','DisplayName','least sq');
+grid on;
+legend('location','northwest');
+ylabel('log(||e||_{2})');
+xlabel('log(h_{n})');
+set(gca,'FontSize',14);
+
+% unit circle
+n = 8;
+dxc = load(['spline' num2str(n) 'ucx.txt']);
+dyc = load(['spline' num2str(n) 'ucy.txt']);
+figure(4);
+for i=1:n
+	p = dxc(i,3:6); % coeffs d,c,b,a for x
+	x = polyval(p,[i-1:.01:i]);
+
+	p = dyc(i,3:6); % coeffs d,c,b,a for y
+	y = polyval(p,[i-1:.01:i]);
+
+	plot(dxc(i,2),dyc(i,2),'ob',x,y,'-b');
+	hold on;
+end
+ph2(1) = plot(dxc(n+1,2),dyc(n+1,2),'ob','DisplayName','Numerical cubic spline circle');
+
+% plot true circle
+t = linspace(0,2*pi,100);
+x = cos(t);
+y = sin(t);
+ph2(2) = plot(x,y,'-k','DisplayName','True circle using cos and sin');
+ylabel('f(x)');
+xlabel('x');
+set(gca,'FontSize',14);
+legend(ph2,'location','northwest');
 
