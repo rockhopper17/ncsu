@@ -9,9 +9,9 @@ implicit none
 
 	real(8), parameter :: PI = 4.D0*DATAN(1.D0)
 
-	integer, parameter :: n = 100				! n cells => n+1 nodes/faces (nx=ny=n)
+	integer, parameter :: n = 101				! n nodes => n-1 cells (nx=ny=n)
 	real(8), parameter :: gridlen = 1.0			! Lx=Ly=1
-	real(8), parameter :: h = gridlen/n			! delta x and delta y
+	real(8), parameter :: h = gridlen/(n-1)		! delta x and delta y
 	real(8), parameter :: tstart = 0.0			! starting time
 	!real(8), parameter :: tstop = 0.5			! stopping time
 	real(8), parameter :: tstop = 5.0			! stopping time
@@ -36,14 +36,14 @@ subroutine grid_setup(grid)
 use inputs
 implicit none
 
-	real(8), dimension(n+1,n+1,2), intent(out) :: grid
+	real(8), dimension(n,n,2), intent(out) :: grid
 
 	integer :: i,j
 
 	! fill grid where data values will be at nodes
 	! for FV, cell centers are at 1/2 indices (cell faces are at nodes)
-	do j = 1,n+1
-	do i = 1,n+1
+	do j = 1,n
+	do i = 1,n
 		grid(i,j,1) = (i-1)*h
 		grid(i,j,2) = (j-1)*h
 	end do
@@ -59,13 +59,13 @@ use inputs
 implicit none
 
 	real(8), dimension(0:n+1,0:n+1), intent(out) :: u
-	real(8), dimension(n+1,n+1,2), intent(in) :: grid
+	real(8), dimension(n,n,2), intent(in) :: grid
 
 	integer :: i,j
 	real(8) :: xval, yval, r2
 
-	do j = 1,n+1
-	do i = 1,n+1
+	do j = 1,n
+	do i = 1,n
 		xval = grid(i,j,1)
 		yval = grid(i,j,2)
 		
@@ -75,7 +75,7 @@ implicit none
 	end do
 	end do
 
-	call apply_boundary(u)
+	!call apply_boundary(u)
 
 end subroutine sln_setup
 
@@ -89,17 +89,13 @@ implicit none
 	
 	integer :: i,j
 
-	! periodic boundary condition and fill ghost cells
-	! look into this more soon - we don't calculate T(Lx,y)
-	!    but we do calculate T(0,y) corresponds to u(1,j)
-	! corners don't matter, never used
 	do i = 0,n+1
-		u(i,n) = u(i,1)    ! this is the BC given in HW (possibly?)
+		u(i,1) = u(i,n)    ! periodic BC (positive wavespeed)
 		u(i,0) = u(i,n-1)  ! ghost cell
 		u(i,n+1) = u(i,2)  ! ghost cell
 	end do
 	do j = 0,n+1
-		u(n,j) = u(1,j)    ! this is the BC given in HW (possibly?)
+		u(1,j) = u(n,j)    ! periodic BC (positive wavespeed)
 		u(0,j) = u(n-1,j)  ! ghost cell
 		u(n+1,j) = u(2,j)  ! ghost cell
 	end do	   
@@ -117,64 +113,12 @@ implicit none
 	
 	real(8) :: dt1, dt2
 
-	dt1 = cfl*h/abs(c)			! advection restriction
-	dt2 = cfl * (h**2/(2*d))	! diffusion restriction
-	!dt = min(dt1,dt2)
-	dt = 0.001
+	dt1 = cfl*h/c				! advection restriction
+	dt2 = cfl*(h**2/d)			! diffusion restriction
+	dt = min(dt1,dt2)
+	!dt = 0.001
 
 end subroutine calc_dt
-
-!==============================================================================
-! Adams-Bashforth 2nd order for 2D
-! 2D advection-diffusion
-!	compact formula for normal derivative (diffusion 2nd deriv term in FV)
-!	central differencing scheme (convection 1st deriv term FV/FD)
-!==============================================================================
-subroutine ode_ab2(dt,u)
-use inputs
-implicit none
-
-	real(8), intent(in) :: dt
-	real(8), dimension(0:n+1,0:n+1), intent(in out) :: u
-
-	! store previous time step and current time step dudt
-	real(8), dimension(n,n,2) :: dudt
-	
-	real(8) :: t
-	integer :: i,j
-
-	! initialize dudt for first time step
-	! let's see if passing dudt can work like this for 2d array portion of 3d
-	!    looks good so far from debugging..
-	call ode_dudt(tstart,dt,u,dudt(:,:,1))
-
-	! time stepping in here so we can save data from any step
-	t = tstart + dt
-	do while (t.le.tstop)
-		! move current dudt (1) to previous dudt (2)
-		do j = 1,n
-		do i = 1,n
-			dudt(i,j,2) = dudt(i,j,1)
-		end do
-		end do
-
-		! calculate current dudt (1)
-		call ode_dudt(t,dt,u,dudt(:,:,1))
-
-		! calculate solution at time step t+dt using AB2 algorithm
-		! and backfill into solution / update solution
-		do j = 1,n
-		do i = 1,n
-			u(i,j) = u(i,j) + 0.5*h*dt*(3*dudt(i,j,1) - dudt(i,j,2))
-		end do
-		end do
-
-		call apply_boundary(u)
-
-		t = t + dt
-	end do
-
-end subroutine ode_ab2
 
 !==============================================================================
 ! dudt = RHS derivative calculation (spatial discretization)
@@ -218,13 +162,71 @@ implicit none
 end subroutine ode_dudt
 
 !==============================================================================
+! Adams-Bashforth 2nd order for 2D
+! 2D advection-diffusion
+!	compact formula for normal derivative (diffusion 2nd deriv term in FV)
+!	central differencing scheme (convection 1st deriv term FV/FD)
+!==============================================================================
+subroutine ode_ab2(dt,u)
+use inputs
+implicit none
+
+	real(8), intent(in) :: dt
+	real(8), dimension(0:n+1,0:n+1), intent(in out) :: u
+
+	! store previous time step and current time step dudt
+	real(8), dimension(n,n,2) :: dudt
+	
+	real(8) :: t
+	integer :: i,j,tidx
+
+	! initialize dudt for first time step
+	! let's see if passing dudt can work like this for 2d array portion of 3d
+	!    looks good so far from debugging..
+	call ode_dudt(tstart,dt,u,dudt(:,:,1))
+
+	! time stepping in here so we can save data from any step
+	! note: we already initialized at time tstart
+	t = tstart + dt
+	tidx = 2
+	do while (t.le.tstop)
+		! move current dudt (1) to previous dudt (2)
+		do j = 1,n
+		do i = 1,n
+			dudt(i,j,2) = dudt(i,j,1)
+		end do
+		end do
+
+		! calculate current dudt (1)
+		call ode_dudt(t,dt,u,dudt(:,:,1))
+
+		! calculate solution at time step t+dt using AB2 algorithm
+		! and backfill into solution / update solution
+		do j = 1,n
+		do i = 1,n
+			u(i,j) = u(i,j) + 0.5*h*dt*(3*dudt(i,j,1) - dudt(i,j,2))
+		end do
+		end do
+
+		call apply_boundary(u)
+
+		! increment time - use a time index so we get to tstop
+		! otherwise computer roundoff error causes us to quit early
+		!t = t + dt
+		t = tstart + (tidx*dt)
+		tidx = tidx+1
+	end do
+
+end subroutine ode_ab2
+
+!==============================================================================
 ! subroutine to print out the solution with corresponding 1/2 grid pt values to file
 !==============================================================================
 subroutine print_sln_to_file(grid,u)
 use inputs
 implicit none
 
-	real(8), dimension(n+1,n+1,2), intent(in) :: grid
+	real(8), dimension(n,n,2), intent(in) :: grid
 	real(8), dimension(0:n+1,0:n+1), intent(in) :: u
 	character(len=50) :: filename
 	integer :: i,j
@@ -234,10 +236,10 @@ implicit none
 	!write(1,*) 'i,x,u'
 	do j = 1,n
 	do i = 1,n
-		xval = grid(i,j,1)+0.5*h
-		yval = grid(i,j,2)+0.5*h
+		xval = grid(i,j,1)
+		yval = grid(i,j,2)
 		!write(1,"(2I3,3F32.16)") i,j,xval,yval,u(i,j)
-		write(1,"(2I3,3E20.8)") i,j,xval,yval,u(i,j)
+		write(1,"(2I5,3E20.8)") i,j,xval,yval,u(i,j)
 	end do
 	end do
 	close(1)
@@ -255,7 +257,7 @@ implicit none
 	integer :: i,j
 
 	do i = 0,n+1
-		write(*,"(I3,A1)",advance="no") i,' '  ! advacne=no will not write newline
+		write(*,"(I5,A1)",advance="no") i,' '  ! advacne=no will not write newline
 
 		do j = 0,n+1
 			!write(*,"(F8.4,A1)",advance="no") u(i,j),' '
@@ -279,7 +281,7 @@ use inputs
 use procedures
 implicit none
 
-	real(8), dimension(n+1,n+1,2) :: grid	! grid 2D: (1) is i/x, (2) is j/y
+	real(8), dimension(n,n,2) :: grid		! grid 2D: (1) is i/x, (2) is j/y
 	real(8), dimension(0:n+1,0:n+1) :: u	! sln 2D
 	real(8) :: dt							! time step (delta t)
 
@@ -289,14 +291,14 @@ implicit none
 
 	write(*,"(A4,F10.5)") 'h = ',h
 	write(*,"(A5,F10.5)") 'dt = ',dt
-	call print_sln(u)
+	!call print_sln(u)
 	!call print_sln_to_file(grid,u)  ! write out init cond
 	
 	! adams-bashforth method handles the time stepping as well
 	!   since it needs data from previous time steps
 	call ode_ab2(dt,u)
 
-	call print_sln(u)
+	!call print_sln(u)
 
 	call print_sln_to_file(grid,u)
 
