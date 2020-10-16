@@ -272,11 +272,15 @@ REACTIONS = CONTENTS[IND[0]:IND[1]]
 global_number = 1
 
 for (x,y) in enumerate(REACTIONS):
+   # added flag for reaction type: 0 for = or <=>, 1 for =>
    y = y.strip().upper()
-   if ('<=>' in y):
+   react_tag = 0
+   if ('<=>' in y or '=' in y):
       y = y.replace('<=>', '=')
+      react_tag = 0
    if ('=>' in y):
       y = y.replace('=>', '=')
+      react_tag = 1
 
    if (y.strip() != '' and (y.strip() != 'DUPLICATE' or y.strip() != 'duplicate') and y[0] != '!' and '=' in y):
       R = {}
@@ -290,9 +294,13 @@ for (x,y) in enumerate(REACTIONS):
       SRI = []
       POS = splitReactionLineIndex(y)
 
+      # added global number (drew 10/15/2020) and reaction tag (drew 10/16/2020)
+      STR = str(global_number) + ',' + str(react_tag) + ','
+      global_number += 1
+
       REACTION = removeWhiteSpace(y[:POS])
       if ('+M' in REACTION and '(+M)' not in REACTION): # Three Body Reactions
-         STR = REACTION
+         STRTMP = STR + ' ' + REACTION # STR is now reserved for output to file
          H_BLOCK = genBlock(REACTIONS,x)
          COUNT = 0
          TROE = findPropertyBlock(vTROE,H_BLOCK)
@@ -335,7 +343,7 @@ for (x,y) in enumerate(REACTIONS):
                  FLAG += 1
          if FLAG != 0:
              continue
-         print ('  ' + STR)
+         print ('  ' + STRTMP)
 
          if ('!'  in y):
             CONSTANTS = depthReplace(y[POS:y.find('!')].strip(),15,WS,'~').split('~')
@@ -361,10 +369,6 @@ for (x,y) in enumerate(REACTIONS):
          RXN_ORD = REACTION[0]
          STO_ORD = REACTION[1]
          
-         # added global number (drew 10/15/2020)
-         STR = str(global_number) + ','
-         global_number += 1
-         #STR = ''
          for n in RXN_ORD:
             STR += str(float(n)) + ','
          for n in STO_ORD:
@@ -376,7 +380,7 @@ for (x,y) in enumerate(REACTIONS):
 
       REACTION = removeWhiteSpace(y[:POS])
       if ('(+M)' in REACTION or '(+N2)' in REACTION or '(+H2)' in REACTION or '(+AR)' in REACTION or '(+HE)' in REACTION or '(+H2O)' in REACTION): # Hybrid Reactions
-         STR = REACTION
+         STRTMP = STR + ' ' + REACTION
          H_BLOCK = genBlock(REACTIONS,x)
          COUNT = 0
          LOW = findPropertyBlock(vLOW,H_BLOCK)
@@ -440,7 +444,7 @@ for (x,y) in enumerate(REACTIONS):
                  FLAG += 1
          if FLAG != 0:
              continue
-         print ('  ' + STR)
+         print ('  ' + STRTMP)
  
          if ('!'  in y):
             CONSTANTS = depthReplace(y[POS:y.find('!')].strip(),15,WS,'~').split('~')
@@ -467,10 +471,6 @@ for (x,y) in enumerate(REACTIONS):
          RXN_ORD = REACTION[0]
          STO_ORD = REACTION[1]
 
-         # added global number (drew 10/15/2020)
-         STR = str(global_number) + ','
-         global_number += 1
-         #STR = ''
          RATE = ''
          for n in RXN_ORD:
             STR += str(float(n)) + ','
@@ -482,7 +482,7 @@ for (x,y) in enumerate(REACTIONS):
 
       REACTION = removeWhiteSpace(y[:POS])
       if ('+M' not in REACTION and '(+N2)' not in REACTION and '(+H2)' not in REACTION and '(+AR)' not in REACTION and '(+HE)' not in REACTION and '(+H2O)' not in REACTION): # Exchange Reactions
-         STR = REACTION
+         STRTMP = STR + ' ' + REACTION
          REACTION = REACTION.replace('+','.').split('=')
          if (REACTION[0].find('.')):
             REAC = REACTION[0].split('.')
@@ -512,7 +512,7 @@ for (x,y) in enumerate(REACTIONS):
                  FLAG += 1
          if FLAG != 0:
              continue
-         print ('  ' + STR)
+         print ('  ' + STRTMP)
          
          if ('!'  in y):
             CONSTANTS = depthReplace(y[POS:y.find('!')].strip(),15,WS,'~').split('~')
@@ -539,10 +539,6 @@ for (x,y) in enumerate(REACTIONS):
          RXN_ORD = REACTION[0]
          STO_ORD = REACTION[1]
 
-         # added global number (drew 10/15/2020)
-         STR = str(global_number) + ','
-         global_number += 1
-         #STR = ''
          for n in RXN_ORD:
             STR += str(float(n)) + ','
          for n in STO_ORD:
