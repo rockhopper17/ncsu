@@ -1,4 +1,11 @@
-
+# modification history
+# (02/06/2017 Tanner) handle blank entry in constants list
+# (10/15/2020 Andrew Navratil) global numbering 
+# (10/16/2020 Andrew Navratil) reaction tags
+# (10/30/2020 Andrew Navratil) handle comments on non-reaction lines (!F=2 in LOW)
+#                              assumes reaction lines have '=' in first 32 chars
+# (10/30/2020 Andrew Navratil) created file1a (exchange_plog.csv) for exchange reacs w PLOG
+#-----------------------------------------------
 import sys, os, getopt, pTable
 
 FILENAME = ''
@@ -21,6 +28,13 @@ def isnumeric(VAL):
        return True
    else:
        return False
+
+def is_number(n):
+    try:
+        float(n)
+    except ValueError:
+        return False
+    return True
 
 def main(argv):
    FILENAME = ''
@@ -166,7 +180,9 @@ def genBlock(RXNS,X):
       if ('!' in y and '=' not in y and y[0] == '!'):
          del LIST[x]
    for (n,m) in enumerate(LIST):
-      if ('=' in m):
+      #if ('=' in m):
+      # fix to handle !F=xx on LOW lines
+      if ('=' in m[0:31]):
          BLOCK = LIST[:n]
          break
    return BLOCK
@@ -209,18 +225,22 @@ vTROE = ['troe','troE','trOe','trOE','tRoe','tRoE','tROe','tROE','Troe','TroE','
 vLOW = ['low','Low','LoW','LOw','LOW','loW','lOw','lOW']
 vSRI = ['sri','Sri','SrI','SRi','SRI','srI','sRi','sRI']
 vREV = ['rev','Rev','ReV','REv','REV','reV','rEv','rEV']
-EXC = set(vTROE + vLOW + vSRI + vREV)
+vPLOG = ['PLOG']
+EXC = set(vTROE + vLOW + vSRI + vREV + vPLOG)
 WEIGHTS_FILE = DIR + '/weights.csv'
 CONFIG_FILE = DIR + '/config.csv'
 REACTION_FILE_1 = DIR + '/exchange.csv'
+REACTION_FILE_1a = DIR + '/exchange_plog.csv'
 REACTION_FILE_2 = DIR + '/three_body.csv'
 REACTION_FILE_3 = DIR + '/hybrid.csv'
 FILE_1 = open(REACTION_FILE_1,'a')
+FILE_1a = open(REACTION_FILE_1a,'a')
 FILE_2 = open(REACTION_FILE_2,'a')
 FILE_3 = open(REACTION_FILE_3,'a')
 FILE_4 = open(CONFIG_FILE,'a')
 FILE_5 = open(WEIGHTS_FILE,'a')
 REACTION_LIST_TYPE1 = []
+REACTION_LIST_TYPE1a = []
 REACTION_LIST_TYPE2 = []
 REACTION_LIST_TYPE3 = []
 STOICH_LIST = []
@@ -268,10 +288,14 @@ IND = indexLine(CONTENTS, 'REACTIONS', 'END')
 REACTIONS = CONTENTS[IND[0]:IND[1]]
 
 # track the order of all reactions in the initial input file
-# global numbering (drew 10/15/2020)
 global_number = 1
 
 for (x,y) in enumerate(REACTIONS):
+   # fix to handle !F=xx on LOW lines
+   # if not a reaction line (= in first 31 chars), just skip ahead to next reaction line
+   if ('=' not in y[0:31]):
+      continue
+
    # added flag for reaction type: 0 for = or <=>, 1 for =>
    y = y.strip().upper()
    react_tag = 0
@@ -294,7 +318,7 @@ for (x,y) in enumerate(REACTIONS):
       SRI = []
       POS = splitReactionLineIndex(y)
 
-      # added global number (drew 10/15/2020) and reaction tag (drew 10/16/2020)
+      # global number and reaction tag appended to beginning of line in output files
       STR = str(global_number) + ',' + str(react_tag) + ','
       global_number += 1
 
@@ -483,6 +507,8 @@ for (x,y) in enumerate(REACTIONS):
       REACTION = removeWhiteSpace(y[:POS])
       if ('+M' not in REACTION and '(+N2)' not in REACTION and '(+H2)' not in REACTION and '(+AR)' not in REACTION and '(+HE)' not in REACTION and '(+H2O)' not in REACTION): # Exchange Reactions
          STRTMP = STR + ' ' + REACTION
+         reacidx = x # save current input file line index for use in PLOG
+         
          REACTION = REACTION.replace('+','.').split('=')
          if (REACTION[0].find('.')):
             REAC = REACTION[0].split('.')
@@ -546,10 +572,30 @@ for (x,y) in enumerate(REACTIONS):
          for n in CONSTANTS:
             STR += n + ','
 
-         REACTION_LIST_TYPE1.append([STR[:-1]])
+         # process reactions with PLOG entries
+         PLOGALL = ''
+         while (True):
+            H_BLOCK = genBlock(REACTIONS,reacidx)
+            PLOG = findPropertyBlock(vPLOG,H_BLOCK)
+            if (PLOG):
+               for (x,y) in enumerate(PLOG):
+                  if (is_number(y)):
+                     PLOGALL += str(y) + ','
+            else:
+               break
+            
+            reacidx += 1 # increment the global reaction list idx to get next PLOG entry
+
+         if (PLOGALL):
+            REACTION_LIST_TYPE1a.append([STR,PLOGALL[:-1]]) # [:-1] is to remove trailing ,
+         else:
+            REACTION_LIST_TYPE1.append([STR[:-1]])
 
 for x in REACTION_LIST_TYPE1:
    FILE_1.write(x[0]+'\n')
+    
+for x in REACTION_LIST_TYPE1a:
+   FILE_1a.write(x[0]+x[1]+'\n')
     
 for x in REACTION_LIST_TYPE2:
    SCALE = []
@@ -581,6 +627,7 @@ for x in REACTION_LIST_TYPE3:
    FILE_3.write(x[0] + LOW + RATE + TROE + SCALES[:-1] + '\n')
 
 NUM_RXNS = len(REACTION_LIST_TYPE2)+len(REACTION_LIST_TYPE3)+len(REACTION_LIST_TYPE1)
+NUM_RXNS += len(REACTION_LIST_TYPE1a)
 NUM_SPECIES = len(S_BLOCK[1:])
 FILE_4.write(str(NUM_RXNS) + ',' + str(NUM_SPECIES))
 
@@ -588,6 +635,7 @@ FILE_4.write(str(NUM_RXNS) + ',' + str(NUM_SPECIES))
 print ('Done processing %d reaction mechanisms from file <%s>.' % (NUM_RXNS,FILENAME) )
 
 FILE_1.close()
+FILE_1a.close()
 FILE_2.close()
 FILE_3.close()
 FILE_4.close()
