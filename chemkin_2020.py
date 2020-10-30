@@ -10,6 +10,7 @@ import sys, os, getopt, pTable
 
 FILENAME = ''
 REACTION_LIST_TYPE1 = []
+REACTION_LIST_TYPE1a = []
 REACTION_LIST_TYPE2 = []
 REACTION_LIST_TYPE3 = []
 STOICH_LIST = []
