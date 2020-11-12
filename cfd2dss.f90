@@ -1,5 +1,5 @@
 ! Andrew Navratil
-! MAE 560 HW4 - 2D Laplace and Poisson
+! MAE 560 HW4 - 2D Steady State Laplace and Poisson
 
 !==============================================================================
 ! module for reading/setting constants, inputs, grid data and metrics
@@ -10,26 +10,97 @@ implicit none
 	real(8), parameter :: PI = 4.D0*DATAN(1.D0)
 
 	! constants	===============================
-	! hard code number of cells for performance
+	integer, parameter :: niter = 1E6			! max num of iterations
+	
+	! testing *** hard code number of cells for performance
 	! look in dat file for numbers (will be nx+1,ny+1 values)
-	!integer, parameter :: pblm = 1				! 1=uniform
+	!integer, parameter :: pblm = 1				! uniform test
 	!integer, parameter :: nx = 10				! nx cells => nx+1 nodes
 	!integer, parameter :: ny = 10				! ny cells => ny+1 nodes
-	integer, parameter :: pblm = 2				! 2=grids/g.dat
+	!integer, parameter :: pblm = 17			! grids/g.dat test
+	!integer, parameter :: nx = 96				! nx cells => nx+1 nodes
+	!integer, parameter :: ny = 56				! ny cells => ny+1 nodes
+
+	! Laplace **********************	
+	!integer, parameter :: pblm = 2				! uniform grid 11x11
+	!integer, parameter :: nx = 11				! nx cells => nx+1 nodes
+	!integer, parameter :: ny = 11				! ny cells => ny+1 nodes
+	!character(len=50) :: filename = 'hw4data/ss_laplace_11.txt'
+	!integer, parameter :: nx = 21				! nx cells => nx+1 nodes
+	!integer, parameter :: ny = 21				! ny cells => ny+1 nodes
+	!character(len=50) :: filename = 'hw4data/ss_laplace_21.txt'
+
+	!integer, parameter :: iteropt = 1			! Jacobi = 1
+	!real(8), parameter :: omega = 1.0			! default relaxation parameter
+	!character(len=50) :: filename2 = 'hw4data/jacobi_11_res.txt'
+	!character(len=50) :: filename2 = 'hw4data/jacobi_21_res.txt'
+	!integer, parameter :: iteropt = 2			! GS/SOR = 2
+	!real(8), parameter :: omega = 1.0			! relaxation parameter for GS
+	!character(len=50) :: filename2 = 'hw4data/gs_11_res.txt'
+	!character(len=50) :: filename2 = 'hw4data/gs_21_res.txt'
+	!integer, parameter :: iteropt = 2			! GS/SOR = 2
+	!real(8), parameter :: omega = 1.8			! relaxation parameter for SOR
+	!character(len=50) :: filename2 = 'hw4data/sor_11_res.txt'
+	!character(len=50) :: filename2 = 'hw4data/sor_21_res.txt'
+
+	!real(8), parameter :: Lx = 2.0				! 0 < x < Lx
+	!real(8), parameter :: Ly = 1.0				! 0 < y < Ly
+	!real(8), parameter :: tol = 1E-6			! absolute residual tolerance
+
+	! Poisson **********************	
+	!integer, parameter :: pblm = 3				! uniform grid 50x50
+	!integer, parameter :: nx = 50				! nx cells => nx+1 nodes
+	!integer, parameter :: ny = 50				! ny cells => ny+1 nodes
+	!character(len=50) :: filename = 'hw4data/ss_poisson_50.txt'
+	integer, parameter :: pblm = 17			! g.dat curvilinear grid
 	integer, parameter :: nx = 96				! nx cells => nx+1 nodes
 	integer, parameter :: ny = 56				! ny cells => ny+1 nodes
+	character(len=50) :: filename = 'hw4data/ss_poisson_g.txt'
 	
-	real(8), parameter :: gridlen = 1.0			! Lx=Ly=1
-	real(8), parameter :: h = gridlen/nx		! delta x and delta y
-	real(8), parameter :: tstart = 0.0			! starting time
-	!real(8), parameter :: tstop = 0.5			! stopping time
-	real(8), parameter :: tstop = 5.0			! stopping time
-	real(8), parameter :: cfl = 1.0				! CFL number
-
-	real(8), parameter :: c = 1.0				! wave speed (c1=u=c2=v=c=1)
-	real(8), parameter :: d = 0.005				! diffusion coefficient (kappa in hw)
+	!integer, parameter :: iteropt = 1			! Jacobi = 1
+	!real(8), parameter :: omega = 1.0			! default relaxation parameter
+	!character(len=50) :: filename2 = 'hw4data/jacobi_50_res.txt'
+	!character(len=50) :: filename2 = 'hw4data/jacobi_g_res.txt'
+	!integer, parameter :: iteropt = 2			! GS/SOR = 2
+	!real(8), parameter :: omega = 1.0			! relaxation parameter for GS
+	!character(len=50) :: filename2 = 'hw4data/gs_50_res.txt'
+	!character(len=50) :: filename2 = 'hw4data/gs_g_res.txt'
+	integer, parameter :: iteropt = 2			! GS/SOR = 2
+	!real(8), parameter :: omega = 0.25			! relaxation parameter for SOR
+	!character(len=50) :: filename2 = 'hw4data/sor_50_025_res.txt'
+	!character(len=50) :: filename2 = 'hw4data/sor_g_025_res.txt'
+	!real(8), parameter :: omega = 0.5			! relaxation parameter for SOR
+	!character(len=50) :: filename2 = 'hw4data/sor_50_050_res.txt'
+	!character(len=50) :: filename2 = 'hw4data/sor_g_050_res.txt'
+	!real(8), parameter :: omega = 0.75			! relaxation parameter for SOR
+	!character(len=50) :: filename2 = 'hw4data/sor_50_075_res.txt'
+	!character(len=50) :: filename2 = 'hw4data/sor_g_075_res.txt'
+	!real(8), parameter :: omega = 1.25			! relaxation parameter for SOR
+	!character(len=50) :: filename2 = 'hw4data/sor_50_125_res.txt'
+	!character(len=50) :: filename2 = 'hw4data/sor_g_125_res.txt'
+	!real(8), parameter :: omega = 1.5			! relaxation parameter for SOR
+	!character(len=50) :: filename2 = 'hw4data/sor_50_150_res.txt'
+	!character(len=50) :: filename2 = 'hw4data/sor_g_150_res.txt'
+	!real(8), parameter :: omega = 1.75			! relaxation parameter for SOR
+	!character(len=50) :: filename2 = 'hw4data/sor_50_175_res.txt'
+	!character(len=50) :: filename2 = 'hw4data/sor_g_175_res.txt'
+	!real(8), parameter :: omega = 2			! relaxation parameter for SOR
+	!character(len=50) :: filename2 = 'hw4data/sor_50_200_res.txt'
+	!character(len=50) :: filename2 = 'hw4data/sor_g_200_res.txt'
+	!real(8), parameter :: omega = 2.25			! relaxation parameter for SOR (NA)
+	!real(8), parameter :: omega = 1.9			! relaxation parameter for SOR (optimal)
+	!character(len=50) :: filename2 = 'hw4data/sor_50_190_res.txt'
+	!character(len=50) :: filename2 = 'hw4data/sor_g_190_res.txt'
+	real(8), parameter :: omega = 1.8			! relaxation parameter for SOR
+	!character(len=50) :: filename2 = 'hw4data/sor_50_180_res.txt'
+	character(len=50) :: filename2 = 'hw4data/sor_g_180_res.txt'
+	
+	real(8), parameter :: Lx = 1.0				! 0 < x < Lx
+	real(8), parameter :: Ly = 1.0				! 0 < y < Ly
+	real(8), parameter :: tol = 1E-4			! relative residual tolerance
 
 	! global variables ========================
+
 	! using 1 pair of ghost cells
 	real(8), dimension(1:nx+1,1:ny+1) :: xn		! grid node x-coordinates
 	real(8), dimension(1:nx+1,1:ny+1) :: yn		! grid node y-coordinates
@@ -55,46 +126,40 @@ implicit none
 
 	real(8), dimension(2,2,1:nx,1:ny) :: Linv	! gradient least sq inverse matrix
 
-	real(8), dimension(0:nx+2,0:ny+2) :: u		! sln
-	real(8), dimension(nx+1,ny+1) :: dudt		! sln 1st derivative du/dt
+	real(8), dimension(0:nx+1,0:ny+1) :: u		! sln(k) (current) cell centered
+	real(8), dimension(0:nx+1,0:ny+1) :: un		! sln(k+1) (next) cell centered
 
-	real(8) :: dt								! time step (delta t)
-	
 	integer :: i,j,k							! reserve i,j,k for indexing
+	real(8) :: res = 0.0						! residual for convergence
+	real(8) :: x0 = 0.0							! centroid of entire grid x coord
+	real(8) :: y0 = 0.0							! centroid of entire grid y coord
 
 contains
-
-!==============================================================================
-! calculate time step based on stability restriction and CFL number
-!==============================================================================
-subroutine calc_dt
-	
-	real(8) :: dt1, dt2
-
-	dt1 = cfl*h/c				! advection restriction
-	dt2 = cfl*(h**2/(2*d))			! diffusion restriction
-	dt = min(dt1,dt2)
-	!dt = 0.001
-
-end subroutine calc_dt
 
 !==============================================================================
 ! generate or read in the grid/mesh
 !==============================================================================
 subroutine grid_setup
 
+	real(8) :: dx,dy			! delta x,y for uniform grids
+	
 	! uniform grid
-	if (pblm.eq.1) then
-		! fill grid where data values will be at nodes
+	if (pblm.eq.1.or.pblm.eq.2.or.pblm.eq.3) then
+		dx = Lx/nx
+		dy = Ly/ny
+		write(*,*) dx,dy
+
+		! fill grid values at nodes
 		! for FV, cell centers are at 1/2 indices (cell faces are at nodes)
 		do j = 1,ny+1
 		do i = 1,nx+1
-			xn(i,j) = (i-1)*h
-			yn(i,j) = (j-1)*h
+			xn(i,j) = (i-1)*dx
+			yn(i,j) = (j-1)*dy
 		end do
 		end do
 	! g.dat
-	else if (pblm.eq.2) then
+	else if (pblm.eq.17) then
+		! nx,ny,Lx,Ly still hard coded by manually checking file
 		open(11,file='grids/g.dat',status='old')
 		read(11,*)
 		do j=1,ny+1
@@ -116,6 +181,12 @@ subroutine grid_metrics
 	! ======================================	
 	! cell based metrics
 	! ======================================	
+	
+	! calculate centroid of mesh for Poisson problem
+	x0 = 0.0
+	y0 = 0.0
+
+	! cell center, volume
 	do j = 1,ny
 	do i = 1,nx
 		xc(i,j) = 0.25*(xn(i,j)+xn(i+1,j)+xn(i+1,j+1)+xn(i,j+1))
@@ -123,8 +194,17 @@ subroutine grid_metrics
 
 		vol(i,j) = 0.5*abs((xn(i+1,j+1)-xn(i,j))*(yn(i,j+1)-yn(i+1,j)) &
 			-(xn(i,j+1)-xn(i+1,j))*(yn(i+1,j+1)-yn(i,j)))
+		!write(*,*) i,j,vol(i,j)
+
+		x0 = x0 + xc(i,j)
+		y0 = y0 + yc(i,j)
 	end do
 	end do
+
+	! finish centroid calculation
+	x0 = x0/(nx*ny)
+	y0 = y0/(nx*ny)
+	write(*,*) x0, y0
 
 	! linear extrapolation calculation for ghost cells
 	do i = 1,nx
@@ -144,7 +224,12 @@ subroutine grid_metrics
 	end do
 
 	! ======================================	
-	! face based metrics
+	! face based metrics (see quadrilateral cell map in FV2D-geometry-exsercise.pdf)
+	! values are computed for 2 faces extending from (i,j) node (bottom left corner)
+	! area_i(i,j) = S(i-1/2,j); area_j(i,j) = S(i,j-1/2)
+	! nhat ...
+	! dinv_i(i,j) = inv dist xc(i-1,j) to xc(i,j)
+	! dinv_j(i,j) = inv dist xc(i,j-1) to xc(i,j)
 	! ======================================	
 	! i faces
 	do j = 1,ny
@@ -167,7 +252,7 @@ subroutine grid_metrics
 		xf_j(i,j) = 0.5*(xn(i,j)+xn(i+1,j))
 		yf_j(i,j) = 0.5*(yn(i,j)+yn(i+1,j))
 
-		area_j(i,j) = sqrt((yn(i,j)-yn(i+1,j))**2 + (xn(i,j)-xn(i+1,j))**2)
+		area_j(i,j) = sqrt((yn(i+1,j)-yn(i,j))**2 + (xn(i+1,j)-xn(i,j))**2)
 
 		nhat_j(1,i,j) = (yn(i,j)-yn(i+1,j)) / area_j(i,j)
 		nhat_j(2,i,j) = -(xn(i,j)-xn(i+1,j)) / area_j(i,j)
@@ -190,137 +275,168 @@ implicit none
 contains
 
 !==============================================================================
-! subroutine for initializing solution (node centered)
+! subroutine for initializing solution (cell centered)
 !==============================================================================
 subroutine sln_setup
 use grid_data
 
-	do j = 1,ny+1
-	do i = 1,nx+1
-		u(i,j) = exp(-300*((xn(i,j)-0.5)**2 + (yn(i,j)-0.5)**2))
+	do j=1,ny
+	do i=1,nx
+		u(i,j) = 0.0
 	end do
 	end do
-
-	!call apply_boundary(u)
 
 end subroutine sln_setup
 
 !==============================================================================
-! apply boundary conditions
+! apply boundary conditions and fill ghost cells
 !==============================================================================
 subroutine apply_boundary
 use grid_data
 
-	do i = 0,nx+2
-		u(i,1) = u(i,ny+1)    ! periodic BC (positive wavespeed)
-		u(i,0) = u(i,ny)  ! ghost cell
-		u(i,ny+2) = u(i,2)  ! ghost cell
-	end do
-	do j = 0,ny+2
-		u(1,j) = u(nx+1,j)    ! periodic BC (positive wavespeed)
-		u(0,j) = u(nx,j)  ! ghost cell
-		u(nx+2,j) = u(2,j)  ! ghost cell
-	end do	   
+	! Laplace
+	if (pblm.eq.2) then
+		! don't need to worry about corners, never used
+		do i=1,nx
+			! insulated upper and lower boundaries
+			! homogeneous Neumann BCs => du/dy = 0
+			! this means ghost cell is just same value as cell above/below
+			u(i,ny+1) = u(i,ny)  	! upper
+			u(i,0) = u(i,1)			! lower
+		end do
+		do j=1,ny
+			! set values of temperature at left and right side
+			! Dirichlet BCs - 1 homogeneous and 1 nonhomogeneous
+			u(0,j) = 0.0			! left
+			u(nx+1,j) = yc(nx+1,j)  ! right (cell centered sln => yc not yn)
+		end do	   
+	! Poisson
+	else 
+		do i=1,nx
+			! homogeneous Dirichlet BCs => u=0 at j=0,ny+1 boundaries
+			u(i,ny+1) = 0.0
+			u(i,0) = 0.0
+		end do
+		do j=1,ny
+			! homogeneous Neumann BCs => du/dx = 0 at i=0,nx+1 boundaries
+			! ghost cell is just same value as cell on right(1) or left(nx)
+			u(0,j) = u(1,j)
+			u(nx+1,j) = u(nx,j)
+		end do	   
+	end if
 
 end subroutine apply_boundary
 
 !==============================================================================
-! dudt = RHS derivative calculation (spatial discretization)
+! Jacobi (1) / SOR (2) / Gauss-Seidel (2) iteration method
+! set omega=1 in constants at top for GS
 !==============================================================================
-subroutine ode_dudt
+subroutine ss_iter
 use grid_data
 
-	! use algorithm from lecture 12 so not doubling the computational work
-	! using simplifications for equi spaced cartesian grid
-	!   normals are +-1 or 0 for nx or ny, cell distaces are just h (h=dy=dist)
-	!   nx = n, ny = n; area = length of face in 2D = dy or dx = h
-	! loop over i faces (i face means normal points in i / x dir) so area is dy
-	!do j = 1,n
-	!do i = 1,n+1
-		!!c = c1*nx + c2*ny => c=c for nx=+1 (+i dir) and ny=0 (+j dir)
-		!dudn = (u(i,j) - u(i-1,j)) / h; ! equidistant => dist(i to i-1) = h
-		!flux = ((-c*(u(i,j) + u(i-1,j))*0.5) + d*dudn) * h;
-		!dudt(i-1,j) = dudt(i-1,j) + flux
-		!dudt(i,j) = dudt(i,j) - flux
-	!end do
-	!end do
+	real(8) :: sigma,a1,a2,a3,a4,uold,ucur,f,resinit
 
-	! now would need to loop over j faces...
+	! save residual & num iter
+	open(2, file = filename2, status='replace')
 
-	! but let's just use the uniform grid example method for now
-	do j = 1,ny+1
-	do i = 1,nx+1
-		dudt(i,j) = ((-c/(2*h)) * (u(i+1,j)-u(i-1,j)+u(i,j+1)-u(i,j-1))) &
-			+ ((d/(h**2)) * (u(i+1,j)+u(i-1,j)+u(i,j+1)+u(i,j-1)-4*u(i,j)))
-	end do
-	end do
+	! iterate solution
+	do k=1,niter
+		res = 0.0
 
-end subroutine ode_dudt
-
-!==============================================================================
-! Adams-Bashforth 2nd order for 2D
-! 2D advection-diffusion
-!	compact formula for normal derivative (diffusion 2nd deriv term in FV)
-!	central differencing scheme (convection 1st deriv term FV/FD)
-!==============================================================================
-subroutine ode_ab2
-use grid_data
-
-	! store previous time step and current time step dudt
-	real(8), dimension(nx+1,ny+1) :: dudtprev
-	
-	real(8) :: t
-	integer :: tidx
-
-	! initialize dudt for first time step
-	call ode_dudt
-
-	! time stepping in here so we can save data from any step
-	! note: we already initialized at time tstart
-	t = tstart + dt
-	tidx = 2
-	do while (t.le.tstop)
-		! move current dudt (1) to previous dudt (2)
-		do j = 1,ny+1
-		do i = 1,nx+1
-			dudtprev(i,j) = dudt(i,j)
-		end do
-		end do
-
-		! calculate current dudt (1)
-		call ode_dudt
-
-		! calculate solution at time step t+dt using AB2 algorithm
-		! and backfill into solution / update solution
-		do j = 1,ny+1
-		do i = 1,nx+1
-			u(i,j) = u(i,j) + 0.5*h*dt*(3*dudt(i,j) - dudtprev(i,j))
-		end do
-		end do
-
+		! apply boundary conditions to current solution u
 		call apply_boundary
 
-		! increment time - use a time index so we get to tstop
-		! otherwise computer roundoff error causes us to quit early
-		!t = t + dt
-		t = tstart + (tidx*dt)
-		tidx = tidx+1
+		do j=1,ny
+		do i=1,nx
+			! terms from rearrangement of discretization
+			a1 = area_i(i,j) * dinv_i(i,j)
+			a2 = area_i(i+1,j) * dinv_i(i+1,j)
+			a3 = area_j(i,j) * dinv_j(i,j)
+			a4 = area_j(i,j+1) * dinv_j(i,j+1)
+			sigma = a1+a2+a3+a4
+
+			! save current sln value into old/prev
+			uold = u(i,j)
+
+			! Laplace has no source term
+			if (pblm.eq.2) then
+				f = 0.0
+			! Poisson has source term
+			else
+				f = exp(-35*((xc(i,j)-x0)**2+(yc(i,j)-y0)**2))
+				!write(*,*) f
+			end if
+
+			! discretization rearrangement
+			! (au's) - sigma*u = f*vol => u = (au's - f*vol)/sigma
+			! integrate over volume, divergence eqn transforms LHS to area
+			! RHS (source term f(x,y,t)) still integrated over volume
+			ucur = (a1*u(i-1,j)+a2*u(i+1,j)+a3*u(i,j-1)+a4*u(i,j+1)-f*vol(i,j))/sigma
+
+			! Jacobi
+			if (iteropt.eq.1) then
+				un(i,j) = ucur
+			! SOR/GS
+			else if (iteropt.eq.2) then
+				! perform relaxation and update current solution as we go along
+				! SOR/GS uses recently updated values from i-1,j-1
+				ucur = (1-omega)*uold + omega*ucur
+				u(i,j) = ucur
+			end if
+
+			! residual calculation for convergence
+			res = res + (ucur-uold)**2
+		end do
+		end do
+
+		! Jacobi copy new solution to current solution
+		if (iteropt.eq.1) then
+			do j=1,ny
+			do i=1,nx
+				u(i,j) = un(i,j)
+			end do
+			end do
+		end if
+
+		! Laplace absolute residual 
+		if (pblm.eq.2) then
+			res = sqrt(res/(nx*ny))
+		! Poisson relative residual 
+		else
+			if (k.eq.1) then
+				resinit = sqrt(res)
+				write(*,*) resinit
+			else
+				!write(*,*) sqrt(res)
+				res = sqrt(res)/resinit
+			end if
+		end if
+
+		! don't write resinit for Poisson (ok not to write k=1 for Laplace too)
+		if (k.ne.1) then		
+			write(*,*) k,res
+			write(2,"(I8,E20.8)") k,res
+		end if
+
+		! break if convergence tolerance achieved
+		if (res.le.tol.and.k.ne.1) then
+			close(2)
+			exit
+		end if
 	end do
 
-end subroutine ode_ab2
+end subroutine ss_iter
 
 !==============================================================================
-! subroutine to print out the solution with corresponding 1/2 grid pt values to file
+! print solution (values at cell centers) to file with grid (cell center coords)
 !==============================================================================
 subroutine print_sln_to_file
 use grid_data
 
-	open(1, file = 'hw3data/slndata_3.dat', status='replace')
-	!write(1,*) 'i,x,u'
-	do j = 1,ny+1
-	do i = 1,nx+1
-		!write(1,"(2I3,3F32.16)") i,j,xval,yval,u(i,j)
-		write(1,"(2I5,3E20.8)") i,j,xn(i,j),yn(i,j),u(i,j)
+	open(1, file = filename, status='replace')
+	do j = 1,ny
+	do i = 1,nx
+		write(1,"(2I5,3E20.8)") i,j,xc(i,j),yc(i,j),u(i,j)
 	end do
 	end do
 	close(1)
@@ -328,15 +444,42 @@ use grid_data
 end subroutine print_sln_to_file
 
 !==============================================================================
-! print out a grid metric in a matrix form (only do for small nx,ny like 10x10)
+! print out solution in a matrix form like viewing x-y axis
+! ** only do for small nx,ny like 10x10
+!==============================================================================
+subroutine print_sln
+use grid_data
+
+	!do j = ny+1,0,-1
+	! print the top right corner
+	do j = ny+1,ny-5,-1
+		write(*,"(I5,A1)",advance="no") j,' '  ! advance=no will not write newline
+
+		!do i = 0,nx+1
+		do i = nx-5,nx+1
+			!write(*,"(A1,F6.4,A2)",advance="no") '(',u(i,j),') '
+			write(*,"(A1,F10.4,A2)",advance="no") '(',u(i,j),') '
+		end do
+
+		write(*,*)  ! write out the new line
+	end do
+
+end subroutine print_sln
+
+!==============================================================================
+! print out a grid metric or solution in a matrix form like viewing x-y axis
+! ** only do for small nx,ny like 10x10
 !==============================================================================
 subroutine print_grid
 use grid_data
 
-	do j = ny+1,0,-1
+	!do j = ny+1,0,-1
+	! print the top right corner
+	do j = ny+1,ny-5,-1
 		write(*,"(I5,A1)",advance="no") j,' '  ! advance=no will not write newline
 
-		do i = 0,nx+1
+		!do i = 0,nx+1
+		do i = nx-5,nx+1
 			write(*,"(A1,F4.2,A1,F4.2,A2)",advance="no") '(',xc(i,j),',',yc(i,j),') '
 			!write(*,"(E15.8,A1)",advance="no") grid(i,j),' '
 		end do
@@ -355,11 +498,11 @@ use grid_data
 	! cells.dat matching
 	! File contains i,j,xc(i,j),yc(i,j),vol(i,j),Linv(1,1),Linv(1,2),Linv(2,1),Linv(2,2)
 	! for -interior- cells (for grid 'g.dat': (nx,ny)=(96,56))
-	!do j=1,2
-	!do i=1,nx
-		!write(*,*) i,j,xc(i,j),yc(i,j)
-	!end do
-	!end do
+	do j=1,2
+	do i=1,nx
+		write(*,*) i,j,xc(i,j),yc(i,j)
+	end do
+	end do
 
 	! I-faces.dat matching
 	! File contains i,j,xf_i(i,j),yf_i(i,j),area_i(i,j),nhat_i(1,i,j),nhat_i(1:2,i,j),
@@ -374,12 +517,12 @@ use grid_data
 	! J-faces.dat matching
 	! File contains i,j,xf_j(i,j),yf_j(i,j),area_j(i,j),nhat_j(1,i,j),nhat_j(1:2,i,j),
 	! dinv_j(i,j) for J-faces (for grid 'g.dat': (nx,ny)=(96,56))
-	!do j=1,2
-	!do i=1,nx
-		!write(*,*) i,j,xf_j(i,j),yf_j(i,j),area_j(i,j),nhat_j(1,i,j),nhat_j(2,i,j) &
-			!,dinv_j(i,j)
-	!end do
-	!end do
+	do j=1,2
+	do i=1,nx
+		write(*,*) i,j,xf_j(i,j),yf_j(i,j),area_j(i,j),nhat_j(1,i,j),nhat_j(2,i,j) &
+			,dinv_j(i,j)
+	end do
+	end do
 
 end subroutine print_grid2
 
@@ -395,23 +538,16 @@ use grid_data
 use procedures
 implicit none
 
-	call calc_dt
 	call grid_setup
 	call grid_metrics
 
-	write(*,"(A4,F10.5)") 'h = ',h
-	write(*,"(A5,F10.5)") 'dt = ',dt
-	call print_grid2
-	!call print_sln_to_file(grid,u)  ! write out init cond
+	call sln_setup
+
+	call ss_iter
 	
-	! adams-bashforth method handles the time stepping as well
-	!   since it needs data from previous time steps
-	!call sln_setup
-	!call ode_ab2
-
-	!call print_sln
-
-	!call print_sln_to_file
+	call print_grid
+	call print_sln
+	call print_sln_to_file
 
 end program cfd
 
