@@ -35,17 +35,18 @@ implicit none
 	real(8), parameter :: xlow=0.0,xhigh=1.0,xcd0=0.5	! x range, con disc init loc
 
 	! Sod shock tube
+	character(len=50), parameter :: tecfile = 'data/rpexact_sod.plt'
 	real(8), parameter :: uL = 0.0, uR = 0.0			! velocity
 	real(8), parameter :: rhoL = 1.0, rhoR = 0.125		! density
 	real(8), parameter :: pL = 1.0, pR = 0.1			! pressure
 	real(8), parameter :: tcur = 0.2					! time to solve at
 	
 	! Lax-Harden shock tube
+	!character(len=50), parameter :: tecfile = 'data/rpexact_lax.plt'
 	!real(8), parameter :: uL = 0.698876404, uR = 0.0	! velocity
 	!real(8), parameter :: rhoL = 0.445, rhoR = 0.5		! density
 	!real(8), parameter :: pL = 3.52773, pR = 0.571		! pressure
 	!real(8), parameter :: tcur = 0.15					! time to solve at
-	!real(8), parameter :: xcd0 = 0.5			! init loc for con disc (x0)
 
 	! speed of sound	
 	real(8), parameter :: cL = sqrt(gma*pL/rhoL), cR = sqrt(gma*pR/rhoR)
@@ -137,23 +138,10 @@ end subroutine calc_pressure
 subroutine calc_uprho_byx
 use rp_data
 
-	!real(8) :: pr1,pr2,gr1,gr2,gr3,gr4,gr5,gr6,gr7,gr8
 	real(8) :: c3,c4,ss,st,sh
 	real(8) :: xcd,xs,xt,xh,x,dx,dxdt
 	real(8) :: u2,rho2,u3,p3,rho3,u4,p4,rho4
 	real(8) :: alpha,prat
-
-	! setup some precalculated ratios
-	!pr1 = p2/pR
-	!pr2 = p2/pL
-	!gr1 = (gma-1.0)/(gma+1.0)
-	!gr2 = 1.0/gma
-	!gr3 = (gma+1.0)/(2.0*gma)
-	!gr4 = (gma-1.0)/(2.0*gma)
-	!gr5 = 2.0/(gma+1.0)
-	!gr6 = (gma-1.0)/2.0
-	!gr7 = (2.0*gma)/(gma-1.0)
-	!gr8 = 2.0/(gma-1.0)
 
 	! Luo formula ratios
 	alpha = (gma+1.0)/(gma-1.0)
@@ -161,7 +149,6 @@ use rp_data
 
 	! region 2 (right of con disc / left of shock)
 	u2 = uR+(cR/gma)*(prat-1.0)/sqrt(((gma+1.0)/(2.0*gma))*(prat-1.0)+1.0)
-	!u2 = uL + ((2.0*cL)/(gma-1.0))*(1.0-(p2/pL)**((gma-1.0)/(2.0*gma)))
 	rho2 = rhoR*(1.0+alpha*prat)/(alpha+prat)
 
 	! region 3 (left of con disc / right of fan)
@@ -171,7 +158,6 @@ use rp_data
 
 	! calculate wave speeds
 	c3 = cL*(p3/pL)**((gma-1.0)/(2.0*gma)) ! sound speed behind (right of) fan
-	!ss = uR+cR*sqrt(gr3*pr1+gr4) ! shock speed
 	ss = (rhoR*uR-rho2*u2)/(rhoR-rho2)	! shock speed
 	st = u3-c3	! fan tail speed (to the right of head)
 	sh = uL-cL	! fan head speed
@@ -184,9 +170,8 @@ use rp_data
 	xh = sh*tcur + xcd0		! fan head loc
 
 	! iterate over x domain and fill in sln arrays
-	dx = (xhigh-xlow)/(npts-1)
+	dx = (xhigh-xlow)/npts
 	do i = 1,npts
-		!x = dx*dble(i-1)
 		x = dx*dble(i-0.5)	! calc values at midpoint of element
 		nodes(i) = x
 
@@ -205,21 +190,16 @@ use rp_data
 			usln(i) = u4
 			psln(i) = p4
 			rhosln(i) = rho4
-			!usln(i) = gr5*(cL+gr6*uL+dxdt)
-			!psln(i) = pL*(gr5+(gr1/cL)*(uL-dxdt))**gr7
-			!rhosln(i) = rhoL*(gr5+(gr1/cL)*(uL-dxdt))**gr8
 		! between waves, left of con disc / right of fan (region 3/*L)
 		else if (x.gt.xt .and. x.lt.xcd) then
 			usln(i) = u3
 			psln(i) = p3
 			rhosln(i) = rho3
-			!rhosln(i) = rhoL*(pr2**gr2)
 		! between waves, right of con disc / left of shock (region 2/*R)
 		else if (x.ge.xcd .and. x.lt.xs) then
 			usln(i) = u2
 			psln(i) = p2
 			rhosln(i) = rho2
-			!rhosln(i) = rhoR*(pr1+gr1)/(gr1*pr1+1)
 		! right region
 		else
 			usln(i) = uR
@@ -236,7 +216,7 @@ end subroutine calc_uprho_byx
 subroutine print_sln_tecplot
 use rp_data
 
-	open(17, file = 'data/rpexact.plt', status='replace')
+	open(17, file = tecfile, status='replace')
 	write(17,*) 'TITLE=RIEMANN PROBLEM EXACT SOLUTION'
 	write(17,*) 'VARIABLES=x,u,p,rho'
 	do i = 1,npts
