@@ -14,7 +14,7 @@ x = reshape(pmesh(2:end,1).', [jmx,imx]).';
 y = reshape(pmesh(2:end,2).', [jmx,imx]).';
 
 % call c code
-[imx,jmx,x,y,zx,zy,ex,ey,xj,u,v] = mesh();
+%[imx,jmx,x,y,zx,zy,ex,ey,xj,u,v] = mesh();
 
 % scatter plot the physical mesh to see it
 scatter(reshape(x.',1,[]),reshape(y.',1,[]),'.');
@@ -23,21 +23,27 @@ scatter(reshape(x.',1,[]),reshape(y.',1,[]),'.');
 grid on;
 
 % contourf
-figure;
-colormap('jet');
-contourf(x,y,ex);
-grid on;
-colorbar;
-figure;
-colormap('jet');
-contourf(x,y,ey);
-grid on;
-colorbar;
+%figure;
+%colormap('jet');
+%contourf(x,y,ex);
+%grid on;
+%colorbar;
+%figure;
+%colormap('jet');
+%contourf(x,y,ey);
+%grid on;
+%colorbar;
 
 % phi analytical
 figure;
 colormap('jet');
 phi = 10*x - 5*y;
+contourf(x,y,phi);
+grid on;
+colorbar;
+figure;
+colormap('jet');
+u = 10*x;
 contourf(x,y,phi);
 grid on;
 colorbar;

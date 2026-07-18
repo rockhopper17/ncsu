@@ -1,6 +1,6 @@
 /* Andrew Navratil */
 /* MAE 456 CFD */
-/* Final Project: VPE (2D steady compressible adiabatic irrotational (isentropic)) */
+/* Final Project: VPE (2D steady compressible adiabatic irrotational (=> isentropic)) sln */
 
 #include <stdlib.h>
 #include <math.h>
@@ -14,45 +14,37 @@
 /*static	const int	imx = 81; [> max i value / num columns <]*/
 /*static	const int	jmx = 81; [> max j value / num rows <]*/
 
-static	const char	*fname = "grid-bumps.txt";  /* physical mesh file name */
-static	const char	*ftitle = "bumps"; /* used in file name and title for tecplot */
-static	const int	imx = 201; /* max i value / num columns */
-static	const int	jmx = 51; /* max j value / num rows */
-static	const int	meshtype = 1; /* rectangular mesh */
+/*static	const char	*fname = "grid-bumps.txt";  [> physical mesh file name <]*/
+/*static	const char	*ftitle = "bumps"; [> used in file name and title for tecplot <]*/
+/*static	const int	imx = 201; [> max i value / num columns <]*/
+/*static	const int	jmx = 51; [> max j value / num rows <]*/
+/*static	const int	meshtype = 1; [> rectangular mesh <]*/
 
-/*static	const char	*fname = "grid-SD7003.txt";  [> physical mesh file name <]*/
-/*static	const char	*ftitle = "sd7003"; [> used in file name and title for tecplot <]*/
-/*static	const int	imx = 200; [> max i value / num columns <]*/
-/*static	const int	jmx = 81; [> max j value / num rows <]*/
-/*static	const int	meshtype = 2; [> o-type mesh <]*/
+static	const char	*fname = "grid-SD7003.txt";  /* physical mesh file name */
+static	const char	*ftitle = "sd7003"; /* used in file name and title for tecplot */
+static	const int	imx = 200; /* max i value / num columns */
+static	const int	jmx = 81; /* max j value / num rows */
+static	const int	meshtype = 2; /* o-type mesh */
 
 /* mach numbers to analyze */
-
-/*static	const double	mach = 0.01;*/
 /*static	const double	mach = 0.1;*/
-/*static	const double	mach = 0.12;*/
+static	const double	mach = 0.12;
 /*static	const double	mach = 0.16;*/
 /*static	const double	mach = 0.25;*/
 /*static	const double	mach = 0.5;*/
 /*static	const double	mach = 0.56;*/
-/*static	const double	mach = 0.57;*/
-/*static	const double	mach = 0.6;*/
-static	const double	mach = 0.73;
-/*static	const double	mach = 0.85;*/
+/*static	const double	mach = 0.57; */
 
-/* relaxation factor for SOR (successive overelaxation) */
-/*static	const double	omega = 1.0;*/
-/*static	const double	omega = 1.25;*/
-static	const double	omega = 1.5;
-/*static	const double	omega = 1.75;*/
-/*static	const double	omega = 1.99;*/
+/* omega for SOR (successive overelaxation) */
+/*static	const double	omega = .5; */
+/*static	const double	omega = 1.1; */
+static	const double	omega = 1.5; 
+/*static	const double	omega = 1.75; */
 
-/*static	const int	maxsteps = 1e7; [> max number of iteration steps <]*/
-static	const int	maxsteps = 250000; /* max number of iteration steps */
-static	const double	resnormratiomin = 1e-4; /* convergence value for residual test */
+static	const int	maxsteps = 1e7; /* max number of iteration steps */
+/*static	const double	resnormratiomin = 1e-4; [> convergence value for residual test <]*/
+static	const double	resnormratiomin = 1e-3; /* convergence value for residual test */
 static	const int	convshow = 100; /* tabulate/print resnormratio every convshow'th interval */
-static	const double	machmax = 2; /* used for max mach correction, will be squared */
-
 static	double	conviter[maxsteps/convshow + 1]; /* array to hold iteration number */
 static	double	convresrat[maxsteps/convshow + 1]; /* array to hold res norm ratio */
 static	int	cvsteps = maxsteps/convshow + 1; /* wil be reset to actual count */
@@ -63,6 +55,7 @@ static	const double	R = 287;  /* stp air gas constant [J/kg K] */
 static	const double	pinf = 101325; /* stp pressure [Pa] */
 static	const double	Tinf = 300; /* stp temperature [K] */
 static	const double	rhoinf = pinf / (R * Tinf); /* stp density [kg/m^3] */
+/*static	const double	machnums[3] = {0.01, 0.5, 0.8}; [> mach numbers <]*/
 static	double	ainf; /* freestream speed of sound */
 static	double	uinf; /* freestream velocity in x dir (vinf=0) */
 
@@ -80,7 +73,6 @@ static	double a[jmx][imx][9]; /* coefficient matrix for 9 point stencil in a dua
 static	double vel[jmx][imx]; /* total velocity */
 static	double m[jmx][imx]; /* mach number */
 static	double cp[imx]; /* Cp at slip surface (j==0) */
-static	double cp2[imx]; /* Cp at slip surface (j==jmx-1) */
 
 /* physical mesh
  * import grid into physical mesh */
@@ -206,7 +198,7 @@ static void phideriv(void) {
 				/* boundary: col 1, all rows */
 				phiz[j][i] = -1.5*phi[j][i] + 2.0*phi[j][i+1] - 0.5*phi[j][i+2];
 			}
-			else if (i == (imx-1)) {
+			else if (i == (imx-1) || ( (i == (imx-4) || i == (imx-5)) && j==0)) {
 				/* boundary: col imx, all rows */
 				phiz[j][i] = 1.5*phi[j][i] - 2.0*phi[j][i-1] + 0.5*phi[j][i-2];
 			}
@@ -334,7 +326,8 @@ static void applyboundary(int btype) {
 	/* locals */
 	int i, j;
 	double dphidz[imx];
-	double b12, b22;
+	double b11, b12, b22;
+	double cx, cy, dx, dy, fx, fy;
 
 	/* wall */
 	if (btype == 1) {
@@ -346,9 +339,20 @@ static void applyboundary(int btype) {
 		}
 
 		for (i = 1; i < (imx-1); i++) {
+			b11 = (pow(zx[j][i],2) + pow(zy[j][i],2));
 			b12 = (zx[j][i] * ex[j][i] + zy[j][i] * ey[j][i]);
 			b22 = (pow(ex[j][i],2) + pow(ey[j][i],2));
-			phi[j][i] = (-b12 * dphidz[i] - (2.0*phi[j+1][i] - 0.5*phi[j+2][i])*b22) / (-1.5*b22);
+
+			if (i != (imx-4) && i != (imx-5)) {
+				phi[j][i] = (-b12 * dphidz[i] - (2.0*phi[j+1][i] - 0.5*phi[j+2][i])*b22) / (-1.5*b22);
+				/*printf("bdry %lf\n",phi[j][i]);*/
+			}
+			else {
+				/* kutta condition */
+				cx = zx[j][i]*(2*phi[j][i-1] - 0.5*phi[j][i-2]);
+				dx = ex[j][i]*(-2*phi[j+1][i] + 0.5*phi[j+2][i]);
+				phi[j][i] = (cx + dx) / (1.5*(zx[j][i] - ex[j][i]));
+			}	
 		}
 
 		/* boundary: row jmx, all cols */
@@ -363,6 +367,7 @@ static void applyboundary(int btype) {
 				b12 = (zx[j][i] * ex[j][i] + zy[j][i] * ey[j][i]);
 				b22 = (pow(ex[j][i],2) + pow(ey[j][i],2));
 				phi[j][i] = (-b12 * dphidz[i] + (2.0*phi[j-1][i] - 0.5*phi[j-2][i])*b22) / (1.5*b22);
+				/*printf("bdry 2 %lf\n",phi[j][i]);*/
 			}
 		}
 		/* apply farfield boundary */
@@ -377,6 +382,8 @@ static void applyboundary(int btype) {
 	/* wake cut phi */
 	else if (btype == 2) {
 		for (j = 0; j < jmx; j++) {
+			/*phi[j][0] = phi[j][imx-3];*/
+			/*phi[j][imx-1] = phi[j][2];*/
 			phi[j][0] = phi[j][imx-2];
 			phi[j][imx-1] = phi[j][1];
 		}
@@ -384,6 +391,12 @@ static void applyboundary(int btype) {
 	/*wake cut u,v,rho*/
 	else if (btype == 3) {
 		for (j = 0; j < jmx; j++) {
+			/*u[j][0] = u[j][imx-3];*/
+			/*v[j][0] = v[j][imx-3];*/
+			/*rho[j][0] = rho[j][imx-3];*/
+			/*u[j][imx-1] = u[j][2];*/
+			/*v[j][imx-1] = v[j][2];*/
+			/*rho[j][imx-1] = rho[j][2];*/
 			u[j][0] = u[j][imx-2];
 			v[j][0] = v[j][imx-2];
 			rho[j][0] = rho[j][imx-2];
@@ -406,14 +419,10 @@ static void applyboundary(int btype) {
 static void flowprops() {
 	/* locals */
 	int i, j;
-	double msq, lmsq, term, la, vdotnz, vdotne, xmcut2, xmtar2, vmagmax, vmag;
+	double msq, lmsq, term, la, vdotnz, vdotne;
 
 	/* first calculate phi derivatives in comp space */
 	phideriv();
-
-	/* correction to limit mach number */
-	xmcut2 = pow(machmax,2);
-	xmtar2 = xmcut2 * (1.0 + 0.5*(gmma-1.0)*pow(mach,2)) / (1.0 + 0.5*(gmma-1.0)*xmcut2);
 
 	/* loop comp grid */
 	for (j = 0; j < jmx; j++) {
@@ -425,12 +434,6 @@ static void flowprops() {
 			/* v = dphi/dy = (dxsi/dy * dphi/dxsi) + (deta/dy * dphi/deta) */
 			v[j][i] = (zy[j][i]*phiz[j][i] + ey[j][i]*phie[j][i]) / xj[j][i];
 
-			/* put in mach limit correction */
-			vmagmax = sqrt(xmtar2*pow(ainf,2));
-			vmag = sqrt(pow(u[j][i],2) + pow(v[j][i],2));
-			u[j][i] = fmin(vmagmax,vmag)/(vmag+1e-6) * u[j][i];
-			v[j][i] = fmin(vmagmax,vmag)/(vmag+1e-6) * v[j][i];
-
 			/* intermediary numbers for the term in rho and a calcs */
 			msq = pow(mach,2);
 			lmsq = (pow(u[j][i],2) + pow(v[j][i],2)) / pow(ainf,2);
@@ -438,6 +441,7 @@ static void flowprops() {
 
 			/* rho = f(u,v,mach,ainf) */
 			rho[j][i] = rhoinf * pow(term, (1/(gmma-1)));
+			/*printf("i=%d, j=%d, msq=%lf, lmsq=%lf, rho=%lf\n",i,j,msq,lmsq,rho[j][i]);*/
 
 			/* calculate mach components in xsi and eta directions for M&C transonic correction */
 			vdotnz = (u[j][i]*zx[j][i] + v[j][i]*zy[j][i]) / sqrt(pow(zx[j][i],2) + pow(zy[j][i],2));
@@ -531,17 +535,17 @@ static void relax(void) {
 	for (j = 1; j < (jmx-1); j++) {
 		for (i = 1; i < (imx-1); i++) {
 			kernel = (resinit[j][i] - rescalcrelax(i,j)) / a[j][i][5-1];
+			/*printf("%lf %lf %lf\n",resinit[j][i],phi[j][i],kernel);*/
 			phitmp = phi[j][i];
 			phi[j][i] = phitmp + omega*(kernel - phitmp);
 		}
 	}
 
 	/* BSOR on interior points only */
-	/*for (j = (jmx-2); j > 1; j--) {*/
-		/*for (i = (imx-2); i > 1; i--) {*/
-	for (i = 1; i < (imx-1); i++) {  /* this converged faster than correct BSOR */
-		for (j = 1; j < (jmx-1); j++) {  /* swapping i and j loops */
+	for (i = 1; i < (imx-1); i++) {
+		for (j = 1; j < (jmx-1); j++) {
 			kernel = (resinit[j][i] - rescalcrelax(i,j)) / a[j][i][5-1];
+			/*printf("%lf %lf %lf\n",resinit[j][i],phi[j][i],kernel);*/
 			phitmp = phi[j][i];
 			phi[j][i] = phitmp + omega*(kernel - phitmp);
 		}
@@ -559,24 +563,11 @@ static void relax(void) {
 /*****************************************************************************/
 static void tecplot(void) {
 	/* locals */
-	int i, j, cv, ile, ite;
-	double xle, c;
+	int i, j, cv;
 	char fname[50];
 
-	/* calculate chord length and leading/trailing edge properly for airfoil */
-	if(meshtype == 2) {
-		ile = 95;
-		ite = imx-5;
-	}
-	else {
-		ile = 0;
-		ite	 = imx-1;
-	}
-	c = x[0][ite] - x[0][ile]; /* chord length */
-	xle = x[0][ile]; /* x val for leading edge, to be subtracted */
-
 	/* save out tecplot file */
-	snprintf(fname, sizeof(fname), "VEL_%s_m%.2lf_o%.2lf.plt",ftitle,mach,omega);
+	snprintf(fname, sizeof(fname), "VEL_%s_%.2lf.plt",ftitle,mach);
 	
 	FILE *fout = fopen(fname, "w+t");
 
@@ -593,7 +584,7 @@ static void tecplot(void) {
 	fclose(fout);
 
 	/* save out convergence history */	
-	snprintf(fname, sizeof(fname), "ConvHistory_%s_m%.2lf_o%.2lf.txt",ftitle,mach,omega);
+	snprintf(fname, sizeof(fname), "ConvHistory_%s_%.2lf.txt",ftitle,mach);
 	
 	fout = fopen(fname, "w+t");
 
@@ -603,56 +594,17 @@ static void tecplot(void) {
 
 	fclose(fout);
 	
-	/* save out Cp on slip surface */	
-	snprintf(fname, sizeof(fname), "PressCoeff_%s_m%.2lf_o%.2lf.txt",ftitle,mach,omega);
+	/* save out Cp */	
+	snprintf(fname, sizeof(fname), "PressCoeff_%s_%.2lf.txt",ftitle,mach);
 	
 	fout = fopen(fname, "w+t");
 
 	fprintf(fout, "x/c\tCp\n");
 	j = 0;
-	for (i = ile; i < (imx+ile); i++)
-		fprintf(fout, "%.15lf\t%.15lf\n",(x[j][i%imx]-xle)/c,cp[i%imx]);
-	
-	fclose(fout);
-
-	/* save out mach on slip surface */	
-	snprintf(fname, sizeof(fname), "MachSlip_%s_m%.2lf_o%.2lf.txt",ftitle,mach,omega);
-	
-	fout = fopen(fname, "w+t");
-
-	fprintf(fout, "x/c\tM\n");
-	j = 0;
 	for (i = 0; i < imx; i++)
-		fprintf(fout, "%.15lf\t%.15lf\n",(x[j][i]-xle)/c,m[j][i]);
+		fprintf(fout, "%.15lf\t%.15lf\n",x[j][i]/x[j][imx-1],cp[i]);
 	
 	fclose(fout);
-
-	/* save Cp for duct top wall too */
-	if (meshtype == 1) {
-		snprintf(fname, sizeof(fname), "PressCoeff2_%s_m%.2lf_o%.2lf.txt",ftitle,mach,omega);
-		
-		fout = fopen(fname, "w+t");
-
-		fprintf(fout, "x/c\tCp\n");
-		j = jmx-1;
-		for (i = 0; i < imx; i++)
-			fprintf(fout, "%.15lf\t%.15lf\n",(x[j][i]-xle)/c,cp2[i]);
-		
-		fclose(fout);
-
-		/* and mach too */
-		snprintf(fname, sizeof(fname), "MachSlip2_%s_m%.2lf_o%.2lf.txt",ftitle,mach,omega);
-		
-		fout = fopen(fname, "w+t");
-
-		fprintf(fout, "x/c\tM\n");
-		j = jmx-1;
-		for (i = 0; i < imx; i++)
-			fprintf(fout, "%.15lf\t%.15lf\n",(x[j][i]-xle)/c,m[j][i]);
-		
-		fclose(fout);
-
-	}
 }
 
 /*****************************************************************************/
@@ -665,7 +617,6 @@ int main()
 	int cv = 0;
 	int p;
 	double resnorm = 0.0, resnorminit = 0.0, resnormratio = 1.0;
-	double Tlocal, alocal, plocal, cplocal;
 
 	/* initialize freestream speed of sound and velocity */
 	ainf = sqrt(gmma * R * Tinf);
@@ -690,6 +641,10 @@ int main()
 	/* if doing airfoil and o-type mesh, need to renumber mesh for boundaries */
 	if (meshtype == 2) {
 		for (j=0; j < jmx; j++) {
+			/*x[j][0] = x[j][imx-3];*/
+			/*y[j][0] = y[j][imx-3];*/
+			/*x[j][imx-1] = x[j][2];*/
+			/*y[j][imx-1] = y[j][2];*/
 			x[j][0] = x[j][imx-2];
 			y[j][0] = y[j][imx-2];
 			x[j][imx-1] = x[j][1];
@@ -715,6 +670,7 @@ int main()
 	for (j=1; j < (jmx-1); j++)
 		for (i=1; i < (imx-1); i++) {
 			resinit[j][i] = rescalc(i,j);
+			/*printf("%lf\n",resinit[j][i]);*/
 		}
 
 	/* apply boundary conditions: 1=wall/farfield, 2=wakecut phi, 3=wakecut u,v,rho */
@@ -734,7 +690,7 @@ int main()
 	/* iterate on residual error until converged or maxsteps reached */
 	/******************************************************/
 	for (n = 0; n < maxsteps; n++) {
-	/*for (n = 0; n < 2000; n++) {*/
+	/*for (i = 0; i < 501; i++) {*/
 		/* calculate residual and get L2 norm */
 		resnorm = rescalcall();
 
@@ -745,13 +701,31 @@ int main()
 		if(n % convshow == 0) {
 			printf("iteration %d, residual norm ratio %.8lf\n",n,resnormratio);
 			
+			/* calculate total velocity and mach num for plots */
+			for (j = 0; j < jmx; j++) {
+				for (i = 0; i < imx; i++) {
+					vel[j][i] = sqrt(pow(u[j][i],2) + pow(v[j][i],2));
+					m[j][i] = vel[j][i] / ainf;
+				}
+			}
+
+			printf("phi=%.8lf, u=%.8lf, v=%.8lf\n",phi[0][imx-5],u[0][imx-5],v[0][imx-5]);
+			printf("phi=%.8lf, u=%.8lf, v=%.8lf\n",phi[0][imx-4],u[0][imx-4],v[0][imx-4]);
+			for (i=150;i<imx;i++) {
+				printf("u=%.8lf, v=%.8lf, vel=%.8lf\n",u[0][i],v[0][i],vel[0][i]);
+			}
+			/*printf("phi=%.8lf, u=%.8lf, v=%.8lf\n",phi[0][imx-5],u[0][imx-5],v[0][imx-5]);*/
+			/*printf("phi=%.8lf, u=%.8lf, v=%.8lf\n",phi[0][imx-4],u[0][imx-4],v[0][imx-4]);*/
 			conviter[cv++] = n;  /* save current iteration and resnormratio for */
 			convresrat[cv] = resnormratio;  /* plotting convergence history */
 		}
 		
 		if (resnormratio < resnormratiomin) {
 			printf("final iteration %d, residual norm ratio %.8lf\n",n,resnormratio);
-
+			printf("phi=%.8lf, u=%.8lf, v=%.8lf\n",phi[0][imx-5],u[0][imx-5],v[0][imx-5]);
+			printf("phi=%.8lf, u=%.8lf, v=%.8lf\n",phi[0][imx-4],u[0][imx-4],v[0][imx-4]);
+			printf("phi(0=%.8lf, u=%.8lf, v=%.8lf\n",phi[0][0],u[0][0],v[0][0]);
+			printf("phi(0=%.8lf, u=%.8lf, v=%.8lf\n",phi[0][imx-1],u[0][imx-1],v[0][imx-1]);
 			conviter[cv++] = n;  
 			convresrat[cv] = resnormratio;  
 
@@ -774,31 +748,23 @@ int main()
 
 		/* recalculate matrix coefficients */
 		matrixcoeff();
-	} /* end main iteration loop */
-
-	/* calculate velocity, mach, Cp for plots */
-	for (j = 0; j < jmx; j++) {
-		for (i = 0; i < imx; i++) {
-			Tlocal = Tinf * pow(rho[j][i]/rhoinf,gmma-1); /* isentropic relations */
-			alocal = sqrt(gmma*R*Tlocal);
-			
-			vel[j][i] = sqrt(pow(u[j][i],2) + pow(v[j][i],2));
-			m[j][i] = vel[j][i] / alocal;
-
-			/* Cp along slip surfaces */
-			if (j == 0 || (j == (jmx-1) && meshtype == 1)) {
-				plocal = rho[j][i] * R * Tlocal; 
-				/* alt form good for compressible flow, from Anderson book */
-				cplocal = (2.0/(gmma*pow(mach,2)))*(plocal/pinf - 1.0); 
-
-				if (j == 0)
-					cp[i] = cplocal;
-				else if (j==(jmx-1))
-					cp2[i] = cplocal;
-			}
-		}
 	}
+
+	/* calculate total velocity and mach num for plots */
+	for (j = 0; j < jmx; j++)
+		for (i = 0; i < imx; i++) {
+			vel[j][i] = sqrt(pow(u[j][i],2) + pow(v[j][i],2));
+			m[j][i] = vel[j][i] / ainf;
+		}
 	
+
+	/* calculate Cp on slip surface */
+	j = 0;
+	for (i = 0; i < imx; i++) {
+		p = rho[j][i] * R * Tinf; /* local pressure */
+		cp[i] = (p - pinf) / (0.5 * rho[j][i] * pow(vel[j][i],2));
+	}
+
 	/* call tecplot to save data out to plt file, conv history and Cp to txt file */
 	tecplot();
 

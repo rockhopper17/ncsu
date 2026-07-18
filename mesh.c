@@ -9,6 +9,9 @@
 /*****************************************************************************/
 /* constants */
 /*****************************************************************************/
+/*static	const char	*fname = "grid-poisson-2015.txt";  [> physical mesh file name <]*/
+/*static	const int	imx = 81; [> max i value / num columns <]*/
+/*static	const int	jmx = 81; [> max j value / num rows <]*/
 static	const char	*fname = "grid-poisson-2015.txt";  /* physical mesh file name */
 static	const int	imx = 81; /* max i value / num columns */
 static	const int	jmx = 81; /* max j value / num rows */
@@ -164,6 +167,7 @@ static void tecplot(double x[jmx][imx], double y[jmx][imx], double m[jmx][imx], 
 	
 	FILE *fout = fopen(fname, "w+t");
 
+	fprintf(fout, "TITLE=\"%s contour plot on physical mesh\"\n", mname);
 	fprintf(fout, "VARIABLES=\"X\",\"Y\",\"%s\"\n", mname);
 	fprintf(fout, "ZONE	 F=POINT\n");
 	fprintf(fout, "I=%d, J=%d\n", imx, jmx);
@@ -180,6 +184,10 @@ static void tecplot(double x[jmx][imx], double y[jmx][imx], double m[jmx][imx], 
 /*****************************************************************************/
 int main()
 {
+	/* locals */
+	int i, j;
+	double diffu, maxdiffu, diffv, maxdiffv;
+
 	/* read in physical mesh from file */
 	int timx, tjmx;
 	FILE *fp = fopen(fname,"r");
@@ -191,17 +199,18 @@ int main()
 	double phi[jmx][imx];
 	double phiz[jmx][imx], phie[jmx][imx];
 	double u[jmx][imx], v[jmx][imx];
+	double diffum[jmx][imx], diffvm[jmx][imx];
 
 	/* fill physical mesh x,y */
-	for (int j=0; j < jmx; j++)
-		for (int i=0; i < imx; i++)
+	for (j=0; j < jmx; j++)
+		for (i=0; i < imx; i++)
 			fscanf(fp,"%lf %lf", &x[j][i], &y[j][i]);
 
 	fclose(fp);
 
 	/* fill phi based on test function phi = 10x - 5y */
-	for (int j=0; j < jmx; j++)
-		for (int i=0; i < imx; i++)
+	for (j=0; j < jmx; j++)
+		for (i=0; i < imx; i++)
 			phi[j][i] = 10.0*x[j][i] - 5.0*y[j][i];
 
 	/* get metric derivatives */
@@ -213,6 +222,22 @@ int main()
 	/* solve vpe for u,v velocities */
 	vpesolve(phiz, phie, zx, zy, ex, ey, xj, u, v);
 
+	/* get max difference from analytic result and printf (so abs(10-u) and abs(-5-v)) */
+	maxdiffu = 0.0;
+	maxdiffv = 0.0;
+	for (j=0; j < jmx; j++) {
+		for (i=0; i < imx; i++) {
+			diffu = fabs(10 - u[j][i]);
+			if (diffu > maxdiffu) maxdiffu = diffu;
+			diffv = fabs(-5 - v[j][i]);
+			if (diffv > maxdiffv) maxdiffv = diffv;
+			diffum[j][i] = diffu;
+			diffvm[j][i] = diffv;
+		}
+	}
+	printf("max diff in u dir = %.15lf\n", maxdiffu);
+	printf("max diff in v dir = %.15lf\n", maxdiffv);
+
 	/* output for tecplot */
 	tecplot(x, y, zx, "ZX");
 	tecplot(x, y, zy, "ZY");
@@ -223,8 +248,9 @@ int main()
 	tecplot(x, y, phi, "PHI");
 	tecplot(x, y, u, "U");
 	tecplot(x, y, v, "V");
+	tecplot(x, y, diffum, "DIFFU");
+	tecplot(x, y, diffvm, "DIFFV");
 
-	/* todo: get max difference from analytic result and printf (so abs(10-u) and abs(-5-v)) */
-
+	
 	return 0;
 }
