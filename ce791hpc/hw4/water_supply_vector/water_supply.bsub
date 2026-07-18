@@ -1,7 +1,0 @@
-#!/bin/csh
-#BSUB -o water_supply.out
-#BSUB -e water_supply.err
-#BSUB -W 1:00
-#BSUB -n 1
-./water_supplyc
-./water_supplyf

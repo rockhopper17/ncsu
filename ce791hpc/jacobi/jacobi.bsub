@@ -1,8 +1,0 @@
-#!/bin/csh
-#BSUB -n 4
-#BSUB -q short
-#BSUB -W 00:05
-#BSUB -o jacobi.out
-#BSUB -e jacobi.err
-mpiexec ./cjacobi
-mpiexec ./fjacobi

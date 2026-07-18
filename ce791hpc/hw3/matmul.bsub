@@ -1,6 +1,0 @@
-#BSUB -o matmul.out
-#BSUB -e matmul.err
-#BSUB -W 00:05
-#BSUB -q short
-cd $HOME/ce791/assignment3
-./matmulc

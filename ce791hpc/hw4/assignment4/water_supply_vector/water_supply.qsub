@@ -1,8 +1,0 @@
-#!/bin/bash
-#PBS -l walltime=0:05
-#PBS -o water_supply.out
-#PBS -e water_supply.err
-#PBS -V
-cd $PBS_O_WORKDIR
-./water_supplyf
-./water_supplyc

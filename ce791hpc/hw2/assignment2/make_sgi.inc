@@ -1,6 +1,0 @@
-CC = cc
-CFLAGS = -O3
-FF = f90
-FFLAGS = -cpp -O3
-CPPFLAGS = 
-LDFLAGS = -O3
