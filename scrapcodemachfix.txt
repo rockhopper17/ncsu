@@ -1,0 +1,32 @@
+      subroutine props
+      include "common.inc"
+
+C Subroutine to calculate fluid properties
+
+      xmcut2 = 2.0**2     ! user specified max Mach number
+      xmtar2 = xmcut2*(1. + 0.5*(gamma-1.0)*xmach**2)   ! xmach = freestream Mach number
+     c               /(1. + 0.5*(gamma-1.0)*xmcut2)     ! gamma = specific heat ratio
+        
+      do j= 1,jmax
+      do i= 1,imax
+
+       .
+       .
+       .
+
+      u(i,j) = (zx(i,j)*dphidz + ex(i,j)*dphide)/xj(i,j)  ! initial calc. of U and V
+      v(i,j) = (zy(i,j)*dphidz + ey(i,j)*dphide)/xj(i,j)
+
+      vmagmax = sqrt(xmtar2*ainf**2)                      ! ainf = freestream sound speed
+      vmag = sqrt(u(i,j)**2 + v(i,j)**2)
+
+      u(i,j) = min(vmagmax,vmag)/(vmag+1e-6)*u(i,j)       ! correction to limit Mach number
+      v(i,j) = min(vmagmax,vmag)/(vmag+1e-6)*v(i,j)
+
+       .
+       .
+       .
+
+      enddo
+      enddo
+
