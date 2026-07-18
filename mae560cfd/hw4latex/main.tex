@@ -1,0 +1,212 @@
+% from aiaa template
+\documentclass[conf]{new-aiaa}
+%\documentclass[journal]{new-aiaa} for journal papers
+
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage[version=4]{mhchem}
+\usepackage{siunitx}
+\usepackage{longtable,tabularx}
+\setlength\LTleft{0pt} 
+%======================================
+
+% additions
+\graphicspath{ {figures/} }
+\usepackage{floatrow}
+\usepackage{ar}
+\usepackage{amstext} % for \text macro
+\usepackage{array}   % for \newcolumntype macro
+\usepackage{gensymb} % for degree symbol
+\newcolumntype{L}{>{$}l<{$}} % math-mode version of "l" column type
+\usepackage[numbered,framed]{matlab-prettifier}
+
+\pagestyle{empty}
+
+\definecolor{listinggray}{gray}{0.9}
+\definecolor{lbcolor}{rgb}{0.9,0.9,0.9}
+\lstset{
+backgroundcolor=\color{lbcolor},
+    tabsize=4,    
+%   rulecolor=,
+    language=fortran,
+        basicstyle=\mlttfamily,
+        upquote=true,
+        aboveskip={1.5\baselineskip},
+        columns=fixed,
+        showstringspaces=false,
+        extendedchars=false,
+        breaklines=true,
+        prebreak = \raisebox{0ex}[0ex][0ex]{\ensuremath{\hookleftarrow}},
+        frame=single,
+        numbers=left,
+        showtabs=false,
+        showspaces=false,
+        showstringspaces=false,
+        identifierstyle=\mlttfamily,
+				keywordstyle=\color{blue}\mlttfamily,
+				stringstyle=\color{red}\mlttfamily,
+				commentstyle=\color[RGB]{34,139,34}\mlttfamily,
+				morecomment=[l][\color{magenta}]{\#}
+        %keywordstyle=\color[rgb]{0,0,1},
+        %commentstyle=\color[rgb]{0.026,0.112,0.095},
+        %stringstyle=\color[rgb]{0.627,0.126,0.941},
+        %numberstyle=\color[rgb]{0.205, 0.142, 0.73},
+%        \lstdefinestyle{C++}{language=C++,style=numbers}’.
+}
+
+\makeatletter
+\DeclareRobustCommand{\vol}{\text{\volumedash}V}
+\newcommand{\volumedash}{%
+  \makebox[0pt][l]{%
+    \ooalign{\hfil\hphantom{$\m@th V$}\hfil\cr\kern0.08em--\hfil\cr}%
+  }%
+}
+\makeatother
+
+%\usepackage{titlesec}
+%\titleformat*{\paragraph}{\large\bfseries}
+%======================================
+
+\title{MAE 560 CFD - HW 4\\Laplace and Poisson with Jacobi, GS, SOR}
+
+\author{Andrew Navratil}
+
+\begin{document}
+
+\maketitle
+
+Jacobi, Gauss-Seidel, and Successive Over-relaxation (SOR) iterative schemes for steady state solution to the Laplace and Poisson equations is implemented and analyzed.  Code is written in Fortran to perform the integration.  Solution values are output to txt files for plotting and additional error analysis in Matlab.  Cell based finite volume is implemented (solutions stored at cell centers), utilizing grid metrics calculated as in the FV2D geometry exercise, with confirmations run against the given cells.dat file for cell based values (cell centers and volumes) and against I-cells.dat and J-cells.dat files for faced based values (areas and distance between cells).  The face center coordinates and normal vectors were also calculated and confirmed against g.dat mesh, but not used in this assignment.  All three iterative schemes are combined into a single subroutine due to the same discretization, combined with conditional changes based on which scheme is being run.  Jacobi uses the same solution at time (k) while calculating all the new solution values.  SOR uses updated solutions at time (k+1) for cells indexing (i-1) or (j-1) while calculating the new solutions values.  Relaxation is performed with an $\omega$ value between 0 and 2 to speed up convergence, selected as $\omega=1.8$ for Laplace and an optimal $\omega=1.9$ used for Poisson, after a comparison on the range of $\omega$.  Gauss-Seidel is run as SOR with $\omega=1.0$.
+
+\section*{Problem 2 - Laplace}
+
+The steady state heat equation, which satisfies Laplace's equation, is solved for the given initial and boundary conditions.  The analytical solution was provided, containing a series solution with an infinite sum, however in running calculations all the values after $n=1$ were insignificant, so just the first term is used when comparing the numeric and analytic solutions.  Iteration is run until an absolute residual of \num{1e-6} is achieved.
+
+Calculations are run against two uniformly spaced Cartesian grids, one 11x11 and the other 21x21.  In both cases, all three iterative schemes eventually converged to the same values, where no difference was observed in contour plots of the solutions, therefore only one plot for each number of cells is shown.
+
+For 11x11, the average percent error was $13.5\%$, however the range was quite large, with a max of $84\%$ on the left side, with a min of $0.08\%$ near the center of the grid, climbing back up to about $25\%$ in the top right corner.  The contour plot in figure \ref{fig:ss_laplace_11} shows this variability with 16 isotherms, comparing the analytical solution (solid lines) to the numeric solution (dashed lines), both plotted using the same isotherm level values, with the 16 levels determined based on the overall min and max values between both solutions.  We can see the solutions are almost the same at the isotherm line near the middle, $T=0.22402\degree C$, with the numeric varying one direction heading left and the other heading right.  This perhaps shows an oscillatory nature to the numeric solution, as might be expected from the second order central to the first derivative FDA utilized in the discretization, although full error analysis for this FV steady state scheme was not conducted.  Laplace is a second order PDE, however the finite volume method utilizes an integration over first derivatives so only first derivative FDAs are required.  Heading away to the left, the numeric solution lags behind the analytical solution in how fast the temperature gets down to the left boundary value of $0\degree C$ (at any x value, the numeric solution is still greater than the analytic when moving from right to left).  Heading away from center to the right, the numeric solution again lags behind the analytic in how fast the solution gets to the right side boundary condition $f(y)=y\degree C$ (at any x value, the numeric solution is less than the analytic when moving from left to right).  The value varies along the right side, as opposed to being constant on the left, and we see that gradient reflected in the isotherms.  In general, the isotherms show a return to $0\degree C$ in the bottom right corner, climbing towards $1\degree C$ in the upper right.  In this case for 11x11, we see in the top right corner the isotherm lines for the analytic solution overtake the numeric solution at more than a full level.  The analytic solution reaches isotherm $T=0.67791\degree C$ (red) before the numeric solution reaches the previous isotherm $T=0.62747\degree C$ (orange).  Note that the overlap seen just before this is a blending of orange and yellow isotherms, where the solutions are a full level different, not the same as near the center in blue.  The insulated top and bottom boundaries mean no heat is lost through them (no temperature gradient observed), and the boundary / ghost cell values are set to the solution values just above or below.
+
+The 21x21 grid shows greater accuracy, with an average percent error of $9.0\%$, again with a large range showing a max of $92\%$ on the left side down to a min of $0.008\%$ near the middle.  The contour plot, seen in figure \ref{fig:ss_laplace_21}, shows the greater accuracy in a better fashion however, as we can see the contour lines for the numeric solution are much closer than with the 11x11 grid.  The same general trend is followed, with solutions matching near the center and numeric lagging the analytic as you move away towards the left and right boundaries.  In this grid however, the analytic does not overtake the numeric by a full level heading towards the top right corner, it stays much closer, and the very last analytic isotherm (dark red) is seen in the numeric solution briefly in the very top right.  This reflects the expected greater accuracy with a larger number of grid points.  The total number of 441 is about 4 times the total of 121 for 11x11, so we might expect an even  greater difference in the average percent error, however the contour plots show a much greater accuracy and additional error analysis would need to be performed on this iterative steady state finite volume solution even though it uses the second order first derivative FDA for which previous error analysis was conducted.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=1\columnwidth]{../hw4data/ss_laplace_11.jpg}
+	\caption{Laplace 11x11}
+	\label{fig:ss_laplace_11}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=1\columnwidth]{../hw4data/ss_laplace_21.jpg}
+	\caption{Laplace 21x21}
+	\label{fig:ss_laplace_21}
+\end{figure}
+
+Jacobi, GS, and SOR convergence rates are compared in figures \ref{fig:res_11} and \ref{fig:res_21}.  The figures show a log plot of the residual versus the number of iterations.  In the case of the Laplace equation, the absolute residual was utilized.  We can see that for both grids, SOR ($\omega=1.8$) converges the fastest (128 for 11x11, 320 for 21x21) followed by Gauss-Seidel (633 for 11x11, 1742 for 21x21) and then Jacobi (1080 for 11x11, 3019 for 21x21) as expected.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=.6\columnwidth]{../hw4data/res_11.jpg}
+	\caption{Convergence rate for 11x11}
+	\label{fig:res_11}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=.6\columnwidth]{../hw4data/res_21.jpg}
+	\caption{Convergence rate for 21x21}
+	\label{fig:res_21}
+\end{figure}
+
+\section*{Problem 3 - Poisson}
+
+The general Poisson equation is solved for the given initial conditions, boundary conditions, and source term function, which is a function of both x and y.  Iteration is run until a relative residual ratio of \num{1e-4} is achieved.
+
+Calculations are run against a uniformly spaced Cartesian 50x50 grid and a given 96x56 curvilinear grid imported from the file g.dat.  Again for both grids, all three iterative schemes eventually converged to the same values.
+
+The source term is included into the Laplace equation and discretized as follows:
+
+\begin{align*}
+	\frac{\partial^2 \phi}{\partial x^2} + \frac{\partial^2 \phi}{\partial y^2} &= f(x,y) \\
+	\frac{\partial}{\partial x}\left(\frac{\partial \phi}{\partial x}\right) + \frac{\partial}{\partial y}\frac{\partial \phi}{\partial y} &= f(x,y)
+\end{align*}
+The divergence theorem is used to change a volume integral on the left side into a surface integral:
+\begin{align*}
+	\int_S\left(\frac{\partial \phi}{\partial x}n_x + \frac{\partial \phi}{\partial y}n_y\right)dS &= \int_{\vol} f(x,y) d\vol
+\end{align*}
+Using the compact formula for normal derivatives and the definitions of a's as in the notes we get:
+\begin{align*}
+	(a_1\phi_{(i-1,j)}+a_2\phi_{(i+1,j)}+a_3\phi_{(i,j-1)}+a_4\phi_{(i,j+1)}) - \phi_{(i,j)}(a_1+a_2+a_3+a_4) &= f_{(i,j)}\vol_{(i,j)}
+\end{align*}
+\begin{align*}
+	\phi_{(i,j)} &= \frac{(a_1\phi_{(i-1,j)}+a_2\phi_{(i+1,j)}+a_3\phi_{(i,j-1)}+a_4\phi_{(i,j+1)}) - f_{(i,j)}\vol_{(i,j)}}{(a_1+a_2+a_3+a_4)}
+\end{align*}
+
+
+Solution for the 50x50 grid is seen in figure \ref{fig:ss_poisson_50}.  Boundary conditions are homogeneous Dirichlet at the top and bottom, as evidenced by the dark red band showing the solution close to zero at the top and bottom.  Homogeneous Neumann boundary conditions are given for the right and left sides, where no flow specifies the boundary ghost cells equaling the solution just to the left or right.  The source term is a decaying exponential function of x,y and the grid centroid, which is at $(0.5,0.5)$ for the square grid.  The circular bands emanating from the centroid show the values of the solution.  The curvilinear grid, as seen in figure \ref{fig:ss_poisson_g}, displays the same expected characteristics as the Cartesian grid.  The centroid of the curvilinear grid is at $(0.63,0.63)$, which is where the dark blue inner circle appears to be centered, and the entire solution flows as expected for the given boundary conditions and source function from there.  Actual values differ from the square grid due to the different dimensions and subsequent distance from the boundary and centroid.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=1\columnwidth]{../hw4data/ss_poisson_50.jpg}
+	\caption{Poisson 50x50 Cartesian}
+	\label{fig:ss_poisson_50}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=1\columnwidth]{../hw4data/ss_poisson_g.jpg}
+	\caption{Poisson 96x56 Curvilinear}
+	\label{fig:ss_poisson_g}
+\end{figure}
+
+Jacobi, GS, and SOR convergence rates are again compared in figures \ref{fig:res_50} and \ref{fig:res_g}.  The figures show a log plot of the residual versus the number of iterations, along with a couple plots analyzing different values of $\omega$ for SOR.  In the case of the Poisson equation, the relative residual ratio was utilized to assess convergence.  We can see that for both grids, SOR ($\omega=1.9$) converges the fastest (269 for 50x50, 201 for 96x56) followed by Gauss-Seidel (4589 for 50x50, 3805 for 96x56) and then Jacobi (9087 for 50x50, 7575 for 96x56) as expected.  It is interesting to note that in this case, the curvilinear grid with more grid points converges faster than the uniformly spaced Cartesian grid, although we might have expected the other way around.  Additional investigation into that would prove interesting.
+
+The SOR $\omega$ exploration shows the same optimal value of $\omega=1.9$ for both grids.  The first SOR plot shows all values tested, including $\omega=2.0$, which shows some oscillations indicative of an unstable scheme even though it still eventually converges.  The value $\omega=2.25$ was also tested and confirmed to be unstable and did not converge.  The second SOR plots for each grid show a close up of the fastest converging values, removing the slowest few, to make the comparison easier to see.  Additional optimization beyond the 0.1 value used could also be explored.  The values varied dramatically, from near 32,000 iterations for the 50x50 grid and 27,000 iterations for the 96x56 grid using an under-relaxation value of $\omega=0.25$, both significantly more than Jacobi even, all the way down to the optimal values of 269 for 50x50 and 201 for 96x56, showing the importance of choosing a good relaxation parameter when using SOR.
+
+\begin{figure}[H]
+	\centering
+	\begin{floatrow}
+		\includegraphics[width=.5\columnwidth]{../hw4data/res_50.jpg}
+	\end{floatrow}
+	\begin{floatrow}
+		\includegraphics[width=.5\columnwidth]{../hw4data/res_sor_50a.jpg}
+		\includegraphics[width=.5\columnwidth]{../hw4data/res_sor_50b.jpg}
+	\end{floatrow}
+	\caption{Convergence rate for 50x50 Cartesian}
+	\label{fig:res_50}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\begin{floatrow}
+		\includegraphics[width=.5\columnwidth]{../hw4data/res_g.jpg}
+	\end{floatrow}
+	\begin{floatrow}
+		\includegraphics[width=.5\columnwidth]{../hw4data/res_sor_ga.jpg}
+		\includegraphics[width=.5\columnwidth]{../hw4data/res_sor_gb.jpg}
+	\end{floatrow}
+	\caption{Convergence rate for 96x56 Curvilinear}
+	\label{fig:res_g}
+\end{figure}
+
+
+
+%======================================
+\newpage
+\section*{Fortran Code}
+\lstinputlisting[language=fortran]{../cfd2dss.f90}
+
+\newpage
+
+\section{Matlab Code}
+\lstset{
+  style      = Matlab-editor,
+  basicstyle = \mlttfamily,
+}
+\lstinputlisting{../hw4.m}
+
+
+\end{document}
+
+
+

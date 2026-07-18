@@ -1,0 +1,325 @@
+% from aiaa template
+\documentclass[conf]{new-aiaa}
+%\documentclass[journal]{new-aiaa} for journal papers
+
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage[version=4]{mhchem}
+\usepackage{siunitx}
+\usepackage{longtable,tabularx}
+\setlength\LTleft{0pt} 
+%======================================
+
+% additions
+\graphicspath{ {figures/} }
+\usepackage{floatrow}
+\usepackage{ar}
+\usepackage{amstext} % for \text macro
+\usepackage{array}   % for \newcolumntype macro
+\usepackage{gensymb} % for degree symbol
+\newcolumntype{L}{>{$}l<{$}} % math-mode version of "l" column type
+\usepackage[numbered,framed]{matlab-prettifier}
+
+\pagestyle{empty}
+
+\definecolor{listinggray}{gray}{0.9}
+\definecolor{lbcolor}{rgb}{0.9,0.9,0.9}
+\lstset{
+backgroundcolor=\color{lbcolor},
+    tabsize=4,    
+%   rulecolor=,
+    language=fortran,
+        basicstyle=\mlttfamily,
+        upquote=true,
+        aboveskip={1.5\baselineskip},
+        columns=fixed,
+        showstringspaces=false,
+        extendedchars=false,
+        breaklines=true,
+        prebreak = \raisebox{0ex}[0ex][0ex]{\ensuremath{\hookleftarrow}},
+        frame=single,
+        numbers=left,
+        showtabs=false,
+        showspaces=false,
+        showstringspaces=false,
+        identifierstyle=\mlttfamily,
+				keywordstyle=\color{blue}\mlttfamily,
+				stringstyle=\color{red}\mlttfamily,
+				commentstyle=\color[RGB]{34,139,34}\mlttfamily,
+				morecomment=[l][\color{magenta}]{\#}
+        %keywordstyle=\color[rgb]{0,0,1},
+        %commentstyle=\color[rgb]{0.026,0.112,0.095},
+        %stringstyle=\color[rgb]{0.627,0.126,0.941},
+        %numberstyle=\color[rgb]{0.205, 0.142, 0.73},
+%        \lstdefinestyle{C++}{language=C++,style=numbers}’.
+}
+
+%\usepackage{titlesec}
+%\titleformat*{\paragraph}{\large\bfseries}
+%======================================
+
+\title{MAE 560 CFD - HW 3\\Model Equations Finite Volume\\1D and 2D}
+
+\author{Andrew Navratil}
+
+\begin{document}
+
+\maketitle
+
+\section*{Problem 1: 1D advection}
+
+The 1D advection equation is solved using a second order central and a first order upwind spatial discretization with RK3 time integration on a finite volume scheme, node centered.  Periodic boundary conditions are implemented and ghost cells are utilized.  Wave speed is positive, value $a=1$.  The grid contains 100 cells over a unit distance resulting in $\Delta x = 0.01$.  The time step is calculated for each space and time combination using a CFL number that will give a stable solution. For the second order central RK3, a CFL number of $1.5$ is used resulting in a time step of $0.015$.  For the first order upwind RK3, a CFL number of $0.8$ is used resulting in a time step of $0.008$.  The stability region for the second order scheme is larger and allows for the larger time step, although we note that simplified stability analysis was utilized looking at the forward time / Euler analysis.  We also note that the second order central finite volume results in the same discretization as second order central finite difference.  The first order upwind finite volume results in the same discretization as a first order backwards finite difference.  Three sets of initial conditions are analyzed: a square wave, sine wave, and Gaussian distribution.  Code is written in Fortran to perform the integration, with data written to a file for plotting in Matlab.  Separate files for 1D and 2D were created in both languages.
+
+\begin{align*}
+	\text{CFL} &= \frac{|a|\Delta t}{\Delta x} \implies \Delta t = \text{CFL} \times \frac{\Delta x}{|a|}
+\end{align*}
+
+Second order central
+\begin{align*}
+	\frac{\partial f}{\partial x} &= \frac{-a}{2\Delta x} (f_{i+1} - f_{i-1})
+\end{align*}
+
+First order upwind (for positive a)
+\begin{align*}
+	\frac{\partial f}{\partial x} &= \frac{-a}{\Delta x} (f_{i} - f_{i-1})
+\end{align*}
+
+Plots show that we achieve higher accuracy using the second order method over the first order method.  The second order method results in mainly dispersive error with little to no dissipation in most cases, while the first order results display both types of numeric errors.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\columnwidth]{../hw3data/slndata_1_1_1.jpg}
+	\caption{1D advection square wave, central RK3, CFL 1.5, 1 cycle}
+	\label{fig:slndata_1_1_1}
+\end{figure}
+
+\begin{figure}[H]
+	\includegraphics[width=.5\columnwidth]{../hw3data/slndata_1_1_1_t5.jpg}
+	\caption{1D advection square wave, central 5 cycles}
+	\label{fig:slndata_1_1_1_t5}
+\end{figure}
+
+Plots showing the exact and numeric solutions after one time cycle for the square wave are shown in figures \ref{fig:slndata_1_1_1} and \ref{fig:slndata_1_1_2}.
+We can see that the second order central RK3 in figure \ref{fig:slndata_1_1_1} maps to the exact solution fairly well.  The numeric solution exhibits dispersive error but little to no dissipative error, as expected from modified wavenumber analysis showing only a real portion of the modified wavenumber, and von Neumann analysis showing an odd derivative on the lowest order LTE term (that being the third derivative in this second order discretization).  The dispersion is seen in the oscillations and slight phase error to the left, as the dispersion slowed the wave over one cycle as expected from $\frac{k^*h}{kh} < 1$ giving a numeric wave speed less than a.  The actual movement of the wave to the right for the given positive wave speed was confirmed by running for 1/4 of a cycle and observing the wave having moved right.  The large undershoot before the first discontinuity at $x=0.25$ and large overshoot before the second discontinuity at $x=0.75$ do not die out even with a finer grid (1000 cells was also tested), reminiscent of the Gibbs phenomenon for Fourier series representations at discontinuities.  The numeric solution was also run for 5 cycles as seen in figure \ref{fig:slndata_1_1_1_t5} (and 10 cycles as well), where high dispersion is observed, including shrinking of the width of the square wave, but dissipation still does not occur as the amplitude is still around the same.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\columnwidth]{../hw3data/slndata_1_1_2.jpg}
+	\caption{1D advection square wave, upwind RK3, CFL 0.8, 1 cycle}
+	\label{fig:slndata_1_1_2}
+\end{figure}
+
+
+\begin{figure}[H]
+	\includegraphics[width=.5\columnwidth]{../hw3data/slndata_1_1_2_t5.jpg}
+	\caption{1D advection square wave, upwind 5 cycles}
+	\label{fig:slndata_1_1_2_t5}
+\end{figure}
+
+
+The first order upwind RK3 plot in figure \ref{fig:slndata_1_1_2} shows both dispersive and dissipative error as expected from modified wave number analysis resulting in both real and imaginary portions of $k^*$, and von Neumann analysis showing an even number on the lowest order term in the LTE (that of two for the second derivative in the LTE on this first order discretization).  Both the dispersion (slight phase error to the left due to slower wave speed from $\frac{k^*h}{kh} < 1$) and slight amplitude error showing dissipative error, are both more predominant when the number of cycles is increased to five as seen in figure \ref{fig:slndata_1_1_2_t5}, where both errors propagate further into the solution.  The CFL of 1.5 was also attempted for upwind, which confirmed it was unstable as the solution oscillated with significantly large amplitudes when plotted (on the order of $10^{18}$) due to the diverging solution.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\columnwidth]{../hw3data/slndata_1_2_1_k1.jpg}
+	\caption{1D advection sine wave, central RK3, CFL 1.5, k=1, 1 cycle}
+	\label{fig:slndata_1_2_1_k1}
+\end{figure}
+
+\begin{figure}[H]
+	\begin{floatrow}
+		\includegraphics[width=.5\columnwidth]{../hw3data/slndata_1_2_1_k5.jpg}
+		\includegraphics[width=.5\columnwidth]{../hw3data/slndata_1_2_1_k10.jpg}
+	\end{floatrow}
+	\caption{1D advection sine wave, central, k=5 and k=10}
+	\label{fig:slndata_1_2_1_k5k10}
+\end{figure}
+
+Plots showing the exact and numeric solutions after one time cycle for the sine wave are shown in figures \ref{fig:slndata_1_2_1_k1}, \ref{fig:slndata_1_2_1_k5k10}, \ref{fig:slndata_1_2_2_k1}, and \ref{fig:slndata_1_2_2_k5k10}.
+
+Second order central RK3 is shown in figures \ref{fig:slndata_1_2_1_k1} and \ref{fig:slndata_1_2_1_k5k10} for $k=1,5,10$.  The slight phase shift left dispersive error is observed for $k=1$ as expected.  However, for $k=5,10$ we see an additional dissipative error on the central difference discretization, where the amplitude is significantly reduced for $k=10$, likely coming from the time integration scheme and should be taken into account in a more thorough stability analysis.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\columnwidth]{../hw3data/slndata_1_2_2_k1.jpg}
+	\caption{1D advection sine wave, upwind RK3, CFL 0.8, k=1, 1 cycle}
+	\label{fig:slndata_1_2_2_k1}
+\end{figure}
+
+\begin{figure}[H]
+	\begin{floatrow}
+		\includegraphics[width=.5\columnwidth]{../hw3data/slndata_1_2_2_k5.jpg}
+		\includegraphics[width=.5\columnwidth]{../hw3data/slndata_1_2_2_k10.jpg}
+	\end{floatrow}
+	\caption{1D advection sine wave, upwind, k=5 and k=10}
+	\label{fig:slndata_1_2_2_k5k10}
+\end{figure}
+
+The upwind RK3 is shown in figures \ref{fig:slndata_1_2_2_k1} and \ref{fig:slndata_1_2_2_k5k10} for $k=1,5,10$.  The $k=1$ case shows both dispersive and dissipative errors, with slight phase shift left again due to reduced speed and noticeable decrease in amplitude after only one cycle.  The upwind scheme for both $k=5,10$ show significant dissipation, with the wave amplitudes barely noticeable at all on the scale compared to the exact solution.  Dispersion is also present albeit overshadowed by the dissipation.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\columnwidth]{../hw3data/slndata_1_3_1.jpg}
+	\caption{1D advection Gaussian, central RK3, CFL 1.5, 1 cycle}
+	\label{fig:slndata_1_3_1}
+\end{figure}
+
+Plots showing the exact and numeric solutions after one time cycle for the Gaussian distribution are shown in figures \ref{fig:slndata_1_3_1} and \ref{fig:slndata_1_3_2}.
+
+Second order central RK3 is shown in figure \ref{fig:slndata_1_3_1}.  The slight phase shift left dispersive error is observed, with no dissipation (amplitude decrease) as expected.  
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\columnwidth]{../hw3data/slndata_1_3_2.jpg}
+	\caption{1D advection Gaussian, upwind RK3, CFL 0.8, 1 cycle}
+	\label{fig:slndata_1_3_2}
+\end{figure}
+
+The upwind RK3 is shown in figure \ref{fig:slndata_1_3_2}.  The plot after one cycle shows both dispersive and dissipative errors.  The dispersion is seen with slight phase shift left due to reduced speed by looking at the peak of the numeric solution, which is slightly behind the exact solution.  Dissipation is also observed from the decrease in peak amplitude and the spreading out of the base, where the numeric solution on the left is sloping down at a lower rate than the exact solution, and the same occurs on the right hand side of the distribution curve.
+
+%============================================================================================
+\section*{Problem 2: 1D diffusion}
+
+The 1D diffusion equation is solved using a second order central second derivative spatial discretization with RK4 and Crank-Nicolson time integrations on a finite volume scheme, node centered.  Fixed boundary conditions are implemented and ghost cells utilized.  Diffusion constant value is $D=0.1$.  Grids of 100 and 200 cells are computed over a distance 10 units long resulting in $\Delta x = 0.1$ for 100 cells and $\Delta x = 0.05$ for 200 cells.  The computation is run from $t = 2.0$ to $t = 4.0$.  A CFL number is utilized when calculating the time step, using von Neumann results for FTCS to set a stability restriction of 1/2 for RK4 and no bounds for the unconditionally stable implicit Crank-Nicolson scheme.  This results in $dt = 0.04$ for RK4 using CFL of 0.4 and using CFL of 5.0 gives $dt = 0.5$ for CN.
+
+\begin{align*}
+	\text{CFL} &= \frac{D \Delta t}{(\Delta x)^2} \implies \Delta t = \text{CFL} \times \frac{(\Delta x)^2}{D}
+\end{align*}
+
+Second order central second derivative
+\begin{align*}
+	\frac{\partial^2 C}{\partial x^2} &= \frac{D}{(\Delta x)^2} (C_{i+1} - 2 C_i + C_{i-1})
+\end{align*}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\columnwidth]{../hw3data/slndata_2_1_1.jpg}
+	\caption{1D diffusion, central RK4, CFL 0.4, n=100}
+	\label{fig:slndata_2_1_1}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\columnwidth]{../hw3data/slndata_2_2_1.jpg}
+	\caption{1D diffusion, central RK4, CFL 0.4, n=200}
+	\label{fig:slndata_2_2_1}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\columnwidth]{../hw3data/slndata_2_1_1_cfl5.jpg}
+	\caption{1D diffusion, central RK4, CFL 5.0, n=100}
+	\label{fig:slndata_2_1_1_cfl5}
+\end{figure}
+
+Plots showing the exact and numeric solutions for RK4 are shown in figures \ref{fig:slndata_2_1_1}, \ref{fig:slndata_2_2_1}, and \ref{fig:slndata_2_1_1_cfl5}.
+We can see that the second order central RK4 for both 100 and 200 cells maps directly to the exact solution.  Dispersive error was expected using the simplified stability analysis, showing that a proper stability analysis using the RK4 time integration should be performed.  The RK4 scheme is expected to have a larger stability range than forward Euler as is, and so the CFL of 5.0 was also looked at.  We can see that dispersive error is present at this higher CFL where RK4 will eventually go unstable, noting oscillations near the boundaries and also upwind of the peak, with smaller oscillations downwind of the peak as well.  No dissipative error is observed as expected for the central scheme, we can see the peaks still match up.  
+
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\columnwidth]{../hw3data/slndata_2_1_2.jpg}
+	\caption{1D diffusion, central Crank-Nicolson, CFL 5.0, n=100}
+	\label{fig:slndata_2_1_2}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\columnwidth]{../hw3data/slndata_2_2_2.jpg}
+	\caption{1D diffusion, central Crank-Nicolson, CFL 5.0, n=200}
+	\label{fig:slndata_2_2_2}
+\end{figure}
+
+Plots showing the exact and numeric solutions for Crank-Nicolson are shown in figures \ref{fig:slndata_2_1_2} and \ref{fig:slndata_2_2_2}.
+We can see that the second order central Crank-Nicolson for both 100 and 200 cells maps directly to the exact solution as well.  The implicit scheme is expected to be unconditionally stable, and the CFL of 5.0 was chosen to demonstrate this stability at a high CFL number.  
+
+%============================================================================================
+\section*{Problem 3: 2D advection-diffusion}
+
+The 2D advection-diffusion equation is solved using a compact formula for the normal derivative in the viscous/diffusive term, which results in the same formula as a second order central second derivative finite difference when using a uniformly spaced Cartesian grid as in this problem, and first order central difference first derivative for the convective term.  The uniform grid simplification is utilized here, negating the need to calculate grid metrics and loop over faces to calculate fluxes.  The entire grid can be looped utilizing the simplified formula for $\frac{dT_{i,j}}{dt}$ and passing that to the time integration scheme.  The finite volume method is utilized on a uniform grid with 100 interior cells in both the x and y directions over a unit length giving $h = \Delta x = \Delta y = 0.01$.  Time integration is performed using the multi-step Adams-Bashforth 2 method (multi time step, that is, utilizing solutions from multiple times when calculating the solution at the next time step).  CFL number was again utilized, just set to 1.0, and stability restrictions for both advection and diffusion equations were utilized to determine a time step for AB2.  This is a rough estimate for the time step, using the minimum of the two giving $dt = 0.01$, and it resulted in successful solution calculations, as did hard coding a time step of $dt = 0.001$.  The solution is plotted for the initial condition, after 0.5 seconds, and then again after 5.0 seconds.\\
+
+Compact formula for normal derivative in diffusion, central difference in advection, uniform grid
+\begin{align*}
+	\frac{\partial T_{i,j}}{\partial t} &=
+		\frac{-c}{2h} (T_{i+1,j} - T_{i-1,j} + T_{i,j+1} - T_{i,j-1}) +
+		\frac{d}{h^2} (T_{i+1,j} - T_{i-1,j} + T_{i,j+1} - T_{i,j-1} - 4T_{i,j})
+\end{align*}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.75\columnwidth]{../hw3data/slndata_3_init_full.jpg}
+	\caption{2D advection-diffusion, AB2, initial condition}
+	\label{fig:slndata_3_init_full}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.75\columnwidth]{../hw3data/slndata_3_t05_full.jpg}
+	\caption{2D advection-diffusion, AB2, t=0.5s}
+	\label{fig:slndata_3_t05_full}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.75\columnwidth]{../hw3data/slndata_3_t5_full.jpg}
+	\caption{2D advection-diffusion, AB2, t=5.0s}
+	\label{fig:slndata_3_t5_full}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.75\columnwidth]{../hw3data/slndata_3_init.jpg}
+	\caption{2D advection-diffusion, AB2, initial condition (zoomed in)}
+	\label{fig:slndata_3_init}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.75\columnwidth]{../hw3data/slndata_3_t05.jpg}
+	\caption{2D advection-diffusion, AB2, t=0.5s (zoomed in)}
+	\label{fig:slndata_3_t05}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.75\columnwidth]{../hw3data/slndata_3_t5.jpg}
+	\caption{2D advection-diffusion, AB2, t=5.0s (zoomed in)}
+	\label{fig:slndata_3_t5}
+\end{figure}
+
+Plots showing the numeric solution for AB2 at multiple times (t=0,0.5,5.0) are shown in figures \ref{fig:slndata_3_init_full} - \ref{fig:slndata_3_t5}.  The same range on the colorbar is utilized in all three plots to help get a sense of the diffusion (not diffusive numerical error, but actual temperature diffusion).  The zoomed in plots are provided to help get a better sense of the convection.  We can see that after 0.5 seconds, the contours have shifted slightly up and to the right, as expected from the positive wave speed in both x and y directions.  We also see that the area for the highest temperature is starting to shrink from the diffusion.  After 5.0 seconds, both the movement due to convection of the concentrated area and diffusion where the concentrated temperature area is decreasing and coming into equilibrium with the surrounding medium can be readily observed again by the movement up and to the right along with clearly darker colors in the concentrated area.
+
+%======================================
+\newpage
+\section*{Fortran Code: 1D}
+\lstinputlisting[language=fortran]{../cfd.f90}
+
+\newpage
+
+\section*{Fortran Code: 2D}
+\lstinputlisting[language=fortran]{../cfd2d.f90}
+
+\newpage
+
+\section{Matlab Code: 1D}
+\lstset{
+  style      = Matlab-editor,
+  basicstyle = \mlttfamily,
+}
+\lstinputlisting{../hw3.m}
+
+\newpage
+
+\section{Matlab Code: 2D}
+\lstset{
+  style      = Matlab-editor,
+  basicstyle = \mlttfamily,
+}
+\lstinputlisting{../hw32d.m}
+
+
+\end{document}
+
+
+

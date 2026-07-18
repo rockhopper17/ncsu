@@ -1,0 +1,279 @@
+% from aiaa template
+\documentclass[conf]{new-aiaa}
+%\documentclass[journal]{new-aiaa} for journal papers
+
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage[version=4]{mhchem}
+\usepackage{siunitx}
+\usepackage{longtable,tabularx}
+\setlength\LTleft{0pt} 
+%======================================
+
+% additions
+\graphicspath{ {figures/} }
+\usepackage{floatrow}
+\usepackage{ar}
+\usepackage{amstext} % for \text macro
+\usepackage{array}   % for \newcolumntype macro
+\usepackage{gensymb} % for degree symbol
+\newcolumntype{L}{>{$}l<{$}} % math-mode version of "l" column type
+\usepackage[numbered,framed]{matlab-prettifier}
+
+\pagestyle{empty}
+
+\definecolor{listinggray}{gray}{0.9}
+\definecolor{lbcolor}{rgb}{0.9,0.9,0.9}
+\lstset{
+backgroundcolor=\color{lbcolor},
+    tabsize=4,    
+%   rulecolor=,
+    language=fortran,
+        basicstyle=\mlttfamily,
+        upquote=true,
+        aboveskip={1.5\baselineskip},
+        columns=fixed,
+        showstringspaces=false,
+        extendedchars=false,
+        breaklines=true,
+        prebreak = \raisebox{0ex}[0ex][0ex]{\ensuremath{\hookleftarrow}},
+        frame=single,
+        numbers=left,
+        showtabs=false,
+        showspaces=false,
+        showstringspaces=false,
+        identifierstyle=\mlttfamily,
+				keywordstyle=\color{blue}\mlttfamily,
+				stringstyle=\color{red}\mlttfamily,
+				commentstyle=\color[RGB]{34,139,34}\mlttfamily,
+				morecomment=[l][\color{magenta}]{\#}
+        %keywordstyle=\color[rgb]{0,0,1},
+        %commentstyle=\color[rgb]{0.026,0.112,0.095},
+        %stringstyle=\color[rgb]{0.627,0.126,0.941},
+        %numberstyle=\color[rgb]{0.205, 0.142, 0.73},
+%        \lstdefinestyle{C++}{language=C++,style=numbers}’.
+}
+
+\makeatletter
+\DeclareRobustCommand{\vol}{\text{\volumedash}V}
+\newcommand{\volumedash}{%
+  \makebox[0pt][l]{%
+    \ooalign{\hfil\hphantom{$\m@th V$}\hfil\cr\kern0.08em--\hfil\cr}%
+  }%
+}
+\makeatother
+
+%\usepackage{titlesec}
+%\titleformat*{\paragraph}{\large\bfseries}
+%======================================
+
+\title{MAE 560 CFD - Final Project\\2D Incompressible Navier-Stokes using Finite Volume}
+
+\author{Andrew Navratil}
+
+\begin{document}
+
+\maketitle
+
+The incompressible Navier-Stokes equations are solved for two sample problems in two dimensions using a cell-centered finite volume version of the fractional step / projection method.  The second-order explicit Adams-Bashforth (AB-2) scheme is utilized for time marching, with symmetric over-relaxation (SOR) used for solving the Pressure Poisson Equation.  The pressure correction is performed by solving for the pressure gradients with the least-squares estimation.  Code is written in Fortran for the solver with data output to plt files for post-processing in Tecplot, and some txt data for Matlab.
+
+\bigskip
+Incompressible Navier-Stokes form being solved, with u-x and v-y components of velocity and p pressure:
+\begin{align*}
+	\frac{\partial u}{\partial t} + \frac{\partial u^2}{\partial x} + \frac{\partial uv}{\partial y} &= -\frac{1}{\rho}\frac{\partial p}{\partial x} + \nu \left(\frac{\partial^2 u}{\partial x^2} + \frac{\partial^2 u}{\partial y^2} \right) &\text{(u-momentum)}\\
+	\frac{\partial v}{\partial t} + \frac{\partial uv}{\partial x} + \frac{\partial v^2}{\partial y} &= -\frac{1}{\rho}\frac{\partial p}{\partial x} + \nu \left(\frac{\partial^2 v}{\partial x^2} + \frac{\partial^2 v}{\partial y^2} \right) &\text{(v-momentum)}\\
+	\frac{\partial u}{\partial x} + \frac{\partial v}{\partial y} &= 0 &\text{(continuity)}
+\end{align*}
+
+Prediction step with AB-2, per cell, calculating a velocity at the next time step which is not divergence-free, and ignoring pressure (which has no time dependence in this form).
+
+\begin{align*}
+	u^* &= u^n + \left(\frac{\Delta t}{V}\right) \left(\frac{1}{2}\right) [3(N_u^n+V_u^n)-(N_u^{n-1}+V_u^{n-1})] \\
+	v^* &= v^n + \left(\frac{\Delta t}{V}\right) \left(\frac{1}{2}\right) [3(N_v^n+V_v^n)-(N_v^{n-1}+V_v^{n-1})] \\
+\end{align*}
+where N and V are non-linear and viscous terms, with $v_n$ normal component of total velocity at a face, $S_f$ area at a face, and $u_f,v_f$ normal x,y components of velocity at a face:
+\begin{align*}
+	v_n &= u_f + v_f & \\
+	N_u &= -\sum_f (v_n u_f)S_f & V_u &= \sum_f \nu \frac{\partial u}{\partial n} S_f \\
+	N_v &= -\sum_f (v_n v_f)S_f & V_v &= \sum_f \nu \frac{\partial v}{\partial n} S_f \\
+\end{align*}
+
+Projection step, solving the integral form of the Pressure Poisson Equation to get a pressure for projecting the u* and v* velocity components back to a divergence-free value (or close to it).  The source term is calculated prior to utilizing SOR, as the SOR is just solving for pressure and the $u^*,v^*$ terms do not change within the current AB-2 time step.
+
+\begin{align*}
+	v_n^* &= u_f^* + v_f^* \\
+	\sum_f \frac{\partial p}{\partial n}S_f &= \frac{\rho}{\Delta t} \sum_f v_n^* S_f
+\end{align*}
+
+Correction step, calculating pressure derivatives using least-squares minimization from the projected pressure.
+
+\begin{align*}
+	u^{n+1} &= u^* - \left(\frac{\Delta t}{\rho}\right) \left(\frac{\partial p}{\partial x}\right)^{lst.sq.} \\
+	v^{n+1} &= v^* - \left(\frac{\Delta t}{\rho}\right) \left(\frac{\partial p}{\partial y}\right)^{lst.sq.}
+\end{align*}
+
+%======================================
+\section*{Problem 1: 2D Taylor Green}
+
+The Taylor-Green problem, modeling the decay in time of 'stationary' vortices, is solved on a 2D domain.  A uniform grid mesh of 100x100 points is utilized with size of 2$\pi$ per side.  Initial condition is specified using the analytical equations at $t=0$ for u,v components of velocity and pressure.  Boundary conditions are periodic.
+
+\begin{figure}[H]
+	\centering
+	\begin{floatrow}
+		\includegraphics[width=.5\columnwidth]{../finalprojdata/tg_u_Re100_t0.png}
+		\includegraphics[width=.5\columnwidth]{../finalprojdata/tg_u_Re100_t1.png}
+	\end{floatrow}
+	\caption{U velocity contours for t=0, t=1}
+	\label{fig:tg_u}
+\end{figure}
+
+Figure \ref{fig:tg_u} shows the velocity contours for the u component of velocity at the initial condition and at t=1.  The vortices can be seen, and their stationary aspect is observed by no change in center.  We can see the slight reduction in velocity by noting the smaller size of the inner yellow and blue circles.
+
+\begin{figure}[H]
+	\centering
+	\begin{floatrow}
+		\includegraphics[width=.5\columnwidth]{../finalprojdata/tg_p_Re100_t0.png}
+		\includegraphics[width=.5\columnwidth]{../finalprojdata/tg_p_Re100_t1.png}
+	\end{floatrow}
+	\caption{Pressure contours for t=0, t=1}
+	\label{fig:tg_p}
+\end{figure}
+
+Figure \ref{fig:tg_p} shows the contours for pressure at the initial condition and at t=1.  The vortices can be seen, with peaks and valleys staggered across the grid opposite that of velocity, and their stationary aspect is again observed by no change in center.  We can also again see the dissipation of pressure by noting the smaller size of the inner yellow and blue circles.
+
+\begin{figure}[H]
+	\centering
+	\begin{floatrow}
+		\includegraphics[width=.5\columnwidth]{../finalprojdata/tg_kindec.png}
+		\includegraphics[width=.5\columnwidth]{../finalprojdata/tg_veldiv.png}
+	\end{floatrow}
+	\caption{Total Kinetic Energy and Velocity Divergence over time (t=0 to 5)}
+	\label{fig:tg_evo}
+\end{figure}
+
+Figure \ref{fig:tg_evo} shows the decay in kinetic energy and velocity divergence over time for Reynolds numbers 10, 100, and 1000.  The numerical solution is compared to the analytic for kinetic energy, and they map directly on top of each other for all three Reynolds numbers.  Kinetic energy is calculated from the u,v velocity components in the numeric plots.  The corresponding velocity divergence stays below \num{4e-5}, close to the desired value of 0.  Both of these plots give additional confidence in this projector-corrector implementation, showing high accuracy at each time step.
+
+
+%======================================
+\section*{Problem 2: Lid-Driven Cavity}
+
+The lid-driven cavity problem is solved on a 128x128 square domain with unit sides.  The velocity over the lid is set to 1.  Initial condition is set to zero for u,v and p.  Boundary conditions are no-slip on the walls (left,right,bottom) and constant on the top for u,v.  Neumann is used for the pressure on all sides.  The 1982 paper by Ghia, Ghia, and Shin\cite{ghia} is utilized for comparing results.  Reynolds numbers 100, 400, and 1000 are solved.  With both U and L being 1, the nu value (dynamic viscosity) is just the inverse of Re.  The AB-2 method is set to a stop condition based on comparing one of the grid point u values from the Ghia paper with what is being computed numerically.  Table I of the paper has u velocities for grid points along a vertical line through the center, and we map the value for grid point 8 to the computational grid u(64,8).  Table II has v velocities across a horizontal line through the center, and comparison between grid point 9 and u(9,64) is reported, however just a comparison to the u value is used for a stop condition.
+
+Numerical computation utilizes a time step of 0.0001.  The relaxation parameter had a large effect on how quickly the PPE converged, as expected.  Experimenting with different values resulted in utilizing $\omega = 0.35$ for the fastest convergence, an under-relaxation value.  As the Reynolds number increases, the amount of time the simulation has to run in order to match the values in the Ghia paper increases, with Re=100 taking under a minute and Re=1000 taking about 25 minutes (utilizing a 2016 Macbook Pro running on a single processor, compiled with gfortran).
+
+\begin{figure}[H]
+	\centering
+	\begin{floatrow}
+		\includegraphics[width=.75\columnwidth]{../finalprojdata/ghia_stream.png}
+	\end{floatrow}
+	\caption{Streamlines from figure 3 in Ghia paper\cite{ghia}}
+	\label{fig:ghia_stream}
+\end{figure}
+
+\begin{table}[H]
+\begin{tabular}{ |c|c|c|c|c|c| } 
+ \hline
+	\text{Re} & \text{t} & \text{u(64,8)} & \text{Ghia u pt 8} & \text{v(9,64)} & \text{Ghia v pt 9} \\
+ \hline
+	100 & 5.4236998629858135 & -0.037169176367328007 & -0.03717 & 0.091023288567609884 & 0.09233 \\
+ \hline
+	400 & 20.205599489563610 & -0.081859047050324180 & -0.08186 & 0.18163870209667571 & 0.18360 \\
+ \hline
+	1000 & 46.159898833902844 & -0.18108900073746839 & -0.18109 & 0.27187814644320163 & 0.27845  \\
+ \hline
+\end{tabular}
+	\caption{Stop times with u,v value comparison to Ghia tables I and II}
+\label{tbl:stopvals}
+\end{table}
+
+Table \ref{tbl:stopvals} shows the stop times based on u values matching up, and the corresponding v values.  We see that the v value matches closely to the Ghia paper as well.  Note that values are in approximately the same grid location but not expected to have the exact same values.  Ghia used a 129x129 grid and possibly stored solution values at nodes.
+
+\begin{figure}[H]
+	\centering
+	\begin{floatrow}
+		\includegraphics[width=.5\columnwidth]{../finalprojdata/lid_stream_plain_Re100.png}
+		\includegraphics[width=.5\columnwidth]{../finalprojdata/lid_stream_vel_Re100.png}
+	\end{floatrow}
+	\caption{Streamlines for Re=100 plain and overlaid on velocity contours}
+	\label{fig:lid_re100_stream1}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\begin{floatrow}
+		\includegraphics[width=.5\columnwidth]{../finalprojdata/lid_stream_u_Re100.png}
+		\includegraphics[width=.5\columnwidth]{../finalprojdata/lid_stream_v_Re100.png}
+	\end{floatrow}
+	\caption{Streamlines for Re=100 overlaid on u,v contours}
+	\label{fig:lid_re100_stream2}
+\end{figure}
+
+Streamlines are generated with Tecplot and plotted on a plain background and on top of velocity magnitude contours along with individual u and v velocity contours.  We can see the streamlines match up well to the Ghia paper for this case of Re=100.  The bottom left and right corner vortices can be seen with an approximately similar size.  We note that the overall velocity magnitude stays the same in both corners, but the u and v magnitudes differ where the flow is coming off the wall.  The overall counter-clockwise circulation is seen from the flow driven over the top from left to right.  Streamlines start to get pulled towards the top left corner when they make it around there, with the center of the overall cavity vortex towards the top right corner.
+
+\begin{figure}[H]
+	\centering
+	\begin{floatrow}
+		\includegraphics[width=.5\columnwidth]{../finalprojdata/lid_stream_plain_Re400.png}
+		\includegraphics[width=.5\columnwidth]{../finalprojdata/lid_stream_vel_Re400.png}
+	\end{floatrow}
+	\caption{Streamlines for Re=400 plain and overlaid on velocity contours}
+	\label{fig:lid_re400_stream1}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\begin{floatrow}
+		\includegraphics[width=.5\columnwidth]{../finalprojdata/lid_stream_u_Re400.png}
+		\includegraphics[width=.5\columnwidth]{../finalprojdata/lid_stream_v_Re400.png}
+	\end{floatrow}
+	\caption{Streamlines for Re=400 overlaid on u,v contours}
+	\label{fig:lid_re400_stream2}
+\end{figure}
+
+Streamlines for Re=400 again compare favorably with the Ghia paper.  Items of note include the bottom right corner has a larger vortex than Re=100, and streamline calculations from Tecplot generated two separate vortices in the corner when choosing starting points.  The bottom left corner vortex is again slightly larger as well, and still smaller than the bottom right corner.  We see that the center of the main cavity vortex is starting to move closer to the center, and the top left corner seems to be sucking the flow back in with a stronger force, as the streamline corner is more peaked.
+
+\begin{figure}[H]
+	\centering
+	\begin{floatrow}
+		\includegraphics[width=.5\columnwidth]{../finalprojdata/lid_stream_plain_Re1000.png}
+		\includegraphics[width=.5\columnwidth]{../finalprojdata/lid_stream_vel_Re1000.png}
+	\end{floatrow}
+	\caption{Streamlines for Re=1000 plain and overlaid on velocity contours}
+	\label{fig:lid_re1000_stream1}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\begin{floatrow}
+		\includegraphics[width=.5\columnwidth]{../finalprojdata/lid_stream_u_Re1000.png}
+		\includegraphics[width=.5\columnwidth]{../finalprojdata/lid_stream_v_Re1000.png}
+	\end{floatrow}
+	\caption{Streamlines for Re=1000 overlaid on u,v contours}
+	\label{fig:lid_re1000_stream2}
+\end{figure}
+
+Trends from Re 100 to 400 continue at 1000, with the bottom right and left corner vortex areas growing, and top left corner being sucked back in.  Center of overall cavity is even closer to the center again.  Result compares favorably with the Ghia paper.  The main cavity streamlines appear thicker - they are multiple streamlines packed together - showing that particles are being pulled towards the center more and not all slowing in nicely separated thin streams, perhaps an indicator of turbulence to come.
+
+%======================================
+\newpage
+\bibliography{refs}
+
+%======================================
+\newpage
+\section*{Fortran Code}
+\lstinputlisting[language=fortran]{../cfd2d.f90}
+
+\newpage
+
+\section{Matlab Code}
+\lstset{
+  style      = Matlab-editor,
+  basicstyle = \mlttfamily,
+}
+\lstinputlisting{../fp.m}
+
+\end{document}
+
+
+
