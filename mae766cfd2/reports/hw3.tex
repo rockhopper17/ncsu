@@ -1,0 +1,101 @@
+% from aiaa template
+\documentclass[conf]{new-aiaa}
+%\documentclass[journal]{new-aiaa} for journal papers
+
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage[version=4]{mhchem}
+\usepackage{siunitx}
+\usepackage{longtable,tabularx}
+\setlength\LTleft{0pt} 
+%======================================
+
+% additions
+\graphicspath{ {figures/} }
+\usepackage{floatrow}
+\usepackage{ar}
+\usepackage{amstext} % for \text macro
+\usepackage{array}   % for \newcolumntype macro
+\usepackage{gensymb} % for degree symbol
+\newcolumntype{L}{>{$}l<{$}} % math-mode version of "l" column type
+\usepackage[numbered,framed]{matlab-prettifier}
+
+%\pagestyle{empty}
+
+\definecolor{listinggray}{gray}{0.9}
+\definecolor{lbcolor}{rgb}{0.9,0.9,0.9}
+\lstset{
+backgroundcolor=\color{lbcolor},
+    tabsize=4,    
+%   rulecolor=,
+    language=fortran,
+        basicstyle=\mlttfamily,
+        upquote=true,
+        aboveskip={1.5\baselineskip},
+        columns=fixed,
+        showstringspaces=false,
+        extendedchars=false,
+        breaklines=true,
+        prebreak = \raisebox{0ex}[0ex][0ex]{\ensuremath{\hookleftarrow}},
+        frame=single,
+        numbers=left,
+        showtabs=false,
+        showspaces=false,
+        showstringspaces=false,
+        identifierstyle=\mlttfamily,
+				keywordstyle=\color{blue}\mlttfamily,
+				stringstyle=\color{red}\mlttfamily,
+				commentstyle=\color[RGB]{34,139,34}\mlttfamily,
+				morecomment=[l][\color{magenta}]{\#}
+        %keywordstyle=\color[rgb]{0,0,1},
+        %commentstyle=\color[rgb]{0.026,0.112,0.095},
+        %stringstyle=\color[rgb]{0.627,0.126,0.941},
+        %numberstyle=\color[rgb]{0.205, 0.142, 0.73},
+%        \lstdefinestyle{C++}{language=C++,style=numbers}’.
+}
+
+\makeatletter
+\DeclareRobustCommand{\vol}{\text{\volumedash}V}
+\newcommand{\volumedash}{%
+  \makebox[0pt][l]{%
+    \ooalign{\hfil\hphantom{$\m@th V$}\hfil\cr\kern0.08em--\hfil\cr}%
+  }%
+}
+\makeatother
+
+%\usepackage{titlesec}
+%\titleformat*{\paragraph}{\large\bfseries}
+%======================================
+
+\begin{document}
+
+\centering
+
+\textbf{(2) Riemann Problem exact solutions for 1D compressible Euler}
+\bigskip
+
+\textbf{Sod shock tube}
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=1\columnwidth]{../data/rpexact_sod.png}
+	\caption{pressure, density, velocity profiles at t=0.2}
+	\label{fig:sod}
+\end{figure}
+
+\newpage
+\textbf{Lax-Harden shock tube}
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=1\columnwidth]{../data/rpexact_lax.png}
+	\caption{pressure, density, velocity profiles at t=0.15}
+	\label{fig:lax}
+\end{figure}
+
+%======================================
+\newpage
+\section*{Fortran Code}
+\lstinputlisting[language=fortran]{../rpexact.f90}
+
+\end{document}
+

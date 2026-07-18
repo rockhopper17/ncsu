@@ -1,0 +1,312 @@
+% from aiaa template
+\documentclass[conf]{new-aiaa}
+%\documentclass[journal]{new-aiaa} 
+
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage[version=4]{mhchem}
+\usepackage{siunitx}
+\usepackage{longtable,tabularx}
+\setlength\LTleft{0pt} 
+%======================================
+
+% additions
+\graphicspath{ {figures/} }
+\usepackage{floatrow}
+\usepackage{ar}
+\usepackage{amstext} % for \text macro
+\usepackage{array}   % for \newcolumntype macro
+\usepackage{gensymb} % for degree symbol
+\newcolumntype{L}{>{$}l<{$}} % math-mode version of "l" column type
+\usepackage[numbered,framed]{matlab-prettifier}
+
+%\pagestyle{empty}
+
+\definecolor{listinggray}{gray}{0.9}
+\definecolor{lbcolor}{rgb}{0.9,0.9,0.9}
+\lstset{
+backgroundcolor=\color{lbcolor},
+    tabsize=4,    
+%   rulecolor=,
+    language=fortran,
+        basicstyle=\mlttfamily,
+        upquote=true,
+        aboveskip={1.5\baselineskip},
+        columns=fixed,
+        showstringspaces=false,
+        extendedchars=false,
+        breaklines=true,
+        prebreak = \raisebox{0ex}[0ex][0ex]{\ensuremath{\hookleftarrow}},
+        frame=single,
+        numbers=left,
+        showtabs=false,
+        showspaces=false,
+        showstringspaces=false,
+        identifierstyle=\mlttfamily,
+				keywordstyle=\color{blue}\mlttfamily,
+				stringstyle=\color{red}\mlttfamily,
+				commentstyle=\color[RGB]{34,139,34}\mlttfamily,
+				morecomment=[l][\color{magenta}]{\#}
+        %keywordstyle=\color[rgb]{0,0,1},
+        %commentstyle=\color[rgb]{0.026,0.112,0.095},
+        %stringstyle=\color[rgb]{0.627,0.126,0.941},
+        %numberstyle=\color[rgb]{0.205, 0.142, 0.73},
+%        \lstdefinestyle{C++}{language=C++,style=numbers}’.
+}
+
+\makeatletter
+\DeclareRobustCommand{\vol}{\text{\volumedash}V}
+\newcommand{\volumedash}{%
+  \makebox[0pt][l]{%
+    \ooalign{\hfil\hphantom{$\m@th V$}\hfil\cr\kern0.08em--\hfil\cr}%
+  }%
+}
+\makeatother
+
+%\usepackage{titlesec}
+%\titleformat*{\paragraph}{\large\bfseries}
+%======================================
+
+\title{MAE 766 CFD\\Project 1: A Finite Element Program for Potential Flows}
+
+\author{Andrew Navratil}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+	A finite element method to solve potential flow using linear Lagrange basis functions is implemented to model two test cases.  The first test case is an internal flow past a channel with a circular bump on the bottom, using an unstructured grid of 1559 triangular elements.  The second test case is external flow past a circular cylinder, comparing four unstructured grids with 128, 512, 2048, and 8192 triangular elements.  A freestream velocity value of $V_x=1$ and $V_y=0$, with $V_n = 0$ at solid walls, is examined, resulting in Neumann boundary conditions when solving for the potential $\phi$.
+	The FEM solver is implemented in Fortran code.  Separate subroutines are coded for importing the grid, calculating grid geometry related metrics, building the stiffness matrix, building the load vector, calculating the flow quantities of velocity, and outputting data to files.  A second file is utilized with numerical method utility functions, and a makefile is used for compilation.  Two linear solution methods are compared, iterative conjugate gradient and direct Gaussian elimination.  The methods show little difference in execution time for all but the very fine grid, where conjugate gradient execution time is around 20 seconds and the Gauss elimination is close to 5 minutes.
+	Tecplot is utilized for plotting.  Contour plots of velocity potential and velocity magnitude are generated.  Plots of surface velocity on the top and bottom of the channel, and surface of cylinder, are generated.  Examination of the results shows a close match to expectations.  The channel bump shows velocity decrease near the leading and trailing edge corners of the bump and bottom wall to ${\sim}0.7V_{\infty}$, increase in velocity over the top to ${\sim}1.3V_{\infty}$, and a slight increase on the top wall above the dump to ${\sim}1.08V_{\infty}$.  The cylinder case shows stagnation points at the leading and trailing edges of the middle of the cylinder, with increase in velocity over the top and bottom of ${\sim}2V_{\infty}$.  The cylinder test case has a known analytic solution for the boundary conditions of a uniform freestream velocity, which is utilized for error calculations.  A grid refinement study is performed, showing the expected convergence.  Plotting the log of the L2 norm of the error versus the log of a grid spacing metric gives $\alpha = 0.74$ and $R^2 = 0.97$.
+	Future work could look at a refined grid for the channel bump flow, using a Gauss quadrature to calculate the L2 norm of the error for the cylinder grid refinement study, and using quadratic basis functions in the FEM implementation. 
+
+\end{abstract}
+
+\section{Introduction}
+\bigskip
+
+The finite element method (FEM) is a way to discretize a computational domain resulting in a linear system that can be solved by direct or iterative methods.  FEM was first applied in the field of structural analysis and was later utilized for modeling continuum problems, as is done here.  One major advantage of FEM over standard finite difference methods is its ability to handle computation over both structured and unstructured grids better.  The mathematics behind FEM has been put into a rigorous and formal framework that allows for analysis of error estimates and convergence criteria \cite{hirsch} (p.225), which is important in order to know how reliable a solution is compared to the physical reality .
+
+The FEM discretizes the spatial domain into a set of contiguous elements of arbitrary shape and specifies a continuous function of the unknowns across the domain.  The function is based on a variational formulation which utilizes weighted residuals as basis functions to create a shape function across an element \cite{luo}.  The set of global basis functions interpolate the value of the unknowns across the elements, and are defined as polynomials in standard FEM.  A linear combination of elemental shape functions across the discretized computational domain gives a global basis function.  Individual nodes each have an associated local basis function, which is a combination of the shape function from all elements in support of the node (all elements which contain the node as a vertex).  Unknowns are calculated at the nodes by solving a linear system, as each nodal basis function is dependent on coefficients defined in the multiple neighboring elements, resulting in a set of functions with multiple cascading dependencies.  FEM requires an integral formulation of the governing equations that are to be solved for the unknowns \cite{hirsch} (p.226).
+
+Velocity potential $\phi$, which satisfies a Laplacian $-\Delta\phi=0$, is the governing equation for potential flows \cite{luo} analyzed across two test cases.  The first test case is an internal flow past a channel with a circular bump on the bottom.  The second test case is an external flow past a circular cylinder.  It can be shown that if the discrete global basis function $B$ is continuous and its spatial first derivatives are also continuous and bounded on the domain, then it can contribute to a weak solution for the potential flow governing equation $\phi$ \cite{luo}.  The result is a weak solution for $\phi$ due to the piecewise continuity of the derivatives of $B$, which results in the first derivatives of $\phi$ not being defined at the nodes, or $\phi \in C^0$.  A strong solution to the Laplacian would see $\phi \in C^2$, or twice continuously differentiable.  The use of the discrete basis function and property of its first derivative forms a variational problem (equation \ref{eqn:variational}, which is a specific FEM discrete form of a more general continuous variational formulation).  The basis function acts as a weight function and the method of weighted residuals gives the weak solution to the problem posed by $\phi$ in solving equation $\ref{eqn:potential}$.
+
+\begin{align}
+	\begin{cases}
+		-\Delta\phi = 0 & \text{\ in\ }\Omega \\
+		\frac{\partial\phi}{\partial n} = g = v_n & \text{\ on \ } \Gamma
+	\end{cases}\label{eqn:potential}
+\end{align}
+\begin{align*}
+	\text{where\ \ \ \ }
+	\Omega &= \text{computation domain volume (bounded, open)} \\
+	\Gamma &= \text{domain boundary}
+\end{align*}
+
+\begin{align}
+	\int_{\Omega} \nabla \phi_h \bullet \nabla B_j d\Omega &= \int_{\Gamma} gB_j d\Gamma \text{\ \ \ \ \ j=1,2,...,N} \label{eqn:variational}
+\end{align}
+\begin{align*}
+	\text{where\ \ \ \ }
+	\phi_h &= \text{global linear finite element solution} \\
+	B_j &= \text{nodal basis function} \\
+	N &= \text{number of basis functions = number of nodes}
+\end{align*}
+
+The global solution $\phi_h$ is itself a linear combination of basis functions with coefficients that are the solutions to the velocity potential $\phi$ at a node.  The summation, when plugged into (\ref{eqn:variational}) gives the linear system to be solved $A\phi = R$.  The A matrix is known as the stiffness matrix, with R known as the load vector.  A is an SPD matrix (sparse, symmetric, positive-definite) \cite{luo}, a property which can be leveraged when choosing a linear solution algorithm.  The continuous version of the linear system is given in equation \ref{eqn:axb_cont}, with the discrete version that is implemented in code given in equation \ref{eqn:axb}.  
+
+\begin{align}
+	\phi_h &= \sum_{i=1}^N \phi_i B_i
+\end{align}
+\begin{align}
+	\sum_{i=1}^N \left( \int_{\Omega_h} \nabla B_i \bullet \nabla B_j d\Omega \right) \phi_i &= \int_{\Gamma} gB_j d\Gamma \text{\ \ \ \ \ j=1,2,...,N} \label{eqn:axb_cont} \\
+	\sum_{i=1}^N \sum_{j=1}^N \left( \frac{dB_i}{dx}\frac{dB_j}{dx} + \frac{dB_i}{dy}\frac{dB_j}{dy}  \right) \phi_i &= \sum_{k=1}^N (v_{k,x} \hat{n}_{k,x} + v_{k,y} \hat{n}_{k,y}) \frac{\Gamma_k}{2} \label{eqn:axb}
+\end{align}
+\begin{align*}
+	\text{where\ \ \ \ }
+	N &= \text{number of nodes} \\
+	\hat{n}_k &= \text{outward facing unit normal vector at boundary face} \\
+	v_k &= \text{given boundary condition velocity value (either 0 for wall or $v_{\infty}$ for freestream)} \\
+	\Gamma_k &= \text{boundary face area corresponding to node k for a particular face}\\
+		& \text{\ \ \ \ \ where $\Gamma_k$ = 0 if a node is not part of a boundary face}
+\end{align*}
+
+\section{Methodology}
+\bigskip
+
+Linear Lagrange basis functions are implemented over triangles for a 2D unstructured grid.  Grid files were provided, one for the bump and one for the cylinder.  The Lagrange basis gives coefficients for the variational formulation that are either 1 or 0, resulting in the local basis function at a node only involving the shape functions for neighboring elements (support of the node).  Barycentric coordinates $\lambda_i$ are used to construct the interpolation polynomials acting as the elemental shape functions.  The polynomials are only dependent on the geometry of the grid, and being linear, the derivatives are constants and also only dependent on geometry.  Linear basis elements also imply $B_i=\lambda_i$.
+
+\subsection{Read mesh file}
+\bigskip
+
+Code is written in Fortran to implement and compute the FEM, providing a solution to $\phi$.  Boundary conditions are given as Neumann BCs for $\frac{d\phi}{dx} = V_x,\frac{d\phi}{dy} = V_y$, where $V_{x,\infty} = 1, V_{y,\infty} = 0$ for freestream, and both are 0 at walls.  The code first reads a grid file and populates data structures for the connectivity matrix (list of global node numbers for each triangle element), the global node coordinates, and boundary face nodes.  The entries for the boundary contain a flag specifying which boundary condition should be implemented on that face.
+
+\subsection{Pre-processing}
+\bigskip
+
+Code then calculates the basis function derivatives (see equations \ref{eqn:dbdx},\ref{eqn:dbdy}) for each node and populates a corresponding data structure by iterating each element and adding the contributions from each elemental shape function to the global basis function.  The data structure stores six derivatives (one for each of the three nodes dx and dy), along with the volume of the element (area of the triangle in this case).  The boundary faces are then iterated over to calculate and store the unit normal vectors and face area (length of face in this case).
+
+\begin{align}
+	\frac{dB_i}{dx} &= \frac{d\lambda_i}{dx} = \frac{y_j-y_k}{D} \label{eqn:dbdx}\\
+	\frac{dB_i}{dy} &= \frac{d\lambda_i}{dy} = \frac{-(x_j-x_k)}{D} \label{eqn:dbdy}
+\end{align}
+\begin{align*}
+	\text{where\ \ \ \ }
+	i &= 1,2,3 \text{ (local node numbers in an element)} \\
+	x_i,y_i &= \text{global coordinates of local node i (or j or k)} \\
+	D &= 2\Delta_{123} = (y_3-y_1)(x_2-x_1) - (y_1-y_2)(x_1-x_3)
+\end{align*}
+
+\subsection{FEM solver: Build LHS}
+\bigskip
+
+The global stiffness matrix (A or the left hand side LHS of equation \ref{eqn:axb}) is next assembled on an element by element basis.  The elements are iterated over, and then each local node of the element is iterated over, retrieving their global node numbers.  Note that node number is a global sequential ordering of all nodes, where each global node then has a global x,y coordinate associated with it, which was utilized in the geometry metrics section to build the derivatives.  The node number is utilized to lookup its associated $\frac{dB_j}{dx}$ and $\frac{dB_j}{dy}$, where j in this case is the global node number.  A global basis function at a node is made up of the sum of local basis functions for the node from each of its support elements.  The data structure storing the basis function spatial derivatives per element will contain multiple entries for a specific global node number depending on all the elements it is a part of.  The global stiffness matrix contains i,j entries for all possible combinations of two node numbers (in order to satisfy the LHS portion of equation \ref{eqn:axb}), where i and j run from 1 to N (number of nodes).  Not all nodes are connected to every other node however, so many of the entries in A will be zero, leading to the sparse portion of A as an SPD matrix.  Elemental stiffness matrix entries are constructed for each local node combination i,j, where in this case i and j run from 1to 3 for each of the 3 nodes of the triangle element.  The local elemental stiffness matrix entry is $\frac{db_i}{dx}\frac{db_j}{dx} + \frac{db_i}{dy}\frac{db_j}{dy}$, where b here refers to the local element related portion of a nodes global basis function B.  This value is then added to the global stiffness matrix for the global node numbers of the corresponding local nodes.  In this fashion, the global stiffness matrix is constructed, where an entry A(i,i) will contain a combination of node i entries from all of its support elements, and an entry A(i,j) contains a value where the two nodes i and j are found together in an element.  The value for a combination entry, or the elemental stiffness matrix entry for a particular i and j from an element, is the same going from i to j or from j to i (as the derivative multiplication in equation \ref{eqn:axb} is commutative), leading to a symmetric matrix A where A(i,j) = A(j,i), the symmetric portion of the SPD matrix property.
+
+\subsection{FEM solver: Build RHS}
+\bigskip
+
+The global load vector (R or the right hand side RHS of equation \ref{eqn:axb}) is shown as a vector with entries for all nodes, however, to satisfy the governing equation condition where $\frac{d\phi}{dn}=g$ on the boundary $\Gamma$, code need only loop the boundary itself to calculate entries for the nodes associated with that boundary face, leaving all other entries equal to zero.  The boundary condition to apply is based upon a condition specified in the input grid file, where a value of 2 corresponds to a solid wall which sets the R value to 0, or a value of 4 which corresponds to a given freestream value (often read from a control file, but coded as a constant in this case) which is then utilized in the calculation with the face unit normals and area as in (\ref{eqn:axb}).
+
+\subsection{FEM solver: Solve linear system $A\phi=R$}
+\bigskip
+
+The linear system is then solved using a basic iterative conjugate gradient method without pre-conditioning, and direct Gauss elimination method for comparison.  The $\phi$ vector is initialized with all zeros.  It is noted that the solution method for the linear system arising from FEM is different than time integrating to a steady state solution arising from a finite difference or finite volume algorithm that might appear similar in nature.  The program here utilizes a separate module in a separate source code file to store the general linear system solution methods in a module that will contain many utility numerical methods for use in future programs.  A makefile is utilized to build the final program with appropriate dependencies built in order, in this case just the single additional utility code file coupled to the main program file.
+
+The solution of the linear system gives a result for the velocity potential in the $\phi$ vector.
+
+\subsection{Post-processing}
+\bigskip
+
+Desired flow quantities are calculated based upon the velocity potential.  The velocity vector (\ref{eqn:velvec}) and pressure coefficient (\ref{eqn:cp}) are calculated \cite{luo}.  The solution $\phi$ is a piecewise polynomial with inflection points at the nodes, therefore the derivative of phi is not defined directly at the nodes.  The velocity vector is calculated from the potential values at the nodes by utilizing a weighted average of the velocities for the node from all supporting elements.  The pressure coefficient is then calculated directly from the velocity magnitude at the node.
+
+\begin{align}
+	v_i &= \frac{\sum\limits_{j \in P}{v_j w_j}}{\sum\limits_{j \in P} w_j} \label{eqn:velvec}\\
+	C_{i,p} &= 1 - \left(\frac{|v_i|}{|v_{i,\infty}|}\right)^2 \label{eqn:cp}
+\end{align}
+\begin{align*}
+	\text{where\ \ \ \ }
+	i &= \text{global node (1,...,N)} \\
+	P &= \text{all nodes in support of i}\\
+	w_j &= \text{weighting value, taken as the volume of the corresponding element}
+\end{align*}
+
+A grid convergence study is performed on the external flow past a circular cylinder, which relies upon information related to the error between the numerical value and analytical value.  The error on the velocity magnitude is utilized for the study, with the analytical solution calculated as in equations (\ref{eqn:vxa}),(\ref{eqn:vya})\cite{hirsch}(p.559).  The L2 norm of the error (\ref{eqn:error}) is calculated with a quadrature using a weighting function corresponding to the sum of the volumes of the elements in support of the node, as in the calculation of the velocity vector itself.
+
+\begin{align}
+	v_x &= v_{\infty,x} \left[ 1 - \frac{a^2(x^2-y^2)}{(x^2+y^2)^2} \right] \label{eqn:vxa}\\
+	v_y &= -2 v_{\infty,y} a^2 \frac{xy}{(x^2+y^2)^2} \label{eqn:vya}\\
+	E &= \sqrt{\sum_{i=1}^N (|v_{numeric}| - |v_{analytic}|)^2 w_i} \label{eqn:error}
+\end{align}
+\begin{align*}
+	\text{where\ \ \ \ }
+	x,y &= \text{global node coordinates} \\
+	a &= \text{radius of cylinder} \\
+	w_i &= \text{weighting value, taken as the sum of the volumes for supporting elements to i}
+\end{align*}
+
+\newpage
+\section{Results}
+\bigskip
+
+\subsection{Channel Bump}
+\bigskip
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=1\columnwidth]{../data/bump_grid.png}
+	\caption{Channel Bump: grid}
+	\label{fig:bump_grid}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=1\columnwidth]{../data/bump.png}
+	\caption{Channel Bump: velocity potential and magnitude contours}
+	\label{fig:bump}
+\end{figure}
+
+Figure \ref{fig:bump_grid} shows the grid used for modeling the internal flow past a channel with a circular bump on the bottom.  Figure \ref{fig:bump} shows contour plots of the velocity potential and velocity magnitude (with three zoomed in portions).  Figure \ref{fig:bump_surfvel} shows a plot of velocity on the top and bottom surfaces of the channel.  The flow slows near the leading edge and trailing edge corners of the circular bump and accelerates over the bump, as expected.  The bottom velocity starts to trend downward almost immediately, implying information about the bump has reached the domain entrance, and appears to be a smooth parabola over the bump.  The corner velocity decrease is slightly greater (slower flow) on the trailing edge.  The top surface sees a slight increase in velocity just above the bump, also at a distance to feel effects of the bump at this freestream velocity.  
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=.6\columnwidth]{../data/bump_surfvel.png}
+	\caption{Channel Bump: velocity magnitude on surfaces}
+	\label{fig:bump_surfvel}
+\end{figure}
+
+\subsection{Cylinder}
+\bigskip
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=1\columnwidth]{../data/cylinder_grids.png}
+	\caption{Cylinder: grids}
+	\label{fig:cylinder_grids}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=1\columnwidth]{../data/cylinder_potential.png}
+	\caption{Cylinder: velocity potential contours}
+	\label{fig:cylinder_potential}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=1\columnwidth]{../data/cylinder_velocity.png}
+	\caption{Cylinder: velocity magnitude contours}
+	\label{fig:cylinder_velocity}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=1\columnwidth]{../data/cylinder_velocity_zoom.png}
+	\caption{Cylinder: zoom on very fine velocity magnitude}
+	\label{fig:cylinder_zoom}
+\end{figure}
+
+Figure \ref{fig:cylinder_grids} shows the grids used for modeling for the external flow past a circular cylinder.  Figures \ref{fig:cylinder_potential} and \ref{fig:cylinder_velocity} show contour plots of the velocity potential and velocity magnitude.  The potential contours show little to no difference between the grids.  The velocity magnitude shows a marked difference between the grids.  The coarse grid fails to capture the full range of velocity change, with the range progressively increasing as grid spacing is reduced.
+
+Figure \ref{fig:cylinder_zoom} shows a zoom on the left, right, top, and bottom portions of the cylinder for the very fine grid.  Figure \ref{fig:cylinder_surfvel} shows the velocity magnitude on the surface of the cylinder, as a function of angular position $\theta$ (given in degrees), calculated from the very fine grid.  The flow comes to a complete stop at a single point directly in the middle of the cylinder on the leading edge, at $\theta = 180^{\circ}$, and again in the middle of the trailing edge at $\theta = 0^{\circ}$.  There does not appear to be a difference as there did in the corners of the bump.  The flow increases to almost twice freestream over the top and bottom.  The locations for the velocity variations match closely with that of the half circle in the channel, however the lack of a bottom surface has a large impact in that the flow comes to a complete stop before separating around the cylinder.  The increase in speed over the top and bottom is also much more pronounced than in the channel.  Analytical values are available for this type of flow over a cylinder with a given freestream velocity in the x direction only, and results match expectations.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=.7\columnwidth]{../data/cylinder_surfvel.png}
+	\caption{Cylinder: velocity magnitude on surface}
+	\label{fig:cylinder_surfvel}
+\end{figure}
+
+\subsection{Cylinder: Grid Refinement Study}
+\bigskip
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=.7\columnwidth]{../data/gridstudy.png}
+	\caption{Cylinder: grid refinement study}
+	\label{fig:gridstudy}
+\end{figure}
+
+A grid refinement study for the flow over the circular cylinder is performed with 4 grids.  The coarse grid contains 128 elements, medium grid 512 elements, fine grid 2048 elements, and very fine grid 8192 elements - a refinement ratio of 4.  The linear FEM is expected to be second order accurate on $\phi$ and first order accurate on it's first derivatives such as velocity magnitude \cite{luo}.  The calculated value of the slope, mapping to $\alpha$, is 0.74, which is close to a predicted value of 1.  The difference could be attributed to the way the error function is calculated.   The linear least-squares fit shows a close match to a linear progression between the grids, with an $R^2$ value of 0.97.  The study shows we do achieve convergence with this FEM implementation, implying an increase in the number of grid elements resulting in smaller grid spacing h will continue to increase the accuracy of the solution.
+
+\newpage
+\section{Conclusion}
+\bigskip
+
+The FEM implementation on unstructured grids for internal and external potential flows on the two test cases show accurate results compared to expectations.  Implementation in Fortran code resulted in a linear system to be solved for the steady state problems, and computation times were minimal for these grids.  Comparison between conjugate gradient and Gauss elimination showed little difference in execution time up until the very fine grid, where conjugate gradient took around 20 seconds while Gauss elimination took closer to 5 minutes.  Internal flow over the bump shows the expected slow down of the flow near the corners of the bump and bottom wall, increase in velocity over the top of the bump, and a slight increase in velocity on the top surface above the bump.  External flow over a circular cylinder shows the expected stagnation of flow at the leading edge tip and trailing edge tip, with increase in velocity over the top and bottom.  Comparison between the two circular obstructions, with the channel containing a half circle, show a pronounced effect of having the wall of the channel, as velocity range is not as large as the cylinder.  The grid refinement study performed on the external flow past a cylinder shows the expected convergence for the linear FEM method, giving $\alpha = 0.74$, and $R^2 = 0.97$, for a linear least-squares fit between the 4 data points.  The slope of 0.74 matches closely with expected value of 1.
+
+Future work could look at increasing the number of elements for the internal flow to see if the velocity magnitudes increase/decrease even further, as they did with the grid refinement for the external flow.  Work could be done on the error calculation for the grid refinement study, such as using a Gauss quadrature, to get a better integration of the errors between numeric and analytic solutions across the entire computation domain.  Quadratic basis functions could be examined for the FEM implementation to asses the impact on accuracy compared to computation time.
+
+%======================================
+\newpage
+\bibliography{proj1refs}
+
+%======================================
+\newpage
+\section*{Fortran Code}
+\lstinputlisting[language=fortran]{../cfdfe.f90}
+\lstinputlisting[language=fortran]{../util.f90}
+
+\end{document}
+
