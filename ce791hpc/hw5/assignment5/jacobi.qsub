@@ -1,0 +1,45 @@
+#!/bin/bash -x
+#
+################################################################
+# NUM_CORES     - Number of cores to launch driver executable
+# MULTI_LEVEL   - Multi-level parallelism is enabled if set to 1
+# NUM_PGROUPS   - Number of pgroups to create
+# NUM_WORKERS   - Number of worker groups to create
+# OPT_CONF      - Optimizer configuration file
+# EVL_CONF      - Evaluator configuration file
+################################################################
+# Sample Torque job submition.
+
+### Job name
+#PBS -N jacobi
+### Declare job non-rerunable
+#PBS -r n
+### Output files
+#PBS -e $PBS_JOBNAME.err
+#PBS -o $PBS_JOBNAME.out
+### Mail to user
+#PBS -m ae
+### Number of nodes
+#PBS -l nodes=1:ppn=4
+
+# This job's working directory
+echo Working directory is $PBS_O_WORKDIR
+cd $PBS_O_WORKDIR    
+
+echo Running on host `hostname`
+echo Time is `date`
+echo Directory is `pwd`
+echo This jobs runs on the following nodes:
+echo `cat $PBS_NODEFILE`
+# Define number of processors
+NUM_CORES=`wc -l < $PBS_NODEFILE`
+echo This job has allocated $NUM_CORES processors
+
+## Output directory
+#OUTPUT_DIR=output
+#echo $PBS_NODEFILE
+#cat $PBS_NODEFILE
+
+# Run the parallel MPI executable
+mpirun -machinefile $PBS_NODEFILE -np $NUM_CORES ./fjacobi
+mpirun -machinefile $PBS_NODEFILE -np $NUM_CORES ./cjacobi

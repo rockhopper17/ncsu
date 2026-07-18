@@ -1,0 +1,88 @@
+\documentclass[a4paper]{article}
+
+%% Language and font encodings
+\usepackage[portuges]{babel}
+\usepackage{fontspec}
+
+%% Sets page size and margins
+\usepackage[a4paper,top=3cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm]{geometry}
+
+%% Useful packages
+\usepackage{amsmath,amsthm,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage[colorinlistoftodos]{todonotes}
+\usepackage[colorlinks=true, allcolors=blue]{hyperref}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\providecommand{\C}{\mathbb{C}}
+
+\theoremstyle{definition}
+\newtheorem{defin}{Definição}
+
+\theoremstyle{plain}
+\newtheorem{theorem}[defin]{Teorema}
+\newtheorem{corollary}[defin]{Corolário}
+
+
+
+\title{Laboratório de Matemática --- Ficha N}
+
+\author{Número: xxxxx Nome\\
+        Número: yyyyy Nome\\
+}
+
+\date{dd/mm/yyyy}
+
+\begin{document}
+\maketitle
+
+%\begin{abstract}
+%Your abstract.
+%\end{abstract}
+
+\section{Introdução do tema}
+
+\emph{\small Incluir aqui uma breve descrição do tema}
+
+\begin{defin}
+Um triângulo diz-se \emph{rectângulo} se tiver um ângulo recto.
+\end{defin}
+
+\begin{theorem}[Pitágoras]
+Num triângulo rectângulo de lados $a$, $b$ e $c$, em que $c$ é o lado maior, tem-se a igualdade
+$$ a^2 + b^2 = c^2 $$
+\end{theorem}
+
+\begin{corollary}
+No plano cartesiano $\R^2$, a distância entre os pontos $A=(a_1,a_2)$ e $B=(b_1,b_2)$ é igual a
+$$ \sqrt{(a_1-b_1)^2 + (a_2-b_2)^2} $$
+\end{corollary}
+\section{Trabalho realizado}
+
+
+%Podem inserir gráficos, usando \includegraphics: por exemplo,
+%\includegraphics[width=0.5\linewidth]{cloud}
+%
+% Veremos na aula como fazer upload de imagens para usar aqui
+
+Usando o Geogebra, realizámos os seguintes passos:
+
+\begin{enumerate}
+\item usando a linha de \emph{input}, construímos dois pontos \texttt{A=(a1,a2)} e \texttt{B=(b1,b2)}
+\item construímos um ponto $C$, de coordenadas $(b1,a2)$
+\item observamos que o triângulo $[ABC]$ é rectângulo em $C$
+\item calculámos a distância entre $A$ e $B$, usando o comando \texttt{d1 = Distance(A,B)}.
+\item calculámos a expressão $\sqrt{(a_1-b_1)^2 + (a_2-b_2)^2}$, usando o commando\\ \texttt{d2=sqrt((x(A)-x(B))\^2+sqrt(y(A)-y(B))\^2}
+
+\item fazendo variar os pontos $A$ e $B$ verificámos que os valores de \texttt{d1} e de \texttt{d2} são sempre iguais entre si.
+\end{enumerate}
+
+\section{Conclusões}
+
+As nossas experiências são consistentes com a fórmula conhecida para a distância entre dois pontos.
+
+%expor aqui as conclusões que retiraram do trabalho
+
+\end{document}

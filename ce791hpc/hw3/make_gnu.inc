@@ -1,0 +1,6 @@
+CC = cc
+CFLAGS = -O3
+FF = gfortran
+FFLAGS = -O3
+CPPFLAGS =
+LDFLAGS = -O3

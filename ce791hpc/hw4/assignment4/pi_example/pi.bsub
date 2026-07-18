@@ -1,0 +1,6 @@
+#!/bin/csh
+#BSUB -n 4
+#BSUB -o pi.out
+#BSUB -e pi.err
+mpiexec ./cpi
+mpiexec ./fpi
