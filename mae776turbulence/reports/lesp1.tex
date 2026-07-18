@@ -1,0 +1,344 @@
+% from aiaa template
+\documentclass[conf]{new-aiaa}
+%\documentclass[journal]{new-aiaa} for journal papers
+
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage[version=4]{mhchem}
+\usepackage{siunitx}
+\usepackage{longtable,tabularx}
+\setlength\LTleft{0pt} 
+%======================================
+
+% additions
+\graphicspath{ {figures/} }
+\usepackage{floatrow}
+\usepackage{ar}
+\usepackage{amstext} % for \text macro
+\usepackage{array}   % for \newcolumntype macro
+\usepackage{gensymb} % for degree symbol
+\newcolumntype{L}{>{$}l<{$}} % math-mode version of "l" column type
+\newcolumntype{R}{>{$}r<{$}} % math-mode version of "r" column type
+\usepackage[numbered,framed]{matlab-prettifier}
+
+\pagestyle{empty}
+
+\definecolor{listinggray}{gray}{0.9}
+\definecolor{lbcolor}{rgb}{0.9,0.9,0.9}
+\lstset{
+backgroundcolor=\color{lbcolor},
+    tabsize=4,    
+%   rulecolor=,
+    language=fortran,
+        basicstyle=\mlttfamily,
+        upquote=true,
+        aboveskip={1.5\baselineskip},
+        columns=fixed,
+        showstringspaces=false,
+        extendedchars=false,
+        breaklines=true,
+        prebreak = \raisebox{0ex}[0ex][0ex]{\ensuremath{\hookleftarrow}},
+        frame=single,
+        numbers=left,
+        showtabs=false,
+        showspaces=false,
+        showstringspaces=false,
+        identifierstyle=\mlttfamily,
+				keywordstyle=\color{blue}\mlttfamily,
+				stringstyle=\color{red}\mlttfamily,
+				commentstyle=\color[RGB]{34,139,34}\mlttfamily,
+				morecomment=[l][\color{magenta}]{\#}
+        %keywordstyle=\color[rgb]{0,0,1},
+        %commentstyle=\color[rgb]{0.026,0.112,0.095},
+        %stringstyle=\color[rgb]{0.627,0.126,0.941},
+        %numberstyle=\color[rgb]{0.205, 0.142, 0.73},
+%        \lstdefinestyle{C++}{language=C++,style=numbers}’.
+}
+
+\makeatletter
+\DeclareRobustCommand{\vol}{\text{\volumedash}V}
+\newcommand{\volumedash}{%
+  \makebox[0pt][l]{%
+    \ooalign{\hfil\hphantom{$\m@th V$}\hfil\cr\kern0.08em--\hfil\cr}%
+  }%
+}
+\makeatother
+
+%\usepackage{titlesec}
+%\titleformat*{\paragraph}{\large\bfseries}
+%======================================
+
+\title{MAE 776 Turbulence\\LES Project: Turbulence Statistics \#1}
+
+\author{Andrew Navratil}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+	A set of velocity data from a large-eddy simulation of a turbulent shear layer is statistically analyzed.  The average u velocity is 470 m/s, and average v velocity is 3.4 m/s.  The u variance is 17547 m\textsuperscript{2}/s\textsuperscript{2}, v variance is 5257 m\textsuperscript{2}/s\textsuperscript{2}, and covariance is -4523 m\textsuperscript{2}/s\textsuperscript{2}.  The correlation coefficient R is -0.47, showing a fairly strong negative correlation between the two velocity quantities.  Probability distributions (PDFs) are generated for the standardized fluctuations ($U=u'/\sigma_u,V=v'/\sigma_v$), which show a close following of a Gaussian distribution in both cases.  Various bin numbers are analyzed, with a value of 25 bins chosen for both U and V for additional analysis.  The joint PDF is calculated and displayed in contour plots, both reflecting the fairly strong negative correlation R value.  Marginals are generated from the joint PDF, mapping directly to the individual PDFs.  The product of the marginals is calculated and plotted, showing a difference with the joint PDF, again confirming that there is a statistical correlation between the two quantities.  The correlation coefficient is also calculated from the joint pdf, matching closely to the R value calculated from the covariance ($R_{covar} = -0.47098, R_{joint} = -0.47143$).  The values are not exact matches due to the number of bins chosen when calculating the joint PDF, and in increase in bins could produce a closer match.  The autocorrelations for both U and V with themselves are calculated and plotted, resulting in integral time scales $\tau_{I,U} = \num{1.75e-5}s$ and $\tau_{I,V} = \num{3.62e-6}s$.
+
+	Statistical analysis of the turbulent data allows for insight into how the two velocity fluctuations are not independant of one another, but do have a correlation in this shear layer.  Additional efforts to produce a closure model for this type of flow could make use of the knowledge around the correlations to help produce an accurate model.
+
+\end{abstract}
+
+%===================================================================================
+\section{Velocity Expectation, Variance, Covariance}
+\bigskip
+
+The expectations for u,v, their variances and covariance are calculated from the time averages of u and v themselves for the discrete set of turbulent data provided.  The derivation of the variance using the definition of the fluctuation leads to the formula using velocity values directly without need to calculate the actual fluctuation first.  Table \ref{tbl:mainstats} shows the calculated values.  The average velocity in the u direction is 470 m/s, and in the v direction is 3.4 m/s.  Figure \ref{fig:uvraw} shows a plot of the raw values.  The u velocity hovers mostly around it's average, however a large dip into a negative value can be observed near $t = 0.0003$.
+
+\begin{align}
+	\overline{u} &= \frac{1}{N} \sum_{i=1}^N u(i) = \langle u \rangle &
+	\overline{v} &= \frac{1}{N} \sum_{i=1}^N v(i) = \langle v \rangle\\
+	\overline{u'u'} &= \left(\frac{1}{N} \sum_{i=1}^N u(i)^2 \right) - \overline{u}^2 = \langle u'u' \rangle &
+	\overline{v'v'} &= \left(\frac{1}{N} \sum_{i=1}^N v(i)^2 \right) - \overline{v}^2 = \langle v'v' \rangle \\
+	\overline{u'v'} &= \left(\frac{1}{N} \sum_{i=1}^N u(i)v(i) \right) -
+		(\overline{u} \ \overline{v}) = \langle u'v' \rangle & \\
+	R_{u'v'} &= \frac{\langle u'v' \rangle}{\langle (u')^2 \rangle \langle (v')^2 \rangle}
+\end{align}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|L|R|L|R|}
+	\hline
+	\overline{u} & 470.49 \ m/s& \overline{v} & 3.4258 \ m/s \\
+	\hline
+	\overline{u'u'} & 17547 \ m^2/s^2 & \overline{v'v'} & 5256.9 \ m^2/s^2 \\
+	\hline
+	\overline{u'v'} & -4523.4 \ m^2/s^2 & & \\
+	\hline
+	R_{u'v'} & -0.47098 & & \\
+	\hline
+\end{tabular}
+	\caption{Main statistics}
+\label{tbl:mainstats}
+\end{table}
+
+The u variance (mean-square fluctuation), as seen in table \ref{tbl:mainstats}, is about three times that of the v variance.  The covariance between u and v - Reynolds stress - is also calculated.  The Reynolds stress term can be found when using the Reynolds decomposition of the velocity field (into it's mean and fluctuation) while taking the mean of the Navier-Stokes (conservation of momentum) equations.  The Reynolds stress term, $\langle u'v' \rangle$, will end up as an extra term in the equation, and leaves the full set of the Reynolds form of the evolution equations unclosed.  It is significant for turbulence as this momentum transferred by the fluctuations in the velocity field is the predominant means that a flow transports turbulence.  An accurate closure model for the Reynolds stress term is required, still a major outstanding topic of research.
+
+The covariance value is also used in the calculation of the correlation coefficient to get an idea of how the two fluctuations in u and v are correlated.  Values range from +1 to -1, where a value of +1 indicates a positive correlation (as one quantity increases so does the other), a negative value indicates a negative correlation, and a value of 0 indicates no correlation where the two quantities are statistically independent.  The value here of $-0.47098$, being negative and midway from 0 to 1, indicates a fairly strong negative correlation that is not direct but should be noticeable.  This can be seen in figure \ref{fig:uvraw}(b), a zoomed in portion of the raw velocity plot in (a).  The u velocity in red can be seen to decrease as the v velocity in blue increases from t=0.0005 to about t=0.0006, and then vice versa near t=0.0006 and after.
+
+\begin{figure}[H]
+	\centering
+	\begin{floatrow}
+		\includegraphics[width=.5\columnwidth]{../data/uv_raw.png}
+		\includegraphics[width=.5\columnwidth]{../data/uv_raw_zoom.png}
+	\end{floatrow}
+	\caption{u,v raw data plots}
+	\label{fig:uvraw}
+\end{figure}
+
+%===================================================================================
+\section{PDFs - Individual}
+\bigskip
+
+Figures \ref{fig:pdf_indiv1},\ref{fig:pdf_indiv2}, and \ref{fig:pdf_indiv3} show probability distributions - probability density functions (PDFs) - for the standardized fluctuations using various numbers of bins.  The PDF gives the probability of finding a value in the data set of the standardized fluctuation falling within a particular bin (between $U$ and $U + \Delta U$), with a range of values from 0 to 1 (0\% to 100\%).  The standardized fluctuation of u velocity is given as $U = u'/\sigma_u$, and similarly for v.  The fluctuation and standard deviation are given in equations (\ref{eqn:fluc}) and (\ref{eqn:std}).  The sample space for U extends from -3.8 to +2.1, and for V it extends from -2.9 to +3.5.  A Gaussian distribution - normal or bell curve - is plotted for comparison, and the spread of the fluctuation for this turbulent data follows it closely for both quantities.  A normal distribution expects to find 99.7\% of data within 3 standard deviations, 68\% within 1, and 95\% within 2.  The U PDF curve follows the bell curve in the negative direction, reaching values below 3 standard deviations in that direction, while only reaching near 2 in the positive direction.  This implies there is perhaps some characteristic of the flow that is pulling back on the velocity in the u direction in a stronger fashion when it wants to increase than it does upon a decrease.  Near the peak for U however, there is a trend that sees slightly more values within 1 sigma above of the mean and slightly less below (observing the PDF lines extending out to the right of the bell curve near +1 sigma and also to the right of the bell curve from -1 to 0 sigma).  The V PDF curve follows the normal distribution in a much closer fashion than the U curve, with only a slight deviation showing an increase in the probability of finding a v fluctuation in the -1 to 0 sigma range.  Slight deviations to the right also occur near $\pm$2.
+
+The curves for bins of 250 and greater are separated out in figure \ref{fig:pdf_indiv2} in order to still discern the curves for the bins from 10 to 100 in figure \ref{fig:pdf_indiv1}.  The larger number of bins show large fluctuations in the spread itself, distorting an observation of the overall trend following closely with the normal distribution.  The best bin number was chosen as 25, being the smoothest curve that still captured the major changes in the variation of the fluctuation, shown in figure \ref{fig:pdf_indiv3}.
+
+\begin{align} 
+	u' &= u - \langle u \rangle \label{eqn:fluc} \\
+	\sigma &= \sqrt{(\langle (u')^2 \rangle)} \label{eqn:std} \\ \nonumber\\
+	\text{where\ \ \ \ }
+	\langle u \rangle &= \bar{u} \text{ (for discrete sample space)} \nonumber
+\end{align}
+
+The PDF itself is calculated as in equation (\ref{eqn:pdf_indiv}), for a generic sample space variable W.  The computer program takes advantage of the uniform bin lengths when counting by looping all the data points only once, calculating the bin number of the current point by taking the difference of the value with the overall minimum and dividing by the bin length.  Edge cases of the current value equaling the min or max are handled.  The PDF is normalized by not just the total number of bins, but also the bin length, in order to ensure the integration in (\ref{eqn:pdf_integ}) is satisfied, which is an important statistical property of the probability density function.
+
+%\begin{align} \label{eqn:pdf_indiv}
+	%f(\bar{W}_m) &= \frac{N_m}{N \Delta W} 
+%\end{align}
+%\begin{center}
+%\begin{align*}
+	%N &= \text{total number of bins} \\
+	%\text{where\ \ \ \ }
+	%N_m &= \text{number of values in bin m} \\
+	%\Delta W &= \text{bin length} (W_{m+1} - W_m)
+%\end{align*}
+%\end{center}
+
+%\begin{align} \label{eqn:pdf_integ}
+	%\int_{-\infty}^{\infty} f(W)dW &= 1
+%\end{align}
+
+\begin{align} 
+	f(\bar{W}_m) &= \frac{N_m}{N \Delta W} \label{eqn:pdf_indiv}\\ 
+	\int_{-\infty}^{\infty} f(W)dW &= 1 \label{eqn:pdf_integ}\\ \nonumber\\
+	\text{where\ \ \ \ }
+	N &= \text{total number of bins} \nonumber \\
+	N_m &= \text{number of values in bin m} \nonumber \\ 
+	\Delta W &= \text{bin length} (W_{m+1} - W_m) \nonumber \\
+	\bar{W}_m &= \text{midpoint of bin m} \nonumber
+\end{align}
+
+\begin{figure}[H]
+	\centering
+	\begin{floatrow}
+		\includegraphics[width=.5\columnwidth]{../data/updf_all.png}
+		\includegraphics[width=.5\columnwidth]{../data/vpdf_all.png}
+	\end{floatrow}
+	\caption{Probability distributions for $u'/\sigma_u$ and $v'/\sigma_v$ (10-100 bins)}
+	\label{fig:pdf_indiv1}
+\end{figure}
+\begin{figure}[H]
+	\begin{floatrow}
+		\includegraphics[width=.5\columnwidth]{../data/updf_all_high.png}
+		\includegraphics[width=.5\columnwidth]{../data/vpdf_all_high.png}
+	\end{floatrow}
+	\caption{Probability distributions for $u'/\sigma_u$ and $v'/\sigma_v$ (250-1000 bins)}
+	\label{fig:pdf_indiv2}
+\end{figure}
+\begin{figure}[H]
+	\begin{floatrow}
+		\includegraphics[width=.5\columnwidth]{../data/updf_25.png}
+		\includegraphics[width=.5\columnwidth]{../data/vpdf_25.png}
+	\end{floatrow}
+	\caption{Probability distributions for $u'/\sigma_u$ and $v'/\sigma_v$ (25 bins)}
+	\label{fig:pdf_indiv3}
+\end{figure}
+
+%===================================================================================
+\section{PDFs - Joint}
+\bigskip
+
+Figure \ref{fig:joint} shows contour plots of the joint PDF for U and V, which allows another view into the correlation between the two quantities.  It describes the probability of finding a data point where both the U and V values fall in a particular bin, where the bin mapping is 2-D with the U range on one axis and the V range on the other - see the continuous form in (\ref{eqn:joint_cont}) and discrete form for an individual bin m in (\ref{eqn:joint_discrete}).  The joint PDF is calculated using 25 bins for both U and V.  The contour plots show a peak, in red, where U is between 0 and +1 sigma with V between 0 and -1 sigma, at a probability of about 18\%.  This shows the highest probability is finding a positive u fluctuation with a negative v fluctuation within one sigma of their means.  The negative correlation is as expected from the negative R value.  The shape of the contour beginning around 10\% probability, in green, is oval, and typical of a joint distribution that has correlation, with the skew direction of the long axis reflecting the negative aspect.  It is centered approximately in the middle of the standard deviation of these standardized fluctuations (sigma values of 0 and 0) with a long axis running from +2 U to +2 V.  The spread of the oval is relatively large, reflecting the medium level correlation (R=-0.47).  A larger R value might see a sharper peak and less spread.  The oval shape also reflects the similarities of both individual PDFs to the Gaussian distribution in the 2-D joint distribution.
+
+\begin{align} 
+	f_{12}(W_{1m},W_{2m}) &= P((W_{1m} \leq W_1 < (W_{1m}+\Delta W_1)),(W_{2m} \leq W_2 < (W_{2m}+\Delta W_2))) \label{eqn:joint_discrete} \\
+	f_{12}(W_{1},W_{2}) &\equiv \frac{\partial^2F_{12}(W_1,W_2)}{\partial W_1 \partial W_2} \label{eqn:joint_cont} \\
+	\text{where\ \ \ \ }
+	F_{12}(W_1,W_2) &= P(W_1<W_{1m},W_2<W_{2m}) \nonumber\\
+	& \text{(cumulative distribution of $W_1$ and $W_2$)} \nonumber \\
+	W_{1m} &= \text{value of $W_1$ in a particular bin m}
+\end{align}
+
+The joint PDF is calculated in a similar fashion to the individual PDFs, by finding the 2-D bin where a data point falls, counting and normalizing to determine the probability in the 2-D space.  The joint PDF also holds the same general PDF property where the sum of all the probabilities sums to 1, or 100\%, as seen in equation \ref{eqn:joint_integ}.
+
+The expectation of some other function of the two quantities can be determined from the joint PDF as well, as in equation (\ref{eqn:Q}).  This property is utilized to calculate the correlation coefficient from the joint PDF, where $Q(W_1,W_2) = u'v'/(\sigma_u \sigma_v)$, resulting in a value of $\overline{u'v'}/(\sigma_u \sigma_v) = -0.47143$.  This compares closely to the original value of $R_{u'v'} = -0.47098$.  The values are not exact due to the binning nature of the PDF and using the midpoint values of u' and v' to calculate R from the joint PDF.  Using more bins to calculate a joint PDF could improve the results.
+
+\begin{align} 
+	\int_{-\infty}^{\infty} \int_{-\infty}^{\infty} f_{12}(W_1,W_2)dW_1dW_2 &= 1 \label{eqn:joint_integ} \\
+	\int_{-\infty}^{\infty} \int_{-\infty}^{\infty} Q(W_1,W_2)f_{12}(W_1,W_2)dW_1dW_2 &= \langle Q(W_1,W_2) \rangle \label{eqn:Q}
+\end{align}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|L|R|}
+	\hline
+	\overline{u'v'}/(\sigma_u \sigma_v) & -0.47143 \\
+	\hline
+\end{tabular}
+	\caption{R from joint PDF}
+\label{tbl:jointR}
+\end{table}
+
+\begin{figure}[H]
+	\centering
+	\begin{floatrow}
+		\includegraphics[width=.5\columnwidth]{../data/joint_2D.png}
+		\includegraphics[width=.5\columnwidth]{../data/joint_3D.png}
+	\end{floatrow}
+	\caption{Joint probability distribution for $u'/\sigma_u$ , $v'/\sigma_v$}
+	\label{fig:joint}
+\end{figure}
+
+%===================================================================================
+\section{PDFs - Marginal}
+\bigskip
+
+A PDF for one of the individual components can be pulled back out of the joint PDF, as seen from equation (\ref{eqn:marginal_integ}), called a marginal PDF or marginal.  Marginals for both U and V were calculated (U by integrating the joint PDF over dV, and V by integrating the joint PDF over dU).  Plotting the marginals (see figure \ref{fig:marginals}) shows a direct mapping to the original individual PDFs, with integrations summing to 1 as expected.  The product of the marginals (figure \ref{fig:marginal_product}) shows a contour again centered around 0,0, but it does not look like the joint PDF contour, implying there is a dependence between U and V.  Had they been independent, we would expect the joint PDF to look exactly like the product of the marginals.  A quantitative comparison of the difference is shown in the second plot of figure \ref{fig:marginal_product}.
+
+\begin{align*}
+	f_{12}(W_1,W_2) &= f(W_1)f(W_2) \implies \text{$W_1,W_2$ statistically independent} \\
+	f_{12}(W_1,W_2) &\ne f(W_1)f(W_2) \implies \text{$W_1,W_2$ statistically correlated, and product of marginals has no meaning} \\
+\end{align*}
+
+
+\begin{align} 
+	\int_{-\infty}^{\infty} f_{12}(W_1,W_2)dW_1 &= f(W_2) \label{eqn:marginal_integ}
+\end{align}
+
+\begin{figure}[H]
+	\centering
+	\begin{floatrow}
+		\includegraphics[width=.5\columnwidth]{../data/u_marginal.png}
+		\includegraphics[width=.5\columnwidth]{../data/v_marginal.png}
+	\end{floatrow}
+	\caption{Marginal PDFs for U,V}
+	\label{fig:marginals}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\begin{floatrow}
+		\includegraphics[width=.5\columnwidth]{../data/marginal_product.png}
+		\includegraphics[width=.5\columnwidth]{../data/marginal_diff.png}
+	\end{floatrow}
+	\caption{Marginal product and difference to joint}
+	\label{fig:marginal_product}
+\end{figure}
+
+%===================================================================================
+\section{Autocorrelation}
+\bigskip
+
+The time scales of a turbulent flow can be looked at by observing what the flow is doing at different points in time and comparing.  One of these multi-time statistics is called the autocorrelation, which looks at the autocovariance (equation (\ref{eqn:autocovar})) normalizing to the autocorrelation function (equation (\ref{eqn:autocorel})).  By looking at various values of $\tau$, one can get a sense of how long the turbulent fluctuation of a quantity stays correlated with itself (for example, how long the shape of an eddy at time $t+\tau$ resembles it's shape at time $t$).  When the plot of $\rho(\tau)$ enters into negative territory, the fluctuations in the particular quantity are no longer correlated.  Figure \ref{fig:auto} shows the plot of $\rho(\tau)$for both U and V.  The curve starts at 1 where $\tau=0$ (so comparing at the same time value), and decreases from there as the time is shifted.  The turbulent fluctuations seem to average near 0 over time, where there is no correlation, and periodically both positively and negatively correlate with the original value.  The important aspect to the curve is where it first crosses from positive into negative, and this area can be seen in a zoomed in plot in figure \ref{fig:auto_zoom}.
+
+The autocorrelation function can be integrated from time $t$ to the time where it first turns negative $\tau_0$ in order to get a decorrelation time, or the integral time scale $\tau_I$ (equation \ref{eqn:inttimescale}).  The values calculated for this flow are $\tau_{I,U} = \num{1.75e-5}$ and $\tau_{I,V} = \num{3.62e-6}$ (table \ref{tbl:inttimescale}). 
+
+\begin{align}
+	R(\tau) &\equiv \langle u'(t)u'(t+\tau) \rangle \label{eqn:autocovar}\\
+	\rho(\tau) &\equiv \langle u'(t)u'(t+\tau) \rangle / \langle u'(t)^2 \rangle \label{eqn:autocorel} \\
+	\tau_I &= \int_0^{\tau_0} \rho(\tau)d\tau \label{eqn:inttimescale}\\
+	\text{where\ \ \ \ }
+	\tau_0 &= \text{value of $\tau$ where $\rho(\tau)$ first crosses x-axis} \nonumber
+\end{align}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|L|R|}
+	\hline
+	\tau_{I,U} & \num{1.75e-5} \ s \\
+	\hline
+	\tau_{I,V} & \num{3.62e-6} \ s \\
+	\hline
+\end{tabular}
+	\caption{Integral time scales of U,V}
+\label{tbl:inttimescale}
+\end{table}
+
+
+\begin{figure}[H]
+	\centering
+	\begin{floatrow}
+		\includegraphics[width=.5\columnwidth]{../data/u_auto.png}
+		\includegraphics[width=.5\columnwidth]{../data/v_auto.png}
+	\end{floatrow}
+	\caption{Autocorrelation on U,V}
+	\label{fig:auto}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\begin{floatrow}
+		\includegraphics[width=.5\columnwidth]{../data/u_auto_zoom.png}
+		\includegraphics[width=.5\columnwidth]{../data/v_auto_zoom.png}
+	\end{floatrow}
+	\caption{Autocorrelation on U,V (zoomed in)}
+	\label{fig:auto_zoom}
+\end{figure}
+
+
+
+%===================================================================================
+\newpage
+\section*{Fortran Code}
+\lstinputlisting[language=fortran]{../cfdles.f90}
+
+\end{document}
+
+
+
