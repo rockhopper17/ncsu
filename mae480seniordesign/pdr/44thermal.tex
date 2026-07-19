@@ -1,0 +1,154 @@
+
+\subsection{Thermal}
+The thermal control system of the CubeSat ensures that the spacecraft can survive the hostile thermal environment of space. Each component can only survive a certain range of temperatures, and the failure of certain components, such as the battery, would result in a critical mission failure. Furthermore, a sun-synchronous orbit presents the challenge of constant thermal interaction with the sun. To facilitate mission success, the thermal control system must balance efficiency and effectiveness with the weight, space, and power constraints of a 3U CubeSat. 
+
+There are many different specific thermal control technologies, such as heaters, multi-layered insulation, coolers, etc. Many of these technologies are used in combination with each other. There are two main configurations of thermal control: passive and active. Passive systems do not to require power and focus on altering the thermal properties of components or of the CubeSat itself to achieve thermal control. Active systems tend to require power, and while they are general more dynamic and precise with their control, they are usually more complicated to integrate into the CubeSat system \cite{thermo}. Note that the two systems are not mutually exclusive in their implementation. Often, a spacecraft will have thermal control technologies from both configurations, and larger spacecrafts will have an amalgamation of both. The following sections outline the different types of technologies belonging to active and passive thermal control systems. \\
+\subsubsection{MLI Blankets}
+Multi-layered insulation (MLI) blankets serve as a barrier to both protect against heat fluxes and to limit excessive dissipation of heat \cite{thermo}. They are a common component of thermal control in large satellites, but not on small satellites, where the blankets run into a number of problems. Their effectiveness decreases with size, to the point where the volume they require might not be worth the protection they provide. MLI blankets are also delicate and get snagged during deployment \cite{thermo}. 
+
+\subsubsection{Paints/Tapes}
+Thermal coatings, including paints and tapes, are another common type of passive thermal control. Paints alter the thermal properties of the surface they are applied to, such as absorptivity and infared emissivity \cite{thermo}. Thermal tapes are used as insulators, radiating internal and rejecting external heat. This makes them ideal for insulating wires and cables. Thermal coatings in general are more easily implemented than MLI blankets, as they take up much less space, and are not prone to similar problems, such as snagging. 
+
+\subsubsection{Sunshields}
+Sunshields operate similarly to the literal meaning of their name. They provide a shield-like barrier around the Cubesat that protects it from the sun.  The lifetime of the sunshield depends on of which material it is made.  Certain weaker materials will only last a mission lifetime of a few months before breaking down. Stainless steel and titanium sunshields that do not break down over time are currently in development \cite{thermo}.  Sunshields by themselves can provide temperatures below 100K and when combined with other active cooling systems, can reach temperatures below 30K \cite{thermo}. \\
+
+\begin{figure}[H]
+    \includegraphics[width=0.4\columnwidth]{Sunshield__thermal.jpg}\\
+    \caption{End View of Sunshield used on CryoCube-1 \cite{thermo}}
+    \label{fig:Thermal1}
+\end{figure}
+
+\subsubsection{Thermal Louvers}
+Thermal louvers are thermal control devices that are both active and passive. Louvers require no power to operate but they provide dynamic heat rejection, allowing for more precise thermal control without the power and integration drawbacks of other active control components. They usually resemble window blinds, with blades that can be "opened" and "closed" to fully expose or obscure anything behind them \cite{SMAD}. They are commonly placed over external radiators, but can also be used to control a spacecraft's internal heat transfer \cite{SMAD}.
+
+\subsubsection{Deployable Radiators}
+Radiators are passive thermal control devices used to eject heat from the spacecraft through IR radiation. Radiators can come in a number of different configurations. They can be built into structural panels, mounted to the spacecraft, or deployed after orbit is achieved. Radiators are also commonly given surface finishes to maximize radiation and decrease absorption \cite{SMAD}. \\
+
+\begin{figure}[H]
+    \includegraphics[width=0.4\columnwidth]{Flexible_radiator_thermal.png}\\
+    \caption{Flexible Deployable Radiator Conceptual Diagram \cite{thermo}}
+    \label{fig:Thermal2}
+\end{figure}
+
+\subsubsection{Electric Heaters}
+Heaters are active thermal control systems used to maintain temperatures for batteries and sensors to function during cold cycles of an orbit. These are electrical resistance heaters that require closed feedback loops and temperature sensors to precisely manage thermal balance. Unlike some of the passive control technologies, there is small spacecraft flight heritage for electric heaters. Several companies manufacture flexible strip heaters that have been implemented on small spacecraft \cite{thermo}. 
+
+\subsubsection{Mini Cryocoolers}
+Cryocoolers are active thermal control systems that maintain temperatures for sensitive components by protecting them from overheating. Cryocoolers are low mass, extend instrument lifetimes, improve thermodynamic efficiency, and lower vibrations by cycling gas to transport heat from objects or instruments to rejection surfaces \cite{thermo}. While cryocoolers have been effective on larger spacecraft, micro-cooler designs are still being perfected for smaller spacecraft \cite{thermo}.\\
+
+\begin{figure}[H]
+    \includegraphics[width=0.4\columnwidth]{Microcryocooler_thermal.png}\\
+    \caption{Microcryocooler Developed by Lockheed Martin Corporation \cite{thermo}}
+    \label{fig:Thermal3}
+\end{figure}
+
+\subsubsection{Summary of Pros and Cons}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{0.2\textwidth}|p{.4\textwidth}|p{.4\textwidth}|} 
+\hline
+\textbf{Passive Thermal System} & \textbf{Pros} & \textbf{Cons}
+\\
+\hline
+     MLI Blankets
+     &
+    \begin{itemize}
+        \item Prevents excessive heat dissipation.
+    \end{itemize}
+    &
+    \begin{itemize}
+        \item Performance decreases greatly if compressed.
+        \item Snags easily on P-Pod launcher.
+    \end{itemize}
+    \\
+\hline
+     Paints/Tapes
+     &
+    \begin{itemize}
+        \item Easy to apply.
+    \end{itemize}
+    &
+        \begin{itemize}
+        \item Does not work well on curved surfaces.
+    \end{itemize}
+    \\
+\hline
+    Sunshields
+    &
+    \begin{itemize}
+        \item Provides a large area of thermal protection.
+    \end{itemize}
+    &
+    \begin{itemize}
+        \item Breaks down after a while.
+        \item Not tested extensively on Cubesats yet.
+    \end{itemize}
+    \\
+\hline
+    Thermal Louvers
+    &
+    \begin{itemize}
+        \item Good at maintaining precise temperature ranges.
+    \end{itemize}
+    &
+    \begin{itemize}
+        \item Not tested extensively on Cubesats yet.
+    \end{itemize}
+    \\
+\hline
+    Deployable Radiators
+    &
+    \begin{itemize}
+        \item Good at maintaining precise temperature ranges.
+    \end{itemize}
+    &
+    \begin{itemize}
+        \item Not tested extensively on Cubesats yet.
+    \end{itemize}
+    \\
+\hline
+\end{tabular}
+\caption{Passive Thermal Systems Pros and Cons}
+\label{tbl:Passive_Thermal_ProCon}
+\end{table}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{0.2\textwidth}|p{.4\textwidth}|p{.4\textwidth}|} 
+\hline
+\textbf{Active Thermal System} & \textbf{Pros} & \textbf{Cons}
+\\
+\hline
+     Electric Heaters
+     &
+    \begin{itemize}
+        \item High thermal precision.
+        \item Great for batteries and electronics.
+    \end{itemize}
+    &
+    \begin{itemize}
+        \item Requires closed-loop feedback with temperature sensor.
+        \item Requires power input.
+    \end{itemize}
+    \\
+\hline
+     Mini Cryocoolers
+     &
+    \begin{itemize}
+        \item Excellent for high precision sensors.
+        \item Improves instrument lifetimes.
+        \item Lower vibrations.
+        \item High thermodynamic efficiency.
+    \end{itemize}
+    &
+        \begin{itemize}
+        \item Requires power input.
+        \item Not tested extensively on Cubesats yet.
+    \end{itemize}
+    \\
+\hline
+\end{tabular}
+\caption{Active Thermal Systems Pros and Cons}
+\label{tbl:Active_Thermal_ProCon}
+\end{table}

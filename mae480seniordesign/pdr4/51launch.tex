@@ -1,0 +1,295 @@
+
+\subsection{Launch}
+In order to assure the chosen material and chassis are able to fulfill the requirements outlined by the launch project element, trade studies were conducted on material and chassis options. These studies were similar to those seen in the CDD, but instead seek to study more specific options using more focused criteria for judging. The trade studies were used to decide on preferred materials for the chassis and to allow for COTS chassis options to be easily compared. The metrics used were chosen and weighted as to give options with high strength, radiation resistance, low weight, and a large internal volume the best score.
+\subsubsection{Material}
+The material selection for the chassis will decide the main physical, mechanical, and thermal properties of the CubeSat as well as the level of shielding for the CubeSat. While chassis design is an important consideration for the structural analysis of the CubeSat, the most clever design is not guaranteed to assure the success of the mission if the material used is chosen poorly. The material for this mission must have a low enough density to allot for other components mass while also being dense enough to substantially protect senestive electronics. The material must also prove strong enough to withstand launching loads and have favorable thermal variables
+\paragraph{Metrics}
+\begin{itemize}
+\item{Density}\\
+\\
+Density is a fundamental physics and engineering concept that involves the mass and volume of an object. The more dense an object the stronger it may be; but, also the heavier it may be. The largest densities will be ranked lower and smallest ranked higher. This analysis is strictly based on mass and ignores radiation shielding benefits from high density materials.
+\\
+\item{Compressive Yield Strength and Compressive Modulus}\\
+\\
+Compressive strength and the compressive modulus dictate the deformations of a material during axial launch loads. It also provides one with the maximum compressive forces before permenant deformation of the chassis. This will be important for launch testing. The higher compressive strength and compressive modulus a material have will result in a higher ranking.
+\\
+\item{Shear Strength and Shear Modulus}\\
+\\
+Shear strength and shear modulus determine the maximum shearing loads. It also dictates the shear deformations of a material. This is also important for launch testing. Therefore, the higher shear strength and modulus of a material will result in a higher ranking. 
+\\
+\item{Melting Point, Specific Heat, Thermal Conductivity}\\
+\\
+These three thermal properties are important for the thermal analysis. The Cubesat will be in a sun synchronous orbit meaning that the materials thermal properties will play a role in the survival of the Cubesat. The higher these properties the higher the rank. 
+\\
+\item{Fatigue Strength}\\
+\\
+Fatigue strength is important because it impacts the longevity measure of the Cubesat structure. The Cubesat must be able to survive launch as well as perform its intended mission. Therefore, the higher the fatigue strength the higher the ranking. 
+\\
+\item{Cost}\\
+\\
+When designing anything, cost is going to play an important role. For the material, this will mean trying to maximize the amount of material and the quality of that material, with the budget that is defined. Materials that cost more will be ranked lower. 
+\\
+\end{itemize}
+
+Table \ref{tbl:material_Metric_Scores} below provides a description for how different values would be assigned to each design option in regards to each metric. And, table \ref{tbl:material_Props} provides details of each material with regard to the metrics.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|c|c|c|c|c|c|} 
+\hline
+    \textbf{Metric} & \textbf{Unit} & \textbf{5} & \textbf{4} & \textbf{3} & \textbf{2} & \textbf{1}
+    \\
+\hline
+    \textbf{Density} & $kg/{m^3}$ & < 2.60 & 2.60 - 2.65 & 2.65 - 2.70 & 2.70 - 2.75 & >2.75
+    \\
+\hline
+    \textbf{Compressive Strength} & $MPa$ & >400 & 400 - 300 & 300 - 200 & 200 -1 00 & <100 
+    \\
+\hline
+    \textbf{Shear Strength} & $MPa$ & >325 & 300 - 225 & 200 - 125 & 100 - 50 & <50
+    \\
+\hline
+    \textbf{Specific Heat Capacity} & $J/{kg-K}$ & >1,000 & 1,000 - 950 & 950 - 900 & 900 - 850 & <850 
+    \\
+\hline
+    \textbf{Thermal Conductivity} & $W/{m-K}$ & <125 & 125 - 150 & 150 - 175 & 175 - 200 & >200 
+    \\
+\hline
+    \textbf{Fatigue Strength} & $MPa$ & >325 & 300 - 225 & 200 - 125 & 100 - 50 & <50
+    \\
+\hline
+    \textbf{Cost} & USD/1 in x 1 ft\textsuperscript{2} & <50 & 50 - 75 & 75 - 100 & 100 - 125 & >125
+    \\
+
+\hline
+\end{tabular}
+\caption{Material Trade Study Metric Values}
+\label{tbl:material_Metric_Scores}
+\end{table}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|c|c|c|c|c|} 
+\hline
+    \textbf{Metric} & \textbf{Unit} & \textbf{Al 7075} & \textbf{Al 6061} & \textbf{Al 5052} & \textbf{Al 5005}
+    \\
+\hline
+    \textbf{Compressive Modulus}\cite{ASM} & $GPa$ & 72.4 & 69.7 & 70.7 & 69.5
+    \\
+\hline
+    \textbf{Compressive Yield Strength}\cite{ASM} & $MPa$ & 462 & 276 & 240 & 125
+    \\
+\hline
+    \textbf{Cost}\cite{mwsaa} & USD/1 in x 1 ft\textsuperscript{2}  & 60 & 45 & 100 &  140
+    \\
+\hline
+    \textbf{Density}\cite{ASM}& $kg/m^3$ & 2.80 & 2.70 & 2.68 & 2.70
+    \\
+\hline
+    \textbf{Fatigue Strength}\cite{ASM} & $MPa$ & 159 & 96 & 130 & N/A 
+    \\
+\hline
+    \textbf{Melting Range}\cite{ASM} & °C & 477 - 635 & 582 - 652 & 607 - 649 & 632 - 652
+    \\
+\hline
+    \textbf{Shear Modulus}\cite{ASM} & $GPa$ & 26.9 & N/A & 25.9 & 25.9 
+    \\
+\hline
+    \textbf{Shear Strength}\cite{ASM} & $MPa$ & 331 & 207 & 160 & 103
+    \\
+\hline
+    \textbf{Specific Heat Capacity}\cite{ASM} & $J/{kg-K}$ & 960 & 896 & 900 & 900
+    \\
+\hline
+    \textbf{Thermal Conductivity}\cite{ASM} & $W/{m-K}$ & 130 & 167 & 138 & 205 
+    \\
+
+\hline
+\end{tabular}
+\caption{Material Properties}
+\label{tbl:material_Props}
+\end{table}
+
+\paragraph{Weights}
+\begin{itemize}
+    \item Density - .2
+    \item Tensile Ultimate Strength and Elastic Modulus - .2
+    \item Shear Strength and Shear Modulus - .2
+    \item Melting Point, Specific Heat, Thermal Conductivity - .2
+    \item Fatigue Strength - .1
+    \item Cost - .1
+\end{itemize}
+\bigskip
+The physical properties, except fatigue strength, were all given the same weight. With respect to density, for the mission to succeed, the material chosen for the CubeSat must be strong yet lightweight to protect from launch loads. This also incorporates the strength and shear properties because the CubeSat must be able to survive launch. Additionally, the material must meet the requirements of the thermal systems and high a high enough density to provide radiation shielding. Since the objective of the CubeSat is to detect high energy radiation, the structure must be able to withstand the energy that is associated with these radiation particles. 
+\bigskip
+Regarding fatigue strength, while this is an important property, the CubeSat has an intended minimum lifespace for the mission. So, as long as that is met the fatigue strength only has to be so high. Lastly, while cost is a variable since the materials vary in price, survivability of the CubeSat is the primary concern. Specific mechanical and material properties dictate the material selection which is then weighted as a choice in the chassis selection.
+
+\paragraph{Potential Pugh Matrix} ~\\~\\
+
+Table \ref{tbl:material_Pugh} below is an example Pugh matrix that could be generated using the metrics and weights defined above once significant analysis has been performed on each of the different Key Design Options. 
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|c|c|c|c|c|} 
+\hline
+    \textbf{Category} & \textbf{Weight} & \textbf{Alum. 7075} & \textbf{Alum. 6061} & \textbf{Alum. 5052} & \textbf{Alum. 5005}
+    \\
+\hline
+    \textbf{Density} & 0.2 & 2 & 3 & 5 & 4
+    \\
+\hline
+    \textbf{Strength Properties} & 0.2 & 5 & 4 & 4 & 3 
+    \\
+\hline
+    \textbf{Shear Properties} & 0.2 & 5 & 4 & 3 & 2 
+    \\
+\hline
+    \textbf{Thermal Properties} & 0.2 & 5 & 4 & 3 & 4
+    \\
+\hline
+    \textbf{Fatigue Strength} & 0.1 & 4 & 2 & 3 & 4 
+    \\
+\hline
+    \textbf{Cost} & 0.1 & 2 & 4 & 3 & 3 
+    \\
+\hline
+    \textbf{Total} & 1 & 4.2 & 3.7 & 3.6 & 3.1 
+    \\
+\hline
+\end{tabular}
+\caption{Example Material Pugh Matrix }
+\label{tbl:material_Pugh}
+\end{table}
+
+In this example case, the aluminum 7075 option has emerged as the best option, narrowly beating out aluminum 6061 and 5052 which were close for second. This is a good indication that, should no other critical errors be uncovered with this kind of system, that aluminum 7075 is a good option for the material. This scoring provides a great baseline for analysis as well as a score that can be fed into the chassis Pugh matrix. It is also worth noting that while there are clearly more robust materials on the list, the usage of low scored materials for specific applications has not been ruled out, especially since every material will have its own specific benefits.
+
+\subsubsection{Chassis}
+The chassis itself must be designed to withstand launch loads while rejecting harmful vibrations, radiation, and unfavorable thermal behavior. Given the heritage and pretested nature of COTS chassis', three providers were studied. This decision was made based on the expertise of the NASC's member as to assure that requirements for radiation shielding are met as well as the trade off for the time to design and fabricate for the relatively low cost of a COTS chassis. 
+\paragraph{Metrics}
+\begin{itemize}
+\item{Mass}\\
+\\
+The entire Cubesat has a mass budget that can't be exceeded. Since the chassis of the Cubesat is a large part of that budget, minimizing this value is vital. Therefore, the smaller mass numbers will be ranked higher. 
+\\
+\item{Volume}\\
+\\
+Similar to mass, there is also a volume budget. There are many components, as well as the payload, that must fit inside of the Cubesat. Therefore, it is important that there is enough room for everything. The larger the volume the higher the ranking will be.
+\\
+\item{Thermal Range}\\
+\\
+Similar to the material selection, the thermal range is important for thermal analysis. The chassis must be able to survive within a certain thermal range. Therefore, the higher this range the higher the ranking.
+\\
+\item{Material}\\
+\\
+The material a chassis is built from is important because some materials have better qualities and properties than others. Therefore, chassis using preferred materials will receive a higher score. 
+\\
+\item{Cost}\\
+\\
+When designing anything, cost is going to play an important role. For the chassis, this will entail purchasing the cheapest structure that also meets all the requirements. Chassis that cost more will be ranked lower.
+\end{itemize}
+
+Table \ref{tbl:chassis_Metric_Scores} below provides a description for how different values would be assigned to each design option in regards to each metric. And, table \ref{tbl:chassis_Props} provides details of each chassis option with regard to the metrics.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|c|c|c|c|c|c|} 
+\hline
+    \textbf{Metric} & \textbf{Unit} &  \textbf{5} & \textbf{4} & \textbf{3} & \textbf{2} & \textbf{1}
+    \\
+\hline
+    \textbf{Mass} & g & <250 & 250 - 275 & 275 - 300 & 300 - 325 & <350
+    \\
+\hline
+    \textbf{Volume} & cm\textsuperscript{3} & >2900 & 2900 - 2800 & 2800 - 2700 & 2700 - 2600 & <2600
+    \\
+\hline
+    \textbf{Thermal Range} & C & >80C & 80 - 60 & 60 - 50 & 50 - 40 & <30
+    \\
+\hline
+    \textbf{Material} & Aluminum & 7075 & 6061 & 5052 & 5005 & Other
+    \\
+\hline
+    \textbf{Cost} & \$ & >2,000 & >3,000 & >4,000 & >5,000 & >6,000
+    \\
+
+\hline
+\end{tabular}
+\caption{Chassis Trade Study Metric Values}
+\label{tbl:chassis_Metric_Scores}
+\end{table}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|c|c|c|c|} 
+\hline
+    \textbf{Metric} & \textbf{Unit} & \textbf{ISIS} & \textbf{Pumpkin Space} & \textbf{Endurosat}
+    \\
+\hline
+    \textbf{Mass} & g & 304.3 & 300 & 285
+    \\
+\hline
+    \textbf{Volume} & cm\textsuperscript{3} & 2,858 & 2,738 & 3,017
+    \\
+\hline
+    \textbf{Thermal Range} & C & -40 to 80 & -40 to 80 & -20 to 65
+    \\
+\hline
+    \textbf{Material} & Aluminum & 6082 & 5052 & 6061
+    \\
+\hline
+    \textbf{Cost} & \$ & 4,309 & 2,250 & 3,093
+    \\
+\hline
+\end{tabular}
+\caption{Chassis Properties\cite{isis2}\cite{enduro_sat}\cite{pumpkin_space}}
+\label{tbl:chassis_Props}
+\end{table}
+
+\paragraph{Weights}
+\begin{itemize}
+    \item Mass - .25
+    \item Volume - .25
+    \item Thermal Range - .2
+    \item Material - .2
+    \item Cost - .1
+\end{itemize}
+
+From a structural perspective, the total mass of the chassis and the available internal volume are crucial preliminary factors. This is why these were given the highest weights. The CubeSat has a total mass and volume budget that every subsystem has to be within. Therefore, reducing how much is spent on the chassis would allow other subsystems more flexibility or just reduce the total altogether. 
+
+Secondary factors include the thermal performance as a result from the thermal team, and the material choice as per prior analysis. These are good preliminary metrics, but the feasibility study will reveal the best option via finite element analysis. Therefore, these were weighted higher than cost but lower than mass and volume.
+
+Similar to the material choice, cost plays a role in deciding which chassis to purchase. However, because the project budget is theoretical and the main objective is the survival of the CubeSat, purchasing better quality is more important than the price. 
+
+\paragraph{Potential Pugh Matrix} ~\\~\\
+
+Table \ref{tbl:chassis_Pugh} below is an example Pugh matrix that could be generated using the metrics and weights defined above once significant analysis has been performed on each of the different Key Design Options. 
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|c|c|c|c|} 
+\hline
+    \textbf{Category} & \textbf{Weight} & \textbf{ISIS} & \textbf{Pumpkin Space} & \textbf{EnduroSat}
+    \\
+\hline
+    \textbf{Mass} & 0.25 & 3 & 2 & 4
+    \\
+\hline
+    \textbf{Volume} & 0.25 & 4 & 3 & 5
+    \\
+\hline
+    \textbf{Thermal Range/Performance} & 0.2 & 5 & 5 & 3
+    \\
+\hline
+    \textbf{Material} & 0.2 & 3 & 3 & 4
+    \\
+\hline
+    \textbf{Cost} & 0.1 & 2 & 4 & 3
+    \\
+\hline
+    \textbf{Total} & 1 & 3.55 & 3.25 & 3.95
+    \\
+\hline
+\end{tabular}
+\caption{Example Chassis Pugh Matrix }
+\label{tbl:chassis_Pugh}
+\end{table}
+
+In this example case, the EnduroSat chassis option has emerged as the best option, narrowly beating out ISIS chassis, with the pumpkin space chassis in last. This is a good indication that, should no other critical errors be uncovered with this kind of system, that EnduroSat chassis is a good option for the chassis.

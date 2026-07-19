@@ -1,0 +1,158 @@
+
+\subsection{Launch}
+For the CubeSat to succeed in its mission, it must first achieve a steady orbit. For this to happen, the satellite shall utilize the Poly Picosatellite Orbital Deployer (P-POD) launcher and is designed to survive all launching loads. The assumed launch conditions are compressive loads ranging from 8 - 13 G's, as well as any vibration loads that may occur. These vibration loads are estimated to appear within lower frequencies (20 - 200 Hz) with variable amplitudes \cite{FEA2, FEA3, FEA4}. In addition to consideration of launching loads, the utilization of the P-POD leads to additional design considerations. P-POD usage requires that the CubeSat conforms to the 3U or 3U+ standard as well as requiring specific aluminum alloys to be used for the 
+CubeSat structure and the rails \cite{CSS}. Making sure the CubeSat is able to withstand these loads and be compatible with the P-POD is critical to the early development of the CubeSat as the choice of a material and chassis dictates budgets for volume and mass. Both the amount of radiation shielding provided for CubeSat internals and the thermal behavior of the CubeSat are also dictated by the radiation shielding.
+\subsubsection{Materials}
+The selection of a material for the chassis is an important consideration as it will determine many attributes of the CubeSat. Physical, mechanical, and thermal properties of the material will dictate which loads the CubeSat can withstand as well as the thermal behavior of the CubeSat's internal envelope. Thus, the material required must be strong, lightweight, and provide favorable thermal performance, and provide enough radiation shielding to ensure the CubeSat's survival for its desired lifespan. While it was previously decided that the CubeSat chassis shall be purchased, COTS chassis are not all made of the same material, meaning some will be favorable to others given our mission criteria. Additionally, since a COTS chassis can be expensive, being able to perform simple tests on a mock structure is invaluable. This means that a material choice for the chassis that is accessible to the NASC team would allow for additional testing to ensure the mission's success. These include static loading, excessive vibration loading, and radiation shielding testing if possible. All information presented on aluminum alloys was acquired from \cite{ASM} unless noted otherwise.
+\paragraph{Aluminum 7075} ~\\~\\
+Of the available alloys from the CubeSat Standard, Aluminum 7075 is a high zinc and copper aluminum alloy which creates a high strength material generally used as a structural alloy. This alloy has been commonly used within the aerospace community, as far back as World War II, and has a large number of applications outside of aerospace due to its high strength and relatively low density. In addition to its normal properties, processes such as over-aging can make Aluminum 7075 resistant to stress corrosion cracking while only reducing the strength by 10-30\% while other processes, such as tempering and annealing, increase the strength and corrosion resistance. These are desirable properties for any CubeSat as it can be used to create a very sturdy chassis \cite{ASM}. 
+\paragraph{Aluminum 6061} ~\\~\\
+In contrast to Aluminum 7075, Aluminum 6061 is an alloy largely comprised of magnesium and silicon and balanced with aluminum and made through precipitation-hardening. It is often used for medium to high strength applications given its strength, ability to be easily worked, and its ability to resist corrosion after abrasion. This means that additional coating will not be needed strictly for corrosion protection. Similar to Aluminum 7075, there are several varieties of this alloy based on temper which serve to increase strength and hardness at some cost to malleability. This alloy is very similar to Aluminum 7075 in its mechanical properties but under-performs slightly when directly compared to it \cite{ASM}.
+\paragraph{Aluminum 5052} ~\\~\\
+This alloy is largely comprised of magnesium and chromium balanced with aluminum and is produced as a sheet product. The main pros of this alloy are its strength and corrosion resistance, making it quite similar to Al 6061. Due to its high corrosion resistance, it can be used in fuel lines and fuel tanks. There are also several available options for tempering this alloy which lead to changes in its mechanical and thermal properties. Comparatively, this option seems weaker but may still perform to the degree required for launching \cite{ASM}.
+\paragraph{Aluminum 5005} ~\\~\\
+This alloy includes maximum tolerances for copper, chromium, and manganese as well as magnesium balanced with aluminum. Aside from the mechanical and physical properties, there is not a wide range of information available for this alloy nor a large number of applications. Given its relatively low strength and lack of applications in the aerospace community, this aluminum alloy appears to be the least favorable option for a main body but could have applications elsewhere in the CubeSat \cite{ASM}.
+%
+\paragraph{Summary of Pros and Cons}\hspace{1cm} 
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{0.2\textwidth}|p{.4\textwidth}|p{.4\textwidth}|} 
+\hline
+\textbf{Material Option} & \textbf{Pros} & \textbf{Cons}
+\\
+\hline
+     Aluminum 7075
+     &
+    \begin{itemize}
+        \item Highest compressive, tensile, and shear strengths
+        \item Hardest material
+        \item High fatigue strength
+        \item Highest specific heat
+        \item Lowest thermal conductivity
+        \item Good radiation shield
+    \end{itemize}
+    &
+    \begin{itemize}
+        \item Most dense
+        \item Most expensive
+        \item Harder to machine
+    \end{itemize}
+    \\
+\hline
+     Aluminum 6061
+     &
+    \begin{itemize}
+        \item Commonly used for CubeSats
+        \item Comporable strengths to 7075
+        \item Comporable specific heat to 7075
+        \item Readily weldable
+    \end{itemize}
+    &
+        \begin{itemize}
+        \item More malleable
+        \item High thermal conductivity
+        \item Lowest fatigue strength
+    \end{itemize}
+    \\
+\hline
+    Aluminum 5052
+    &
+    \begin{itemize}
+        \item Least dense
+        \item Wide range of tempers
+        \item Easily workable
+        \item Easily welded
+    \end{itemize}
+    &
+    \begin{itemize}
+        \item Low shear strength
+        \item Less common in CubeSats
+    \end{itemize}
+    \\
+\hline
+    Aluminum 5005
+    &
+    \begin{itemize}
+        \item Wide range of tempers
+    \end{itemize}
+    &
+    \begin{itemize}
+        \item Highest thermal conductivity
+        \item Lowest shear strength
+        \item Few resources on applications and performances
+    \end{itemize}
+    \\
+\hline
+\end{tabular}
+\caption{Material Options Pros and Cons}
+\label{tbl:Material_ProCon}
+\end{table}
+
+\subsubsection{Chassis}
+
+\paragraph{ISIS} ~\\~\\
+The ISIS CubeSat chassis are built to be generic, modular satellite structures. Their designs allow for multiple mounting configurations, giving the buyer maximum flexibility when designing their chassis. The chassis also comes with detachable side shear panels to allow for maximum accessibility. Along with this, a dual kill-switch mechanism is provided with the chassis. The chassis is scalable in design to larger CubeSat forms and is compatible with most other products sold by ISIS. It is fully compliant with the CubeSat standard \cite{isis2}. 
+\paragraph{Pumpkin Space} ~\\~\\
+The pumpkin space chassis structure is unique because it is formed from sheet metal. This unique approach to CubeSat structures allows for a better strength-to-weight ratio, internal volume availability, simplicity in design, and minimal use of fasteners. The options available from pumpkin space consist of solid-wall and skeleton structure versions, with various Base Plate and Cover Plate Assemblies to help solve different switch, external payload, and antenna mounting options. The main structure of each chassis, or core, is a single piece of folded and riveted precision sheet metal. This chassis structure is available in different lengths to provide for a variety of needs.\cite{pumpkin_space} 
+\paragraph{Endurosat} ~\\~\\
+The endurosat chassis is promoted as being a high tier structure. Similar to the other COTS options, this one has a modular design, allowing the buyer to customize it. Also, the modularity allows for easy integration of other components and hardware. The chassis is manufactured on a CNC machine from hard anodized aluminum alloys. Uniquely, this chassis includes its flight heritage upon purchase of the structure. Lastly, the 3U structure is fully compliant with the CubeSat standard\cite{enduro_sat}.
+
+\paragraph{Summary of Pros and Cons}\hspace{1cm} 
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{0.2\textwidth}|p{.4\textwidth}|p{.4\textwidth}|} 
+\hline
+\textbf{Chassis Option} & \textbf{Pros} & \textbf{Cons}
+\\
+\hline
+     ISIS
+     &
+    \begin{itemize}
+        \item Shear Panels included
+        \item Larger thermal range
+        \item Largest internal envelope
+        \item Made from aluminum 6082
+    \end{itemize}
+    &
+    \begin{itemize}
+        \item Most expensive
+        \item largest total mass
+    \end{itemize}
+    \\
+\hline
+     Pumpkin Space
+     &
+    \begin{itemize}
+        \item Cheapest option
+        \item Solid-wall designs
+        \item Larger thermal range
+        \item Mid level internal envelope
+    \end{itemize}
+    &
+        \begin{itemize}
+        \item Made from aluminum 5052
+        \item Total mass unknown
+    \end{itemize}
+    \\
+\hline
+    Endurosat
+    &
+    \begin{itemize}
+        \item Lighter total mass
+        \item Uses Aluminum 6061
+        \item Has flight heritage
+        \item Kill switch included
+    \end{itemize}
+    &
+    \begin{itemize}
+        \item Smaller thermal range
+        \item Smaller internal envelope
+        \item No shielding included
+        \item Mid-level price
+    \end{itemize}
+    \\
+\hline
+\end{tabular}
+\caption{Chassis Options Pros and Cons}
+\label{tbl:Chassis_ProCon}
+\end{table}

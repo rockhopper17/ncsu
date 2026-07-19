@@ -1,0 +1,162 @@
+ 
+\subsection{Power}
+The power systems within CubeSats are involved in two primary tasks: the collection and storage of power. The capacity of small batteries is not enough to sustain the CubeSat for a long-term mission. Thus, the CubeSat will need to collect power from an external source to keep the CubeSat’s electronic systems online. STARS shall collect this power from the sun using solar panels. The power collected by the solar panels will be stored safely in a battery, which will provide the power for the CubeSat when the system cannot generate power. Solar power generation is the predominant method of power generation on small spacecrafts. As of 2010, approximately 85\% of all nanosatellite form factor spacecrafts were equipped with solar panels and rechargeable batteries\cite{03Power}. Different battery and solar panel options are explored in the following sections. 
+\subsubsection{Solar Panels}
+\paragraph{Deployable Solar Panel} ~\\ ~\\
+The Deployable Solar Panel (DSP) system consists of three panels connected with spring loaded hinges. During the launch, the panels are folded into the side of the CubeSat inside the deployment pod. Once the CubeSat is in the correct position, the release mechanism will deploy the solar panels, and they will enter their designated position. 
+
+For CubeSats, there are two common types of deployable solar panel systems: 90$\degree$ DSP and 135$\degree$ DSP. Each configuration is composed of a solar panel that attaches to the CubeSat structure and two deployable solar panels. The Figure \ref{fig:SolarPanel1} and Figure \ref{fig:SolarPanel2} shows the configuration of those DSP systems. The number of deployable solar panels can change and primarily depends on the available space inside of the deployer.
+\begin{figure}[H]
+    \includegraphics[width=0.5\columnwidth]{Solar_Panel_1.jpg}\\
+    \caption{90$\degree$\space Deployable Solar Panel\cite{GomspaceDSP}}
+    \label{fig:SolarPanel1}
+\end{figure}
+\begin{figure}[H]
+    \includegraphics[width=0.5\columnwidth]{Solar_Panel_2.jpg}\\
+    \caption{135$\degree$\space Deployable Solar Panel\cite{GomspaceDSP}}
+    \label{fig:SolarPanel2}
+\end{figure}
+\paragraph{Stationary Solar Panel} ~\\ ~\\
+The stationary solar panel system consists of multiple solar panels mounted to the structure of the CubeSat. The stationary solar panels are mounted to the CubeSat before it is launched. This method greatly reduces the chance of mechanical failure after launch. Aside from generating power, the stationary solar panels also act as a shielding mechanism to protect internal components. The stationary solar panels will provide the CubeSat with continuous power generation while it is self-rotating. Figure \ref{fig:SolarPanel3} shows an example of stationary solar panels on a 3U CubeSat.
+\begin{figure}[H]
+    \includegraphics[width=0.15\columnwidth]{Solar_Panel_3.jpg}\\
+    \caption{Stationary Solar Panel\cite{03Power}}
+    \label{fig:SolarPanel3}
+\end{figure}
+\subsubsection{Batteries}
+
+\paragraph{Lithium Polymer} ~\\ ~\\
+Lithium batteries are the most commonly used battery type in the small spacecraft industry \cite{SMAD}. This is in large part due to their high capacity to weight ratio, which allows for flexibility when choosing parts for other subsystems on the spacecraft. Lithium polymer (LiPo) batteries are a variation of lithium batteries that use a polymer-based electrolyte as opposed to a liquid-based one \cite{vs}. This allows LiPo batteries to be stackable, so less space is needed for allocation. Several companies have COTS options for LiPo batteries specifically tailored for small spacecraft, including AAC-Clyde's CubeSat battery shown in Figure \ref{fig:BP1}. The AAC-Clyde battery has several features that can help improve performance, including a digital monitor that allows for tracking of the battery temperature, which would prove useful for thermal monitoring \cite{03Power}.
+\begin{figure}[H]
+    \includegraphics[width=0.4\columnwidth]{AAC-Clyde-battery-pack.png}\\
+    \caption{Lithium polymer battery pack (AAC-Clyde) \cite{03Power}}
+    \label{fig:BP1}
+\end{figure}
+\paragraph{Lithium Ion} ~\\ ~\\
+The original variation of lithium batteries are lithium ion batteries, which are the gold standard for CubeSats with a plethora of options available. Lithium ion batteries are more cost effective than lithium polymer batteries, while still providing a relatively high capacity to weight ratio. Most Li-Ion packs have well over 100 Wh/kg capacity \cite{03Power}. The issues with using Li-Ion batteries have been well documented, with the main issue being thermal control. They are more susceptible to potential explosions and failure when subject to adverse thermal conditions, such as that of space \cite{SMAD}. CubeSat part manufacturers circumvent this issue by including thermal control features on their battery parts, such as battery heaters. GomSpace has several options for Li-Ion packs including their NanoPower BP4 displayed in Figure \ref{fig:BP2}. The NanoPower BP4 pack has a capacity to weight ratio of 143 Wh/kg, and includes features such as a temperature sensor and battery heater to keep the pack functioning properly in any conditions \cite{gomspace}.
+\begin{figure}[H]
+    \includegraphics[width=0.4\columnwidth]{lithiumion.png}\\
+    \caption{Lithium ion battery pack (GomSpace) \cite{gomspace}}
+    \label{fig:BP2}
+\end{figure}
+\paragraph{Nickel Cadmium} ~\\ ~\\
+Nickel cadmium batteries are a reliable option for power storage in small spacecraft. Before lithium batteries became the primary method of power storage, NiCd batteries were commonly used thanks to their durability and low cost. They are less susceptible to thermal control problems than lithium batteries are and have a long heritage of success in the industry. The main issue with using NiCd batteries is that the capacity to weight ratio is lacking. A typical NiCd battery has a capacity to weight ratio of around 50 Wh/Kg, well short of that of lithium variants \cite{nicd}.  Most CubeSat part manufacturers have moved on to lithium batteries, meaning that an NiCd pack intended for CubeSat use would be difficult to find. 
+\begin{figure}[H]
+    \includegraphics[width=0.4\columnwidth]{nickel.png}\\
+    \caption{Nickel cadmium battery pack (BatterySpace) \cite{batteryspace}}
+    \label{fig:BP3}
+\end{figure}
+\paragraph{Solar Panel Summary of Pros and Cons} ~\\ ~\\
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{0.3\textwidth}|p{.35\textwidth}|p{.35\textwidth}|} 
+\hline
+\textbf{Solar Panel Option} & \textbf{Pros} & \textbf{Cons}
+\\
+\hline
+     90\degree\space Deployable Solar Panel
+     &
+    \begin{itemize}
+        \item Large solar panel area
+        \item Power generation under some degree of rotation
+    \end{itemize}
+    &
+    \begin{itemize}
+        \item Potential release mechanism failure
+        \item Complex design
+        \item Discontinues power generation when CubeSat is self-rotated
+        \item High cost
+        \item Large mass
+    \end{itemize}
+    \\
+\hline
+     135\degree\space Deployable Solar Panel
+     &
+    \begin{itemize}
+        \item Large solar panel area
+    \end{itemize}
+    &
+    \begin{itemize}
+        \item Potential release mechanism failure
+        \item Complex design
+        \item Discontinues power generation when CubeSat is self-rotated
+        \item High cost
+        \item Large mass
+    \end{itemize}
+    \\
+\hline
+    Stationary Solar Panel
+    &
+    \begin{itemize}
+        \item Simple design
+        \item Continuous power generation
+        \item Low Cost
+        \item Low mass
+        \item Can rotate to reduce thermal load
+        \item Provide shielding to internal components
+    \end{itemize}
+    &
+    \begin{itemize}
+        \item Limited amount of power generation
+    \end{itemize}
+    \\
+\hline
+\end{tabular}
+\caption{Solar Panel Options Pros and Cons}
+\label{tbl:SolarPanel_ProCon}
+\end{table}
+\paragraph{Batteries Summary of Pros and Cons} ~\\ ~\\
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{0.3\textwidth}|p{.35\textwidth}|p{.35\textwidth}|} 
+\hline
+\textbf{Batteries Option} & \textbf{Pros} & \textbf{Cons}
+\\
+\hline
+     Lithium ion
+     &
+    \begin{itemize}
+        \item Low cost
+        \item High energy density
+        \item 100\% efficiency within lifetime
+    \end{itemize}
+    &
+    \begin{itemize}
+        \item Aging
+        \item Requires precise thermal control
+    \end{itemize}
+    \\
+\hline
+     Lithium-Polymer
+     &
+    \begin{itemize}
+        \item Safe
+        \item Thin
+        \item Light weight
+        \item Stackable
+    \end{itemize}
+    &
+    \begin{itemize}
+        \item High cost
+        \item Poor energy density
+    \end{itemize}
+    \\
+\hline
+    Nickel Cadmium (NiCd)
+    &
+    \begin{itemize}
+        \item Older and more proven technology
+        \item Low cost
+        \item More durable
+    \end{itemize}
+    &
+    \begin{itemize}
+        \item Short lifespan due to memory characteristic
+        \item Poor efficiency, so more space would have to be allocated
+    \end{itemize}
+    \\
+\hline
+\end{tabular}
+\caption{Batteries Options Pros and Cons}
+\label{tbl:Batteries_ProCon}
+\end{table}

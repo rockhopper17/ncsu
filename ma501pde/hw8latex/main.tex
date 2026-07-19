@@ -1,0 +1,67 @@
+% from aiaa template
+\documentclass[conf]{new-aiaa}
+%\documentclass[journal]{new-aiaa} for journal papers
+
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage[version=4]{mhchem}
+\usepackage{siunitx}
+\usepackage{longtable,tabularx}
+\setlength\LTleft{0pt} 
+%======================================
+
+% additions
+\graphicspath{ {figures/} }
+\usepackage{floatrow}
+\usepackage{ar}
+\usepackage{amstext} % for \text macro
+\usepackage{array}   % for \newcolumntype macro
+\usepackage{gensymb} % for degree symbol
+\newcolumntype{L}{>{$}l<{$}} % math-mode version of "l" column type
+\usepackage[numbered,framed]{matlab-prettifier}
+
+\geometry{top=.5in,bottom=.5in}
+\pagestyle{empty}
+
+%\usepackage{titlesec}
+%\titleformat*{\paragraph}{\large\bfseries}
+%======================================
+
+\begin{document}
+
+\begin{figure}[H]
+	\centering
+	\begin{floatrow}
+		\includegraphics[width=.5\columnwidth]{../hw8data/t0.jpg}
+		\includegraphics[width=.5\columnwidth]{../hw8data/t05.jpg}
+	\end{floatrow}
+	\begin{floatrow}
+		\includegraphics[width=.5\columnwidth]{../hw8data/t10.jpg}
+		\includegraphics[width=.5\columnwidth]{../hw8data/t15.jpg}
+	\end{floatrow}
+	\begin{floatrow}
+		\includegraphics[width=.5\columnwidth]{../hw8data/t20.jpg}
+		\includegraphics[width=.5\columnwidth]{../hw8data/t25.jpg}
+	\end{floatrow}
+	\begin{floatrow}
+		\includegraphics[width=.5\columnwidth]{../hw8data/t30.jpg}
+	\end{floatrow}
+	\caption{Wave eqn with Dirichlet BCs using max n = 10}
+\end{figure}
+
+\newpage
+
+\section*{Matlab Code}
+
+\lstset{
+  style      = Matlab-editor,
+  basicstyle = \mlttfamily,
+}
+\lstinputlisting{../hw8.m}
+
+
+\end{document}
+
+
+

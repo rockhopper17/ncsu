@@ -1,0 +1,179 @@
+
+\subsection{Communication}
+\subsubsection{Transmitter Frequency}
+\paragraph{Metrics}
+\begin{itemize}
+    \item Cost \\
+    \\
+While cost is an important factor in the development of the communication system, it is also very important to choose the form of communication that will most benefit the mission. It is important to take into account the cost of the communication system and especially the ground station, as the cost of a single ground station can be quite significant. However, the ground station and communication system are both necessary parts of a CubeSat mission; without them, the mission would fail and so the cost of the communication system would be less drastic than the need for a functioning system. ~\\
+    \item Beam Width \\
+    \\
+The determined beam width is related to a number of different factors, but for a ground station, the width is primarily determined by the frequency being selected to communicate with the CubeSat. It is specified by the manufacturers of pre-built ground stations. As a result, the beam width of the ground station antenna is determined by the chosen transmitter frequency. With a larger beam width, it will be easier to communicate between the ground station and CubeSat. With a small beam width, the controls of the antennae and CubeSat need to be more fine-tuned to be able to make contact with the smaller beam. ~\\
+    \item Uplink Capability \\
+    \\
+It is required in \textbf{DR.7.2} that the CubeSat must be able to recieve uplink from the ground station. Being able to control the CubeSat from the ground and make any necessary changes or commands from the ground is essential to the STARS mission. While it is not always necessary to send information to the CubeSat if the system’s autonomous features can maintain proper control, it is required to make any changes to the software and to trigger the end-of-life procedure. ~\\
+    \item Maximum Downlink Speed \\
+    \\
+The downlink speed is a vital characteristic of the communication system. With limited coverage, the CubeSat and ground station need to be able to communicate at a fast-enough speed that all of the necessary information can be transmitted in that time.
+\end{itemize}
+
+Table \ref{tbl:Transmitter_Metric_Scores} below provides a description on the different weights given to the scores for the metrics of the transmitter frequency. These scores can be used to create a ranking system and score for different frequencies that could be used to communicate between the ground station and the CubeSat. 
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{3.5cm}|c|c|c|c|c|}
+\hline
+    \textbf{Metric} & \textbf{5} & \textbf{4} & \textbf{3} & \textbf{2} & \textbf{1}
+    \\
+\hline
+    \textbf{Estimated Cost (\$)} & 80,000 or less & 80,000-90,000 & 90,000-100,000 & 100,000-110,000 & 110,000 or more
+    \\
+\hline
+    \textbf{Beam Width} & 60$^{\circ}$ or more & 60$^{\circ}$ - 45$^{\circ}$ & 45$^{\circ}$ - 30$^{\circ}$ & 30$^{\circ}$ - 15$^{\circ}$ & 15$^{\circ}$ or less
+
+    \\
+\hline
+    \textbf{Uplink Capability} & Yes &  &  &  & No
+    \\
+\hline
+    \textbf{Maximum Downlink Speed (kbps)} & 140 or more & 140 - 100 & 100 - 60 & 60 - 20 & 20 or less
+    \\
+
+\hline
+\end{tabular}
+\caption{Transmitter Trade Study Metric Values}
+\label{tbl:Transmitter_Metric_Scores}
+\end{table}
+
+\paragraph{Weights}
+\begin{itemize}
+    \item Cost - 0.20
+    \item Beam Width - 0.30
+    \item Uplink Capability - 0.40
+    \item Maximum Downlink Speed - 0.10
+\end{itemize}
+
+The cost of the transmitter frequency is given a 20\% weight. The weight of this metric is due to the requirements of the communications system and the necessary role that it plays in the STARS mission. It is required that the CubeSat must have the capability of communicating with the ground station. Without means of communication, the STARS mission would ultimately be ruled a failure. As a result, it is imperative that the communications system must operate successfully and reliably. It is also important to note that with the high cost of ground stations, the differences between the different types of ground stations is less significant compared to the already high cost. This further reinforces the given weight for this metric as the differences in cost between transmission frequencies is less significant than the overall cost. 
+
+The beam width is given a weight of 30\% as it is one of the more important metrics of the transmitter frequency. While the type of frequency chosen is not the sole variable for determining the beam width, it is a major factor in this characteristic. For ground stations, the beam width is often predetermined for each station depending on what frequency is being used. The ground station may even use several different frequencies to communicate with the CubeSat, but even in this case, the beam widths can still be determined by the manufacturer. The beam width is an important feature in determining the appropriate frequency to utilize as it plays a role in determining the effectiveness of communicating with the CubeSat from the ground station. With a larger beam width, there is more room for error in the case that the antennae are misaligned or are unable to point directly towards the target. If a fault like this were to occur, a larger beam width may still capture the target in its field of view while a smaller beam width must be much more accurate and would likely miss the target should a fault occur with the targeting system. 
+
+The ability for the transmission frequency to allow for uplink to the CubeSat from the ground station is given a weight of 40\%, the highest of these metrics. This metric is the most important factor in determining what transmitter frequency to utilize in the STARS mission as per \textbf{DR.7.2}. Not all frequencies that could be used for the mission are able to send data both to and from the CubeSat and would require additional communication systems in order to successfully complete the mission. 
+
+The maximum downlink speed of the communications system was given a weight of 10\%. This is the lowest weight given to the metrics of the transmitter frequency. The downlink speed is important in determining the amount of data that can be transmitted to the ground station from the CubeSat during communication windows. This metric was given a lower weight as the mean transmission times and the total transmission times per month calculated in Table \ref{satcom} show enough communication time for the CubeSat to be able to transmit necessary amounts of data during communication windows. 
+
+\paragraph{Potential Pugh Matrix} ~\\~\\
+Table \ref{tbl:transmitter_pugh} gives an outline of what potential scores could be given to each of the communication systems. These scores are preliminary and will require further analysis to confirm each of the individual rankings of each metric for the three system types. 
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|c|c|c|c|} 
+\hline
+    \textbf{Category} & \textbf{Weight} & \textbf{VHF/UHF} & \textbf{S-Band} & \textbf{VHF/UHF/S-Band}
+    \\
+\hline
+    \textbf{Estimated Cost} & 0.2 & 4 & 4 & 1
+    \\
+\hline
+    \textbf{Beam Width} & 0.3 & 3 & 1 & 3
+    \\
+\hline
+    \textbf{Uplink Capability} & 0.4 & 5 & 1 & 5
+    \\
+\hline
+    \textbf{Max. Downlink Speed} & 0.1 & 1 & 4 & 4
+    \\
+\hline
+    \textbf{Total} & 1 & 3.8 & 1.9 & 3.5
+    \\
+\hline
+\end{tabular}
+\caption{Example Transmitter Frequency Pugh Matrix }
+\label{tbl:transmitter_pugh}
+\end{table}
+
+With these preliminary, predicted values, the VHF/UHF system has the highest score, making it the theoretical, ideal transmitter frequency for the STARS mission. Further analysis must be conducted to confirm these scores, but without significant, unforeseen changes, it is predicted that the VHF/UHF system will maintain its position as the best candidate for the STARS mission. 
+
+\subsubsection{Antenna}
+
+
+\paragraph{Metrics}
+\begin{itemize}
+    \item Cost\\
+    \\
+    While the costs of wire antennae do not significantly vary between different configurations, it is important to consider the costs associated with every system. The scoring of the cost is based on minimum price in USD for each wire antenna configuration.\\
+    \item Overall Wire Length\\
+    \\
+    While the length of the antenna can influence the drag characteristics of the satellite, the effect would be minimal considering the small surface area of the wire antenna. The antenna system is deployable; therefore, the overall length of the antenna influences the time for deployment and power cost of deployment. The length of the antenna is measured in transmission wavelengths.\\
+    \item Radiation Pattern \\
+    \\
+    Different antennae radiate signals based on how they are polarized, their signal frequency, and the orientation of the antennae as well as the orientation of the device they are mounted on. Selecting an antenna that can function at certain orientations and transmit data at the desired frequency is crucial to the design of a communications system. While the metric for this study was originally going to be measured in percent coverage of a one wavelength sphere, centered at the base of the antenna, the directivity value of the antenna is a much better gauge of radiation coverage from the antenna. It compares the functionality of the antenna itself to an isotropic radiation source. A directivity of an antenna means that a source is isotropic, or fully covers the surrounding area with a signal power, which is independent of orientation. A higher directivity indicates that the signal from the antenna is more focused.\\
+    \item Maximum Nominal Power Usage \\
+    \\
+    Power usage is highly limited on the satellite, making power usage a vital aspect of the antenna system. This metric does not include deployment costs. The power usage of the antenna is scored by the maximum power use at nominal conditions, which is measured in milliWatts.
+\end{itemize}
+
+
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{3.5cm}|c|c|c|c|c|}
+\hline
+    \textbf{Metric} & \textbf{5} & \textbf{4} & \textbf{3} & \textbf{2} & \textbf{1}
+    \\
+\hline
+    \textbf{Estimated Cost (\$)} & 4999 or less & 5,000-5,249 & 5,250-5,500 & 5,501-5,750 & 6,000 or more
+    \\
+\hline
+    \textbf{Overall Wire Length ($\lambda$)} & 0.25 or less & 0.26-0.49  & 0.5-0.74 & 0.75-0.99 & 1 or greater
+    \\
+\hline
+    \textbf{Radiation Pattern} & 1 &  & 1.6-1.8 &  & 3.28
+    \\
+\hline
+    \textbf{Maximum Nominal Power Usage (mW)} & less than 40 &  & 60 &  & more than 60
+    \\
+\hline
+\end{tabular}
+\caption{Antenna Trade Study Metric Values}
+\label{tbl:Antenna_Metric_Scores}
+\end{table}
+
+\paragraph{Weights}
+\begin{itemize}
+    \item Cost - 0.1
+    \item Overall Wire Length - 0.3
+    \item Radiation Pattern - 0.4
+    \item Maximum Nominal Power Usage - 0.2
+\end{itemize}
+
+The cost of the Antenna is given a weight of ten percent. While cost is an important factor in the mission, there is little variance in cost (roughly 1000 USD) between each of the antenna configurations \cite{shop}. Therefore, this is a small factor in the overall cost weight decision. While maximum nominal power usage is important over the length of the mission, the power usage of the antenna is between 40-60 milliWatts for every configuration. Because this value is so small, and because there is so little variation between the configurations, this criteria was assigned a weight of 0.2. The overall wire length is more vital to the mission than the cost and the nominal power usage, as the wire length will affect the time required to deploy the antenna, which will increase overall power usage during deployment. Since this criteria is more important than cost and maximum Nominal Power Usage, it is assigned a weight of 0.3. Finally, the radiation pattern of the antenna system is mission critical. The directivity of the system will directly influence the slew rates required for the antenna to effectively transmit information to the ground station. Being the most important criteria of the antenna system, Radiation Pattern was given a weight of 0.4
+\paragraph{Possible Pugh Matrix} ~\\ ~\\
+Table \ref{tbl:antenna_pugh} is an example of what a pugh matrix might look like for these under the specified criteria.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|c|c|c|c|c|} 
+\hline
+    \textbf{Category} & \textbf{Weight} & \textbf{Monopole} & \textbf{Dipole}& \textbf{Turnstile} & \textbf{Vertical Monopole}
+    \\
+\hline
+    \textbf{Cost} & 0.1 & 4 & 3 & 2 & 3
+    \\
+\hline
+    \textbf{Overall Wire Length}& 0.3 & 5 & 3 & 1 & 4
+    \\
+\hline
+    \textbf{Radiation Pattern} & 0.4 & 1 & 3 & 5 & 3
+    \\
+\hline
+    \textbf{Max. Nominal Power Usage}& 0.2 & 5 & 5 & 3 & 5 
+    \\
+\hline
+    \textbf{Total} & 1 & 3.3 & 3.4 & 3.1 & 3.7
+    \\
+\hline
+\end{tabular}
+\caption{Possible Antenna system Pugh Matrix }
+\label{tbl:antenna_pugh}
+\end{table}
+
+While this Pugh Matrix demonstrates an ideal antenna system according to its criteria, this is a temporary Pugh matrix and may be validated or invalidated by further feasibility analysis. However, given the values shown in the Pugh matrix, it is reasonable to assume that the vertical monopole array will be the ideal design decision, excluding some major undiscovered error in the metrics of this Pugh matrix.

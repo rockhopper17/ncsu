@@ -1,0 +1,149 @@
+
+\thispagestyle{empty}
+
+\begin{center}
+
+% -------------------------------------------------------------------------------------------------  Title Page 
+% ----------------------------------------------------------------------
+
+\includegraphics[width=.6\columnwidth]{ncsulogo.jpg}\\
+
+\bigskip
+
+{\huge \textbf{College of Engineering}}\\
+\bigskip
+{\Large \textbf{Department of Mechanical and Aerospace Engineering}}\\
+\bigskip
+\bigskip
+
+\includegraphics[width=.2\columnwidth]{ncsulogoround.jpg}\\
+
+\bigskip
+\bigskip
+
+\large
+MAE 480\\
+\bigskip
+Preliminary Design Review\\
+\bigskip
+\textbf{Satellite for Telemetric Acquisitions of Radioactive Statistics}\\
+\textbf{(STARS)}\\
+\bigskip
+
+\includegraphics[width=0.7\columnwidth]{NASC_Logo.png}\\
+\bigskip
+
+\end{center}
+\normalsize
+\pagebreak
+% --------------------------------------------------------------------------------- Table of Contents
+% ----------------------------- List of Figures
+% ----------------------------- List of Tables
+% ----------------------------------------------------------------------
+\tableofcontents % Makes table of contents as we go based off of the section headers we create
+\pagebreak
+
+\listoffigures
+ 
+\listoftables
+\pagebreak
+
+%\addcontentsline{toc}{section}{Introduction}    % Used to manually add entries
+%\section*{Introduction}   % Section Title without a number
+
+
+%----------------------------------------------------------------------------------------
+%	Acronyms
+%----------------------------------------------------------------------------------------
+\section*{Nomenclature and Acronyms}
+
+\begin{tabbing}
+  XXXXXXX \= \kill% this line sets tab stop   Add 'X' for more space between meaning and acronym
+  $GNC$ \> Guidance, Navigation, and Control \\
+  NASC \> NCSU's Advancement in Space Cubes \\
+  $\gamma$ \> specific heat of a fluid \\
+  $P_{01}$ \> stagnation pressure before the shock, Pa \\
+  $T$ \> Temperature, K  \\
+  $EoL$ \> End Of Life \\
+  $PDR$ \> Preliminary Design Review \\
+  $CDR$ \> Critical Design Review \\
+  $UHF$ \> Ultra High Frequency \\
+  $VHF$ \> Very High Frequency \\
+  $LiPo$ \> Lithium Polymer \\
+  $Li-Ion$ \> Lithium Ion \\
+  $NiCd$ \> Nickel Cadmium \\
+  [5pt]
+ \end{tabbing}
+ 
+ \vspace{0.5mm}
+\pagebreak
+%----------------------------------------------------------------------------------------
+%	Project Information
+%----------------------------------------------------------------------------------------
+\section{Project Information}
+\subsection{NASC Personnel}
+%
+% begin table for personnal
+\begin{center}
+\begin{tabular}{|p{5.3cm}||p{5.3cm}||p{5.3cm}|}
+\hline
+ \multicolumn{3}{|c|}{Team Members of NASC} \\
+ %
+ \hline % 3 per row
+ \textbf{John Inness:}&  \textbf{Logan Bilich: }& \textbf{Josh Cannon: }\\ 
+ Co-Project Manager   & Co-Project Manager & Flight Dynamics Team Lead   \\
+ Primary GNC Lead & EOL Lead & Primary Mission Analysis Lead \\
+ Flight Dynamics Team  & Flight Dynamics Team  & Flight Dynamics Team  \\
+ jinness@ncsu.edu   & ltbilich@ncsu.edu   & jkcannon@ncsu.edu \\
+ 919-561-3505  & 704-490-1848 & 919-518-6379 \\
+\hline % 3 per row
+ \textbf{Tyler Young: } &  \textbf{Kirby Hullender:} & \textbf{Anna Freundt:}\\ 
+  Mission Analysis Lead  & Manufacturing Lead & Systems Engineer   \\
+Flight Dynamics Team  & Secondary GNC Lead & System Integration \\
+ & Flight Dynamics Team &  \\
+ tcyoung3@ncsu.edu   & kahullen@ncsu.edu & akfreund@ncsu.edu  \\
+ 336-309-2746  & 704-236-3419  & 336-937-3170\\
+ \hline % 3 per row
+ \textbf{Nick Reid: }&  \textbf{Joshua Miller: }& \textbf{Kevin Alexander: }\\ 
+ CubeSat Survivability Team Lead   & Manufacturing Lead & Financial Lead   \\
+ Thermal Lead & Simulation Lead & Structures Lead \\
+ CubeSat Survivability Team  & CubeSat Survivability Team  & CubeSat Survivability Team  \\
+ email   & email & kkalexan@ncsu.edu  \\
+ number  & number & 704-281-0915 \\
+ \hline % 3 per row
+ \textbf{Zane Garris: }&  \textbf{Anton Scholten: }& \textbf{Abdullah Elkadsi:}\\ 
+ Financial Lead   & Manufacturing Lead & Systems Engineer    \\
+ Secondary Thermal Lead & CAD Lead & Systems Integration \\
+ CubeSat Survivability Team  & CubeSat Survivability Team  &   \\
+ zkgarris@ncsu.edu   & ahschol@ncsu.edu & email  \\
+ 336-430-2386  & 919-578-4933 & number \\
+ \hline % 3 per row
+ \textbf{Ian Swart: }&  \textbf{Jacob Pilsbury: }& \textbf{Matt Wyland: }\\ 
+ Safety Lead   & Test Lead & Manufacturing Lead  \\
+ Ground Station Lead & Power Lead & Communication Lead \\
+ Electronics Team  & Electronics Team  & Electronics Team  \\
+ igswart@ncsu.edu   & jrpilsbu@ncsu.edu & email  \\
+ 978-766-0605  & 704-840-5872 & number \\
+ \hline % 3 per row
+ \textbf{Rixing Chen: }&  \textbf{Andrew Navratil: }& \textbf{Lila Crick: }\\ 
+ Safety Lead   & Stakeholder Liaison &  Payload Lead  \\
+ Power Lead & Avionics Lead & Electronics Team \\
+ Electronics Team  & Electronics Team Lead  &  \\
+ rchen12@ncsu.edu   & email & email  \\
+ 828-398-8268  & number & number \\
+\hline
+\end{tabular}
+\end{center}
+
+\subsection{NASC Organizational Stucture}
+
+To structure all eighteen members of the team, considerations had to be made for structuring the team and ensuring work to be accomplished, NASC had to be organized to meet specific goals. The figure below shows the organizational structure of NASC. \\
+
+\begin{figure}[H]
+    \includegraphics[width=0.8\columnwidth]{NASCORGChart.png}\\
+    \caption{NASC Organization Chart}
+\end{figure}
+
+NASC is headed by the co-project managers who lead the team's effort and organizing the team and direct the route the team takes. Below the project managers, the team is made out of four teams: CubeSat Electronics, CubeSat Flight Dynamics, and CubeSat Survivability, and Systems Integration. Each of the three CubeSat teams has a separate lead who is responsible for leading their individual teams. This leadership is more technical in nature in contrast to the programmatic focus the co-project managers have and each team has a unique set of subsystems associated with their team. For example, the CubeSat Electronics team includes the Power, Ground Station, Communication, Payload, and Avionics subsystems. These subsystems are closely grouped together and thus are tied together for the CubeSat Electronics team. CubeSat Flight Dynamics team features the GNC, End of Life, and Mission Analysis subsystems, and the CubeSat Survivability team features the Structures, Thermal, CAD, and Simulation subsystems. The Systems Integration team is comprised of Systems Engineers whose main duty is to serve as an interface between the different CubeSat teams and ensure that the system as a whole is able to work. This connection is represented by the purple arrows connecting the Systems Integration team with the CubeSat teams. 
+
+

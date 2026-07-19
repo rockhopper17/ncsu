@@ -1,0 +1,309 @@
+
+%----------------------------------------------------------------------------------------
+%	Feasibility Study
+%----------------------------------------------------------------------------------------
+\section{Feasibility Study}
+
+\subsection{Launch}
+In order to assure the chosen material and chassis are able to fulfill the requirements outlined by the launch Critical Project Element, trade studies were conducted on material and chassis options. These studies were similar to those seen in the CDD, but instead seek to study more specific options using more focused criteria for judging. The trade studies were used to decide on preferred materials for the chassis and to allow for COTS chassis options to be easily compared. The metrics used were chosen and weighted as to give options with high strength, radiation resistance, low weight, and a large internal volume the best score.
+\subsubsection{Literature Data}
+The majority of structural analysis performed for CubeSats is achieved through finite element analysis \cite{FEA1, FEA3, FEA4, FEA5} as well as occasional simplified analysis \cite{FEA2}. While mesh generation for FEA is a complicated problem, the actual information needed to set up and perform this analysis is relatively simple. Additionally, since most structures are far more complicated than simple solid mechanical analysis will support, simplification can be made for first pass analysis. Performing a simplified analysis such as that seen \cite{FEA2} is the first step to assuring the success of the CubeSat. During launch, the majority of loads will be experienced within the rails of the CubeSat inside of the P-POD. Therefore, treating the chassis as a set of four beams made of the main material and calculating the force of each rail during launch as well as critical forces to achieve permanent deformation or buckling, provides a first pass safety metric. In addition to a simplification of the chassis as beams, another simplifying assumption can be made for early modal analysis by finding the natural frequency using just the structure mass and stiffness \cite{FEA5}. As the rest of the CubeSat is developed, larger scale analysis can be performed on parts such as the main chassis.
+\\
+\\
+The main analysis to be performed to assure a successful launch is an FEA analysis of the chassis under launching loads and vibrations. Specifically, using an empty chassis gives a worst case scenario as no components or internal structures will provide additional support \cite{FEA5}. Combining this analysis with modal analysis will yield the worst deformations expected, a metric to potential damage done to the CubeSat, and an assurance that resonance will not occur \cite{FEA1, FEA5}. Additional analysis can be performed as other subsections are analyzed such as thermal loading and cycling of the structure, modal analysis of sensitive equipment, and potential analysis of radiation effects \cite{FEA5, FEA6, FEA7, SCRP}.
+\subsubsection{Simulation Analysis}
+Simulation has not yet been completed and will be conducted as part of the CDR.
+\\
+\\
+Simulation for the structural system of the CubeSat is essential to the mission's success as it will determine any danger during launch, deployment, and during normal operation. Overall, the structural analysis is easily split into two main sections with freedom for additional analysis given the time and resources.
+\paragraph{Finite Element Analysis} ~\\
+
+The majority of the simulation work for structural analysis comes through the usage of finite element analysis. The tests run will first simulate static axial compression forces of 8 - 13 G's as well as compression forces of ~6 G's along the other axis. These loads will closely simulate launching loads for the CubeSat, and the finite element analysis will return locations of high stress as well as deformations. If the result are acceptable, then the analysis on static launch loads can be concluded and the design left as is. If results provide any reason to doubt the design, the chassis will be modified virtually until a desirable configuration is found. These changes will be reflect on the physical final chassis.
+\\
+\\
+The second part of finite element analysis will be to study fragile or essential components of the CubeSat. Based on the final design, these will also experience loads that come from the chassis during launch. If any parts are found to be in danger of failing during launch, the design for the chassis will be modified to assure internal failures do not occur. If all static loading is withstood, then more specific analysis can be performed while other subsystems start and continue analysis that requires the chassis design to be fully realized.
+
+All FEA will be performed in SOLIDWORKS or ANSYS.
+\paragraph{Modal Analysis} ~\\
+
+Modal analysis of the CubeSat assures that vibrations from launch and normal operation do not result in resonance. This analysis consists of finding natural frequencies for the chassis in the range of 0 - 2000 Hz and assuring none are within specific ranges. While these ranges are not perfectly known for the ride share options considered, previous modal analysis reports that natural frequencies are above 35Hz in the vertical direction and 20Hz in the lateral directions \cite{FEA1, FEA5, FEA7}. It is already expected that the CubeSat structure will meet these requirements given the designs being considered, but in the event that these requirements are not met simple, additions to the structure can assure these problems are fixed.
+~\\~\\
+All modal analysis will be performed in SOLIDWORKS or ANSYS.
+\paragraph{Additional Analysis} ~\\
+
+If time and resources permit, there are several opportunities for additional analysis methods which will further assure mission success and CubeSat longevity. The easiest avenue is to collect data from the thermal analysis and use it to simulate the thermal loading and cycling of the CubeSat during normal operations. Since the CubeSat is in a sun-synchronous orbit, the thermal loading will be substantial, thus its effects must be understood and accounted for. Not only will this assure internal systems remain safe, but will allow for the study of any deformations from thermal loads as well as changes to material properties which could accelerate cracking or result in cold welding of components. This analysis can be completed in SOLIDWORKS or ANSYS.
+~\\~\\
+Modal analysis of sensitive components such as the sensors and avionics system assures neither becomes damaged through launch or normal operation. Inspired by the work seen in \cite{FEA7}, modal analysis of PCBs extends to studying the fatigue from reversible deformations from vibrations. Thus, more information about the launch vehicle and process is needed or must be estimated. This analysis can be completed in SOLIDWORKS or ANSYS.
+~\\~\\
+The last big option for additional structural analysis extends beyond launching loads into exposure of constant radiation during normal operation. The methods outlined in \cite{SCRP} provide a framework of simulating radiation effects on a CubeSat and its components. Since the CubeSat will be placed closed to the inner Van-Allen belt, protection from radiation and an understanding of the level of protection provided is invaluable to assure the continued operation of the CubeSat. This analysis can be completed in SHIELDOSE-2 and SPENVIS.
+\subsubsection{Equations}
+The equations used to study the launch of the CubeSat represent a first pass analysis based on a simplified model of the chassis. These equations come from basic solid mechanics and classical physics. Note that variables within the equation will be explained in sentences before or after the equation as to avoid confusion with variables listed in other sections.
+\begin{equation}
+    \label{rail_V}
+    V_r = n_rl_rh_rt_r
+\end{equation}
+\begin{equation}
+    \label{CS_rho}
+    \rho_{CS} =\frac{m_{CS}}{V_{CS}}
+\end{equation}
+\begin{equation}
+    \label{rail_t}
+    t_r = \frac{m_{CS}}{\rho_{CS}n_rl_rh_r}
+\end{equation}
+The above equation treats the CubeSat chassis as a set of n rails with a predetermined height and length. A further assumption could also be made that each rail is square thus eliminating the need for a length measurement. V is representative of the volume, l, h, and t are length, height, and thickness respectively, rho is density, and m is mass. Subscripts of "CS" are for CubeSat measurements while "r" is for rails. Depending on the choice of simplification, the compression displacement can be found as follows.
+\begin{equation}
+    \label{rail_I}
+    \delta_r = \frac{Fl_r}{A_rE}
+\end{equation}
+Here, F is the axial compression force, A is the cross-sectional area of the rail, and E is the compressive modulus of the material. In addition to a total compression of the rail, the stiffness can also be estimated with these values and thus a simplified natural frequency can be found as follows.
+\begin{equation}
+    \label{rail_k}
+    k_r = \frac{A_rE}{l_r}
+\end{equation}
+\begin{equation}
+    \label{natf}
+    \omega_n = \sqrt{\frac{n_rk_r}{m_CS}}
+\end{equation}
+Thus, a simple first analysis can be performed for the natural frequency of a single rail. However, the critical buckling load can also be calculated with relative ease.
+\begin{equation}
+    \label{I_r}
+    I_r = \frac{3t_rh_r}{10}
+\end{equation}
+\begin{equation}
+    \label{P_cr}
+    P_{cr} = \frac{\pi^2EI_r}{2l_r}
+\end{equation}
+Here, I is the moment of inertia of the rail and P is the critical buckling force. Classical analysis of the chassis beyond this simplification becomes complicated while yielding less helpful results for the amount of work required. Therefore, analysis of the structure beyond this will be performed via FEA.
+\subsection{Control}
+\subsubsection{Literature Data}
+In order to assure the STARS CubeSat has control to meet maneuver requirements, a review of the CubeSat mission has to be conducted from deployment to the end of its life. This begins with damping the tip off rates induced by the deployment and then orienting the solar panels and sun sensor towards the sun to charge the batteries \cite{GNC_Kiss}. Once the battery system has been charged, the maneuver requirements are dependent on the various subsystems. These maneuvers could potentially include inducing a barbecue roll for controlling thermal radiation, pointing the communication array towards the ground, or other requirements imparted on the system \cite{SMAD}. Validating the performance of the chosen actuators and sensors will be dependent on datasheets available to NASC and their flight heritage. 
+\subsubsection{Simulation Analysis}
+To conduct simulation analysis of the controllability, simulations of the different controlled maneuvers must be conducted. As part of these simulations, assumptions have to be made about how to approach these calculations. For analysis, the Earth's magnetic field will be treated as equally distributed around the globe with a constant value of 25 micro Teslas. Additionally, space will be treated as a pure vacuum and lack environmental induced torques such as those induced by the Sun's or Earth's atmospheres \cite{SMAD}. Additionally, the CubeSat will be treated as a uniform mass with a center of gravity with a three millimeter offset from the geometric center of the CubeSat \cite{SMAD}. Torque rods in alignment with the Earth's magnetic field will be treated as if torque rods can induce a roll moment. There are more complicated systems that can control the roll using Earth's magnetic field but analysis time precludes those for calculates to be made. These assumptions can be made with the Goddard Golden Rules actuator sizing for margin guidance for pre-Phase A and Phase A, given as 100\%, so it ensures the feasibility of the calculations with a high level of margin. 
+\begin{figure}[H]      
+    \includegraphics[scale=0.75]{figures/Picture1.jpg}\\
+    \caption{Detumble Analysis Trade Example\cite{Inspector}}
+    \label{fig:detumble_example}
+\end{figure}
+The figure above shows a sample detumble calculation from another CubeSat study and the results gathered from it \cite{Inspector}. The CubeSat used in said study was a 12U CubeSat with a 1.2 A-m\textsuperscript{2} torque rod so results for STARS will differ from this example. \\
+In order to calculate other maneuvers such as time to turn 90 degrees, calculations will be used determine the time period to conduct the maneuvers. These maneuvers will be driven by subsystem maneuver requirements and will be conducted with the listed assumptions mentioned earlier.\\
+Due to time constraints, detailed analysis of the control actuator system has not been conducted but will be conducted in the near future. 
+
+\subsubsection{Equations}
+
+Magnetic Dipole calculation for magnetic torquers \cite{SMAD}:
+\begin{align}
+	D &= T/B
+\end{align}
+where $D$ is magnetic dipole, $T$ is torque, and $B$ is the magnetic field of the Earth.  
+
+Max acceleration slews with no resisting momentum\cite{SMAD}
+\begin{align}
+	\theta/2 &= \tfrac{1}{2}(T/I)(t/2)^2\\
+	T &= 4\theta I t^2
+\end{align}
+where $\theta$ is slew angle, $T$ is the time in seconds, $I$ is the moment of inertia, and $t$ is the applied torque.
+
+Momentum dumping sizing force level\cite{SMAD}
+\begin{align}
+	F &= h/(Lt)
+\end{align}
+where $h$ is stored wheel momentum, $L$ is thruster moment arm, and $t$ is burn time.
+
+Slew rate sizing force level\cite{SMAD}
+\begin{align}
+	T &= FL = I\alpha
+\end{align}
+where $\alpha$ is acceleration required.
+
+\subsection{Power}
+\subsubsection{Literature Data}
+The University of Colorado Boulder's Colorado Student Space Weather Experiment is powered by four independent solar array strings, one on each long-axis side of the CubeSat. The solar array consists of triple junction solar cells that are manufactured in house by the University of Colorado students with the efficiency of 28\%\cite{UCB_EPS}. This configuration ensured that the Colorado Student Space Weather Experiment continuously operated for three months.  
+\subsubsection{Simulation Analysis}
+Limited amount of simulation is being conducted for the PDR documents due to time constraints. For the CDR document, the START will first be modeled in detail via CAD simulation software. Then both the CAD model and the Orbital parameters will be imported into STK. Using the STK Solar panel Analysis Tool, detailed graph and data can be obtained for power generation.
+\begin{table}[H]
+\centering
+\begin{tabular}{| +c | ^c | ^c | ^c |}
+	\hline
+	\rowstyle{\bfseries}%
+	Month & \shortstack{Minimum Solar \\ Flux ($\frac{W}{m^2})$} & \shortstack{Maximum Solar \\ Flux ($\frac{W}{m^2})$} & \shortstack{Mean Solar \\ Flux ($\frac{W}{m^2})$} \\ \hline
+	Nov & 1385.1 & 1403.6 & 1395.1 \\ \hline
+	Dec & 1403.6 & 1411.9 & 1408.9 \\ \hline   
+	Jan & 1406.4 & 1412.0 & 1410.3 \\ \hline
+	Feb & 1391.1 & 1406.4 & 1399.4 \\ \hline
+    Mar & 1367.0 & 1390.4 & 1379.0 \\ \hline
+    Apr & 1344.6 & 1367.1 & 1355.5 \\ \hline
+    May & 1327.5 & 1344.6 & 1335.3 \\ \hline
+    Jun & 1320.6 & 1327.5 & 1323.2 \\ \hline
+    Jul & 1320.6 & 1325.2 & 1321.9 \\ \hline
+    Aug & 1325.1 & 1340.3 & 1331.9 \\ \hline
+    Sep & 1340.3 & 1361.9 & 1350.7 \\ \hline
+    Oct & 1361.9 & 1383.4 & 1372.7 \\ \hline
+    
+\end{tabular}
+\caption{Simulated Solar Flux Experienced}
+\label{flux}
+\end{table}
+
+In Table \ref{flux}, the solar flux values from STK simulation shows the solar flux values do vary with the months of the year. The variation of the solar flux is significant and can affect the performance of the solar panel. This means for the CubeSat at Sun-synchronous orbit will have different amount of solar energy depending on the month of the mission. Further simulation and analysis is need to prove the solar panel choice will provide enough power for the mission.\\  
+
+Future analysis will include a power model and concise power budget for the CubeSat. The power budget will factor in orbit average power, the power drawn from each subsystem, efficiency losses due to multiple battery charges, and battery capacity, among other factors. The power model will determine the power available over the course of one orbit. This will be important in determining the peaks and valleys of power available, so that the power can be properly allocated to each subsystem when needed. 
+\subsubsection{Equations}
+The principle equation behind the STK solar panel Tool is the basic power equation\cite{STK_SPT}. The basic power equation is given below as equation \ref{BasicPowerEqn}.
+\begin{equation}
+Power = Efficiency \times Solar \:Intensity \times Effective \:area \times Solar \:Irradiance
+\label{BasicPowerEqn}
+\end{equation}
+In the equation \ref{BasicPowerEqn}, the efficiency is specified for the solar panel in the vehicle model file and ranges between zero (0) and one (1). The solar intensity ranges from umbra zero (0) through penumbra (0 < i <1) to full sunlight one (1). The effective area is the cross-sectional area exposed to the sunlight. The solar irradiance is output power of the sun, and it is dependent on the distance as governed by the equation given:
+\begin{equation}
+Solar \:Irradiance = \frac{Solar \:Flux \:At 1 \:AU}{distance\textsuperscript{2}}
+\label{SolarIrradiance}
+\end{equation}
+The distance in the equation \ref{SolarIrradiance} is the apparent position of the sun relative to the satellite in Astronomical Unit\cite{STK_SPT}.
+
+The orbit average power is an important parameter in determining how much power will be available on average during the course of the mission. The equation below gives a useful estimate for the OAP of the CubeSat \cite{budget}. 
+\begin{equation}
+OAP = 0.60 \times P
+\end{equation}
+Where \textit{P} is the power generated by one panel. This estimate will be useful in comparing the OAP generated by the power model to ensure that the power model is accurate. 
+
+\subsection{Thermal}
+\subsubsection{Literature Data}
+Thermal analysis of a spacecraft is typically done in two main phases: an information gathering phase and an analysis phase \cite{SMAD}. The information gathering phase is where the context of the analysis is established. This includes information such as temperature requirements of components, locations, and directions of heat sources (in this case, the sun primarily), any simplified geometry defined for the analysis, etc. \cite{SMAD}. The analysis phase involves computing properties such as average incident heat fluxes, absorbed heat fluxes, radiant dissipation capability, and so on. \cite{SMAD}. After this, computing temperatures is done by heat balancing, which is then compared to temperature requirements for components. The process is then repeated, readjusting the TCS until the temperature requirements are satisfied for the mission \cite{SMAD}. It may also be necessary to define more than one thermal environment to obtain a more rigorous model of the thermal loading. This analysis model would involve defining "isothermal nodes", computing their heat balances, and then analyzing the heat transfer between the nodes to obtain a complete model of the temperatures experienced by the spacecraft. For a small spacecraft like a 3U CubeSat, the only two nodes will likely be the exterior of craft and the internal electronics compartment.
+\subsubsection{Simulation Analysis}
+\begin{table}[H]
+\centering
+\begin{tabular}{| +c | ^c | ^c | ^c |}
+	\hline
+	\rowstyle{\bfseries}%
+	Month & \shortstack{Minimum Environmental \\ Temperature (\degree C)} & \shortstack{Maximum Environmental \\ Temperature (\degree C)} & \shortstack{Mean Environmental \\ Temperature (\degree C)} \\ \hline
+	Nov & -40.520 & -36.370 & -39.190 \\ \hline
+	Dec & -39.750 & -35.717 & -38.336 \\ \hline   
+	Jan & -39.634 & -35.773 & -38.424 \\ \hline
+	Feb & -40.271 & -37.178 & -39.338 \\ \hline
+    Mar & -41.285 & -38.448 & -40.188 \\ \hline
+    Apr & -75.189 & -37.202 & -40.488 \\ \hline
+    May & -85.807 & -36.558 & -47.908 \\ \hline
+    Jun & -86.049 & -36.551 & -50.998 \\ \hline
+    Jul & -86.051 & -36.702 & -50.000 \\ \hline
+    Aug & -85.890 & -37.489 & -42.845 \\ \hline
+    Sep & -42.426 & -38.859 & -41.175 \\ \hline
+    Oct & -41.502 & -38.831 & -40.594 \\ \hline
+    
+\end{tabular}
+\caption{Simulated Environmental Temperature Conditions}
+\label{temperature}
+\end{table}
+Table (\ref{temperature}) shows the extreme of the environmental temperatures experienced by the CubeSat over a duration of 12 months. These values were calculated using AGI Systems ToolKit. As of the writing of this document, this is the only analysis that has been performed with regard to thermal control. Information about the model of the CubeSat itself is to complete the full design of the thermal control system. This information includes the CubeSat frame material and thermal properties, as well as overall geometry. Analysis will be performed using numerical simulation tools such as ANSYS to effectively model and calculate the heat transfer across the CubeSat.
+
+\subsection{Communication}
+\subsubsection{Literature Data}
+Selecting a transmission frequency is vital decision in designing and developing the communication system. To ensure that the information regarding this and the ground stations operating at these frequencies are representative of real-world systems, information from real-world ground station systems and transmitters are used. Innovative Solutions In Space (ISIS) is a company that offers a variety of space system equipment that can be used in developing a CubeSat mission. The information they provide on their ground station systems \cite{isis_ground} presents a good example in looking at the characteristics and functionality of pre-built ground stations along with other sources involving the topic of ground stations and CubeSat communication systems. In a full literature review, more manufacturers and other sources will be included to research the design of communication systems. This will give NASC more information in deciding which transmitter frequency to use in the STARS mission. 
+
+Using the ISIS information sheet for antenna systems \cite{shop}, and the fundamentals of Antenna theory textbook \cite{Wong}, the radiation patterns of each antenna will be analyzed for dead zones, or zones with no radiation pattern. The slew rate required for each option will then be determined by finding the worst possible orientation for data transmission for each antenna, and determining the rotation required to reestablish communications. Then, using the payload data size per communications interval, and the data transfer rate of the transmitter, the average amount of time required per interval to transmit the data is determined. Subtracting this value from the mean communications interval determined by STK will yield the theoretical available time for maneuvering during the comms interval, and dividing the required rotation by the maneuver time will yield the slew rate required for each antenna option.
+\subsubsection{Simulation Analysis}
+In order to calculate the amount of data that can be transmitted to and from the CubeSat, analysis must be conducted on the communication windows between the CubeSat and the ground station. Using STK, the orbit of the satellite, and the range of the communications system is simulated. Table \ref{satcom} below shows the minimum, maximum, mean, and total transmit window times for the months between November 2019 to October 2020. This data was generated using an STK model of the STARS mission with a ground station located in Raleigh, North Carolina. 
+
+\begin{table}[H]
+\centering
+\begin{tabular}{| +c | ^c | ^c | ^c | ^c | }
+	\hline
+	\rowstyle{\bfseries}%
+	Month & \shortstack{Minimum Transmit \\ Time (s)} & \shortstack{Maximum Transmit \\ Time (s)} & \shortstack{Mean Transmit \\ Time (s)} & \shortstack{Total Transmit \\ Time (s)} \\ \hline
+	Nov & 107.079 & 695.930 & 548.547 & 76248 \\ \hline
+	Dec & 29.729  & 695.849 & 531.170 & 78613 \\ \hline   
+	Jan & 105.345 & 695.675 & 545.028 & 78484 \\ \hline
+	Feb & 37.511  & 695.813 & 538.232 & 70508 \\ \hline
+    Mar & 21.610  & 695.932 & 543.083 & 78747 \\ \hline
+    Apr & 142.641 & 695.944 & 552.211 & 76205 \\ \hline
+    May & 180.793 & 695.918 & 550.913 & 79332 \\ \hline
+    Jun & 216.358 & 695.808 & 552.883 & 76851 \\ \hline
+    Jul & 242.257 & 695.600 & 552.752 & 79596 \\ \hline
+    Aug & 265.263 & 695.306 & 552.954 & 79625 \\ \hline
+    Sep & 245.500 & 695.565 & 550.672 & 77094 \\ \hline
+    Oct & 220.018 & 695.746 & 548.284 & 71825 \\ \hline
+    
+\end{tabular}
+\caption{Simulated Communication Window Data from November 2019 to October 2020}
+\label{satcom}
+\end{table}
+
+This information will be useful in estimating the amount of data that can be transmitted for each of these statistics. The average length of the communication windows fall between 530 and 560 seconds. This small amount of variation in the mean length of the communication windows show that the STARS mission will have similar times whenever the mission launches. These consistencies are in part due to the anticipated orbit of the mission. Assuming a mean length of 545 seconds per communication window for a mission, and a downlink speed of 9.6 kbps (as is the maximum downlink speed of a VHF/UHF communication system \cite{isis_ground}), the mean data transfer per overpass of the ground station is 5232 kbits. This is a basic, preliminary estimate; further analysis will be conducted on communication windows, data transfer rates, and the overall effectiveness of each transmitter system. 
+
+
+\subsection{End of Life}
+\subsubsection{Literature Data}
+A crucial characteristic of the End of Life requirements is to ensure a complete disintegration of all parts of the satellite upon re-entry. Failure to do so can lead to parts of the craft landing back on the Earth's surface. Besides the obvious safety concerns of debris falling over populated areas, there are also logistical and legal ramifications of a failed disintegration. Logistically, it must be ensured that there is less than 1 in 10,000 chance that any non-disintegrated debris will cause concerns for any other mission, land or sea traffic, or persons on the ground. Legally, the company or group in control of the satellite will be responsible for any damages caused by falling parts. 
+
+In order to establish that the STARS mission will disintegrate on re-entry, a literature review will be conducted in so far as to research the materials used in its construction and how they will respond to the re-entry effects. The review will focus on finding data about the temperature effects of entering the Earth's atmosphere and how it will effect the structural integrity of high density metals used in the structure of STARS. 
+
+\subsubsection{Simulation Analysis}
+Simulation has not yet been completed and will be conducted in the CDR.\\
+
+Simulation shall be conducted in order to determine the feasibility of the End of Life systems being considered. This will be done in order to ensure compliance with NASA Standard NASA-STD-8719.14B. 
+
+The simulation program to be used will be MATLAB. A satellite will be simulated in an original circular orbit at a radial value of 500km. Force and Drag calculations will be conducted for the given parameters, and will be used to calculate a new specific momentum of the satellite at the instantaneous moment of EoL deployment. This will then be iterated for a fixed time step until the satellite orbit reaches a radial value of 70-80km. This altitude is chosen because it is approximately the point at which small orbital objects burn up on re-entry. \cite{STD8719}
+
+This simulation will be conducted for each of the EoL design options to find which are feasible in accordance with \textbf{DR.8.1}
+
+The equations used to calculate this simulation can be seen in \ref{orbit} through \ref{time sum}.
+
+\subsubsection{Equations}
+\paragraph{Battery Dissipation Equations} ~\\~\\
+As stated in \textbf{DR.8.2.1}, during End of Life operations the battery must discharged in order to prevent a potential explosion that could leave a vast amount of debris in LEO. To accomplish this, other subsystems such as GNC and communications will be left on after the power passivation in order to slowly use up the energy in the battery. These subsystems will function as markers to indicate how well the satellite is de-orbiting from the atmosphere. Once communication is lost with the craft, it will be assumed that STARS has burned up on re-entry.
+
+In order to prove the feasibility of using various subsystems to trickle energy out of the battery as an effective means of power dissipation, the effective power draw over time must be calculated. This can be done via the equation, 
+\begin{equation}
+    I_{specific} = \frac{V}{R_{specific}}
+\end{equation}
+where I is the effective current, V is the voltage of the battery, and R is the total specific resistance in the circuitry connected to the powered subsystems. Then, the power can be calculate by,
+\begin{equation}
+    P = I_{specific}V
+\end{equation}
+where P is the power draw of a single subsystem. Finally, we get specific power draw from,
+\begin{equation}
+    Q = Pt
+\end{equation}
+where Q is the rate of power flow in kWh and t is the unit time in hours. This can then be summed to find the total draw.
+$$ \sum Q = Total \:Rate \:of \:Power \:Draw $$
+
+\paragraph {Simulation Equations} ~\\~\\
+The MATLAB simulation of EoL options will also need calculations done. The first will be to find the specific momentum of the original orbit via,
+\begin{equation}
+\label{orbit}
+    r = \frac{h^{2}}{\mu} \frac{1}{1+ecos\theta}
+\end{equation}
+where r is the radius from the center of the Earth, h is the specific momentum of a space object, $\mu$ is the mass of the earth, e is the eccentricity of orbit, and theta is the true anomaly. Due to the fact that a circular orbit has an eccentricity of 0, this can be condensed into,
+\begin{equation}
+\label{simplified orbit}
+    r = \frac{h^{2}}{\mu}
+\end{equation}
+This equation gives us the original parameters of the satellite before the EoL systems are deployed. In order to find the parameters after deployment, the acceleration and $\Delta V$ will need to be calculated. This can be done by starting with the equation, 
+$$F = ma$$
+where F is the force generated by the EoL system, m is the mass of the satellite, and a is the deceleration caused by deployment. The acceleration will then be used in,
+\begin{equation}
+\label{Delta V}
+    \Delta V = a\Delta t
+\end{equation}
+where $\Delta V$ is the instantaneous change in velcocity, and $\Delta t$ t is the selected time step. In this case of circular orbit, all of the original $\Delta V$ will be in the azimuthal direction $V_{\perp}$. 
+\begin{equation}
+\label{azimuthal}
+    V_{\perp} = \frac{\mu}{h}(1+ecos\theta)
+\end{equation}
+Using \ref{azimuthal} a new specific momentum can be found just after deployment. It can then be plugged back into \ref{orbit} in order to find the new orbit's eccentricity. This will then be used to find the radial velocity $V_{r}$ and the change in altitude of the satellite by,
+\begin{equation}
+\label{radial}
+    V_{r} = \frac{\mu}{h}esin\theta
+\end{equation}
+\begin{equation}
+\label{radius change}
+    \Delta r = V_{r}\Delta t
+\end{equation}
+\begin{equation}
+\label{new radius}
+    r_{n} = r_{n-1} - \Delta r
+\end{equation}
+These calculations will then be iterated through n number of time steps until $r_{n}$ is equal to the altitude of disintegration. A summation of total change in times can be done to find time to disintegrate.
+\begin{equation}
+\label{time sum}
+    \sum_{1}^{n} \Delta t = Total \: Time \: to \: Disintegrate
+\end{equation}

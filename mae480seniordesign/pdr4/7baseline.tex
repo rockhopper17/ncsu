@@ -1,0 +1,60 @@
+
+%----------------------------------------------------------------------------------------
+%	Baseline Design
+%----------------------------------------------------------------------------------------
+\section{Baseline Design}
+
+The following subsystems were not included with the in depth trade study analysis performed on CPEs.  Results from the CDD are highlighted here.
+\bigskip
+
+\subsection{Non-CPE Subsystems}
+
+\subsubsection{Payload} High energy particle detector
+%\noindent\textbf{Payload:} High energy particle detector
+\begin{itemize}
+    \item Mass: 1.25 kg
+    \item Volume: \textasciitilde100 cm3, cylindrical envelope \textasciitilde3.2 cm radius, 6 cm length
+    \item Thermal Limits: $-20\degree$C to $+30\degree$C
+    \item FOV: $~50\degree$
+    \item Power: <1 W
+\end{itemize}
+
+\subsubsection{Avionics}
+COTS Highly Integrated On-board Computing System
+\begin{itemize}[topsep=0pt]
+    \item Space heritage: Many TRL 9 options
+    \item Features: Sensor integration, processor, memory
+    \item Attributes: Power consumption, radiation resistance
+\end{itemize}
+
+\subsection{CAD Model}
+% I dont think we have the capability to write these subsections
+%\subsection{Trade study overview}
+%\subsection{Sensitivity Analysis}
+%\subsection{Literature Review}
+\subsection{Orbital Parameters}
+STARS will operate in Low Earth Orbit (LEO) as per \textbf{FR.9} in order to monitor the inner Van Allen radiation belt, which starts at approximately 640 kilometers.\cite{VanAllen_1} As stated in \textbf{DR.9.1} the orbit shall be 500 kilometers sun synchronous, meaning that the satellite is passing over any given location along the orbit's ground track at the same local mean solar time on each pass. \cite{Boain} The specific form of sun synchronous orbit (SSO) selected for this mission is the dawn-dusk orbital pattern. A dawn-dusk orbit is a SSO which has a ground track that follows the line along the Earth that represents the transition between night and day. \cite{Boain} Figure \ref{fig:Dusk_Dawn} provides a 3D render of the proposed dawn-dusk orbit.
+\begin{figure}[H]
+    \includegraphics[width=0.8\columnwidth]{OrbitSnap.png}\\
+    \caption{Dawn-Dusk Sun Synchronous Orbit}
+    \label{fig:Dusk_Dawn} 
+\end{figure}  
+The unique ground track of a dawn-dusk orbit will allow STARS to remain in constant sunlight throughout the entire lifetime of the mission. This will help the power system meet \textbf{DR.5.1} by allowing the solar panels to constantly collect power from the sun. Constant power collection will also allow STARS to stay active for longer periods of time and increase the amount of data collected and transmitted. Remaining in constant sunlight also impacts \textbf{FR.6} which revolves around the temperature and radiation STARS will be experiencing. With constant exposure to sunlight STARS will be under constant thermal loads and solar radiation, which the thermal subsystem will have to account for. This orbit does require not only the specific inclination required to maintain a SSO, but it must also have a specific time of ascending node in order to be considered dawn-dusk. A dawn-dusk orbit must have an ascending node that occurs at either 06:00:00 or 18:00:00. In order for the orbit to 500 kilometers sun synchronous it must have an inclination of approximately 97.4\degree. \cite{Garada} While a dawn dusk orbit presents a few issues for the mission the benefit of constant power generation far outweighs the inconveniences they present.
+
+There is another benefit to this orbital design that originates from the sun synchronous nature of STARS' orbit. Orbital period increases with altitude so the 500 kilometer altitude proposed by \textbf{DR.9.1} will result in over 15 revolutions per day, according to simulations made in STK. Sun synchronous orbits maintain a constant trajectory around the Earth as it rotates. This means that the satellite will make multiple passes over the same area in a single day. Having so many revolutions per day will therefore allow for multiple communication windows in a single day. Multiple communication windows will allow for a greater amount of data transmission and more freedom in the mission design. If STARS needs to go into a state of low power consumption for a few passes then it will still have plenty of time to make the next communication window. Several altitudes were considered for STARS, ranging from 450 to 600 kilometers, with each being analyzed for communication with the ground station over the course of a year. For the simulation the ground station was set to be on top of Engineering Building 3 at North Carolina State University. Table \ref{Altitude} provides the minimum, maximum, mean, and total communication times from STARS to the ground station.  
+\begin{table}[H]
+\centering
+\begin{tabular}{| +c | ^c | ^c | ^c | ^c | }
+	\hline
+	\rowstyle{\bfseries}%
+	Altitude (km) & \shortstack{Minimum Transmit \\ Time (s)} & \shortstack{Maximum Transmit \\ Time (s)} & \shortstack{Mean Transmit \\ Time (s)} & \shortstack{Total Transmit \\ Time (s)} \\ \hline
+	450 & 25.743 & 655.946 & 516.093 & 873745 \\ \hline
+	500 & 21.610 & 695.943 & 546.680 & 965437 \\ \hline   
+	550 & 14.317 & 734.760 & 577.544 & 1056906 \\ \hline
+	600 & 24.586 & 772.581 & 607.149 & 1147511 \\ \hline
+
+\end{tabular}
+\caption{Communication Windows for Simulated Orbit Altitudes}
+\label{Altitude}
+\end{table}
+This range of orbits was selected because they are the most readily available in ride along programs such as the ISIS Small Satellite Launch Service. \cite{ISIS} Both maximum and mean transmit time increase as altitude increases, which results in higher total transmit times. The mean transmit time for any of these altitudes would fulfill the needs of STARS with regards to data transmission. However higher altitudes are more desirable since higher total transmit times would result in more data transmitted to the ground station. Higher orbits draw closer to the inner Van Allen Belt that STARS is studying, which could present more radiation issues for the CubeSat. The proposed 500 kilometer orbit was considered to be a good median for all these factors, and is one of the most readily available altitudes for ride along launches. \cite{ISIS} 

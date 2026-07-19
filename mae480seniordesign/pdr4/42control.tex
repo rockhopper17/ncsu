@@ -1,0 +1,130 @@
+
+\subsection{Control}
+ The control system is designed to manipulate several actuators and sensor to adjust the vehicle's orientation to Earth. There are an unlimited combination of systems that can be used to control and determine the attitude of the vehicle. Once the NASC vehicle is deployed from the PPOD specified in \textbf{FR.3}, the control system must activate to detumble the vehicle from the tip off rates imparted by the PPOD deployment. The system must be able to orient itself to point in specified directions as required by other subsystems and conduct specific maneuvers required by other subsystems. A series of actuators and sensors were considered to meet the other subsystem requirements on the attitude control system for the NASC satellite.
+ %
+\subsubsection{Actuators}
+Every satellite is equipped with a series of actuators to create a torque onto the vehicle. In space the lack of atmosphere makes the use of traditional control surfaces difficult to control and use. To produce moments along the vehicle axes, torque must be introduced or opposed using a an actuator. The internal torque produced by the actuators works in conjunction with or opposed to the external moments along the satellites axes. The gravitational forces from Earth exert certain gravity gradients that can be estimated for LEO \cite{AttSim}. Without actuators the vehicle would enter a tumble along its launched trajectory. To align with the mission's attitude, the actuators act in parallel to the designated sensors. The list of the actuators suitable for the desired design requirement are: torque rods, reaction wheels and reaction control systems. The final design will include one or more of these systems to work along side the designated sensors as each actuator has its own advantages and disadvantages. 
+%
+\paragraph{Torque Rods}
+Torque rods work by using Earth’s magnetic field with an electromagnet to help orient the satellite into alignment with the Earth’s magnetic field by inducing a current into an electromagnet and creating a moment on the satellite \cite{SMAD}. Torque rods are typically used as a more passive form of actuator where they can align the satellite with Earth’s magnetic field but are not capable of precise control that other actuators offer. Torque rods are frequently used to detumble satellites following deployment because it is a known alignment that can be achieved after activation of the torque rods. However, the main downside to using torque rods where they are only effective in two axis and can not impart a moment when the torque rod is in alignment with the magnetic field. 
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale = .18]{TorqueRod.png}
+    \caption{Torque rod system designed to test the magnetic force across a cylindrical area\cite{TRod}}
+    \label{fig:torque rods}
+\end{figure}
+Torque given by the rods is determined heavily on the number of coils and the length of the rod. The larger the torque rod, the moment that can be created is. Some smaller torque rods may provide enough torque and reduce the amount of power consumption. Analysis will determine the required sizing of the torque rods. Due to the nature of torque rods
+%
+\paragraph{Reaction Wheels}
+Reaction wheels work via a spinning a wheel inside of a casing and induce a moment on the satellite \cite{SMAD}. Reaction wheel comes in various sizes with larger sizes being able to induce larger moments onto the satellite. The primary limitation of reaction wheels is reaction wheel saturation where the reaction wheel reaches a maximum speed and is unable to provide additional moment to the satellite. In order to unload the saturated reaction wheels, there are two techniques used: torque rods using a moment to counter the moment produced by the reaction wheel or a reaction control system to induce a counter moment. One advantage of reaction wheels is that they can be used for fine pointing control when coupled with precise attitude sensors.   
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale = 1.3]{ReationWheel.png}
+    \caption{CubeSat reaction wheel designed to produce torque in one axis \cite{Rwheel}}
+    \label{fig:RW}
+\end{figure}
+The moments produced by a reaction wheel are a result of the internal wheel spinning inside the casing. The larger the wheel and casing correlates to larger moments to be produced as well as higher levels that of total moment that can be produced by the reaction wheels. The two key terms for determining the performance of a reaction wheel are the moment produced and the total momentum storage. 
+%
+\paragraph{Reaction Control Systems}
+Reaction control system or RCS is a series of small thrusters placed in key positions around the spacecraft or satellite are used to create moments on the spacecraft or satellite \cite{SMAD}. Depending on the size of the spacecraft or satellite, different RCS configurations can be used. Ideally, a pure moment configuration would be used where thrusters are grouped to create pure moments versus a non-pure moment configuration where the RCS system would impart a small velocity change onto the satellite. For missions requiring precise mission profile, this concept of non-pure moments would not be pursued. The figure below shows a sample RCS thruster.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale = .4]{nanosatellite-micropropulsion-system-min.png}
+    \caption{Small propulsive system used to prevent de-tumble and adjust altitude \cite{Prop}}
+    \label{fig:Nanothrust}
+\end{figure}
+The primary advantage of RCS is that it is capable of precise maneuvers without being limited by saturation found in reaction wheels. The primary disadvantage of RCS is it requires a propulsion system which can add additional complexity, size, and weight to the satellite. Additionally the RCS thrusters can provide some limited adjustment to the trajectory of the vehicle. However, there is no standard for RCS's for CubeSats and the NASC team would need to develop a custom thruster location and plumbing system to power the RCS system which would add additional risk to the design. 
+\paragraph{Summary of Pros and Cons}\hspace{1cm} 
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{0.2\textwidth}|p{.4\textwidth}|p{.4\textwidth}|} 
+\hline
+\textbf{Control Option} & \textbf{Pros} & \textbf{Cons}
+\\
+\hline
+     Torque Rods
+     &
+    \begin{itemize}
+        \item Simple
+        \item Small power consumption < 1W
+        \item Lowest Cost
+        \item Flight heritage
+    \end{itemize}
+    &
+    \begin{itemize}
+        \item Dependent on Earth's magnetic field 
+        \item Lacks a fine point of adjustment
+    \end{itemize}
+    \\
+    \hline
+     Reaction Wheels
+     &
+    \begin{itemize}
+        \item Fine point of adjustment with sensor
+        \item Small power consumption < 3W
+        \item Flight Heritage
+    \end{itemize}
+    &
+    \begin{itemize}
+        \item Reaction wheel saturation
+        \item Requires additional actuators to desaturate
+    \end{itemize}
+    \\
+    \hline
+     Reaction Control System
+     &
+    \begin{itemize}
+        \item No saturation 
+        \item Can actuate independent of Earth's magentic field
+    \end{itemize}
+    &
+    \begin{itemize}
+        \item Complex and requires custom fitment
+        \item No flight heritage
+        \item Most expensive system
+    \end{itemize}
+    \\
+\hline
+     Small Actuators
+     &
+    \begin{itemize}
+        \item Smaller volume, mass, and power draw
+    
+    \end{itemize}
+    &
+        \begin{itemize}
+        \item Less control authority
+    \end{itemize}
+    \\
+\hline
+    Large Actuators
+    &
+    \begin{itemize}
+        \item More control authority
+
+    \end{itemize}
+    &
+    \begin{itemize}
+        \item Larger volume, mass, and power draw
+    \end{itemize}
+    \\
+\hline
+\end{tabular}
+\caption{Control Options Pros and Cons}
+\label{tbl:Control_ProCon}
+\end{table}
+
+The table is a summary of pros and cons of the various different actuators being considered for STARS. Specific analysis and trade studies will help determine the actuators selected and the specific size required by STARS's subsystems. This actuator analysis includes slew rates of the system, attitude stability, and other maneuvers required by subsystems.
+
+\subsubsection{GNC Sensors}
+While actuators control the orientation of the CubeSat, sensors approximate the orientation and location of the CubeSat. Sensor selection is based upon the pointing and position accuracy requirements from the other subsystems. Additionally, it will depend on mass and volume constraints of the CubeSat. Due to the nature of the mission, fine pointing control is not required. To meet this pointing knowledge requirement, NASC will utilizing a sun sensor, magnetometer, and an IMU for attitude and location determination. This combination of sensors will enable CubeSat pointing knowledge of approximately five degrees and location knowledge of approximately 20 meters until the location knowledge is degraded over time\cite{GNC_Kiss}. The IMU position information can be updated with information from the ground tracking station ensuring the CubeSat has accurate position data to update the IMU. Due to time constraints on conducting analysis, the specific sensor selection will be based on performance in the datasheets and will be assumed to be accurate information to be used. 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale = .7]{CubeSense.png}
+    \caption{CubeSat Sun Sensor and Horizon Sensor \cite{CubeSense}}
+    \label{fig:SunSensor}
+\end{figure}
+

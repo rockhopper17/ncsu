@@ -1,0 +1,166 @@
+
+%----------------------------------------------------------------------------------------
+%	Project Description
+%----------------------------------------------------------------------------------------
+\section{Project Description}
+\subsection{Project Overview}
+
+The Van Allen Belts are comprised of two regions of space around Earth in which charged particles are trapped by Earth's magnetic field. The inner Van Allen belt is located between approximately 640 to 96000 kilometers (100-6,000 miles) in altitude, and the outer Van Allen belt is located between approximately 13,440 to 57600 kilometers (8,400 to 36,000 miles) in altitude \cite{VanAllen_1}. Both the inner and outer Van Allen belts pose a threat to the astronauts, satellites, and space probes that pass through them due to prolonged exposure to radiation. Additionally, the Van Allen belts are not static. They fluctuate over time are not fully nor precisely understood. STARS will focus on developing our understanding of the inner Van Allen belt and its implications on space travel.
+
+STARS will use a 3U/3U+ CubeSat located in Low Earth Orbit (LEO) to observe the inner Van Allen belt and further develop our understanding of the mechanisms by which particles become trapped. STARS will gather data on the particles relative density, distribution, and frequency of radioactive events. This data will then be transmitted to the ground station where it will be processed and analyzed.
+
+%-------------------------------------------------------------------------------------------------------------------CONOPS
+%---------------------------------------------------------------------------
+\subsection{Concept of Operations}
+The concept of operations (CONOPS) illustrates the steps that the STARS CubeSat will undergo to complete its mission. To better organize and detail the steps of each phase, CONOPS was divided into 3 phases: the pre-mission, mission, and post-mission phases which are displayed in Figures \ref{fig:conop1} through \ref{fig:conop3} respectively. The pre-mission phase consists of reaching the desired orbit and initializing the system.  The mission phase details the interactions of the subsystems that enable the scientific data collection to accomplish the objective of the STARS mission. Finally, the post-mission phase discusses the end-of-life plan for the CubeSat. The images used in each CONOPS phase are stock images and are used in a representative capacity only.  
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Pre-Mission Phase
+\begin{figure}[H]      
+    \includegraphics[width=0.9\columnwidth]{conop1.JPG}\\
+    \caption{Concept of Operations, Pre-Mission Phase}
+    \label{fig:conop1}
+\end{figure}
+
+Figure \ref{fig:conop1} displays the pre-mission concept of operations phase of the STARS mission. This stage is focused on the vehicle reaching orbit through launch and initializing all systems to check their functionality before the main mission begins. The CubeSat will reach orbit through a rideshare launch vehicle, followed by deployment from a P-POD launcher contained on the rideshare vehicle. During the launch, all systems of the CubeSat are powered off with the battery disconnected, per the Cal Poly CubeSat Design Specification: “No electronics may be active during launch to prevent any electrical or RF interference with the launch vehicle and primary payloads,” \cite{CSS}. A deployment switch will close upon deployment from the P-POD, connecting the battery to the bus which will provide power to the CubeSat \cite{UCB_EPS}. The avionics systems will also receive power from the battery and turn on, and remain on throughout the rest of the pre-mission phase. 
+
+After the CubeSat is launched from the P-POD launcher into the desired orbit, the GNC system will conduct a detumble maneuver to initially gain control over the vehicle's attitude. The power management, avionics, and thermal systems will be on to support this maneuver. The GNC System will turn on followed by the thermal system. The systems are turned on sequentially to lessen the initial power draw and prevent complete discharge of the battery as the peak power draw of most systems occurs at startup. The thermal system will turn on to provide the GNC system with some telemetric data for attitude alignment with the sun. With data from thermal system and the GNC sensors, the GNC actuators will conduct the detumble maneuver, gaining initial control of the CubeSat’s alignment and prepare the CubeSat for charging the battery. 
+
+After the initial attitude alignment, the CubeSat battery will be charged using the system's solar panels since the battery at launch is not fully charged. This requires the same systems to be on as the detumble maneuver with the addition of the solar panels. Charging will continue until the battery is fully charged. 
+
+Finally, initial systems checks will be conducted on the avionics, communication, power, thermal, GNC, and payload subsystems to confirm all systems are functioning properly for mission operations. Each check will occur individually in the order stated above and each proceeding check will begin after the previous one is determined to function as designed. The end-of-life subsystem is the only subsystem that will not undergo an initial system check as it does not have an “off” button.  Once activated, there is no way to stop the end-of-life plan and therefore will be tested during the post-mission phase. After all the subsystems have been checked and are deemed operational, the mission phase will begin. 
+
+The activity of each subsystem during the pre-mission phase of the CubeSat is shown in Table \ref{tab:on1}. The subsystems are all off initially and are slowly turned on throughout the pre-mission phase. 
+
+% PRE-MISSION Phase on/off chart
+\begin{table}[htbp]
+  \centering
+  \caption{Pre-Mission Phase Activity}
+    \begin{tabular}{|c|c|c|c|c|c|}
+    \hline
+    \textbf{Subsystem} & \multicolumn{5}{c|}{\textbf{Pre-Mission Phase}} \\
+          & \multicolumn{1}{c}{Launch} & \multicolumn{1}{c}{Deployment} & \multicolumn{1}{c}{Detumble} & \multicolumn{1}{c}{Charging} & System Checks \\
+    GNC   & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .573,  .816,  .314}ON & \cellcolor[rgb]{ .573,  .816,  .314}ON & \cellcolor[rgb]{ .573,  .816,  .314}ON \\
+    Communication & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .573,  .816,  .314}ON \\
+    Ground Station & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .573,  .816,  .314}ON \\
+    Solar Panels  & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .573,  .816,  .314}ON & \cellcolor[rgb]{ .573,  .816,  .314}ON \\
+   Batteries  & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .573,  .816,  .314}ON & \cellcolor[rgb]{ .573,  .816,  .314}ON & \cellcolor[rgb]{ .573,  .816,  .314}ON & \cellcolor[rgb]{ .573,  .816,  .314}ON \\
+    End-Off-Life & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .753,  0,  0}OFF \\
+   Thermal  & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .573,  .816,  .314}ON & \cellcolor[rgb]{ .573,  .816,  .314}ON & \cellcolor[rgb]{ .573,  .816,  .314}ON \\
+   Payload & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .573,  .816,  .314}ON \\
+    Avionics & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .573,  .816,  .314}ON & \cellcolor[rgb]{ .573,  .816,  .314}ON & \cellcolor[rgb]{ .573,  .816,  .314}ON & \cellcolor[rgb]{ .573,  .816,  .314}ON \\
+    \hline
+    \end{tabular}
+  \label{tab:on1}
+\end{table}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Mission Phase
+\begin{figure}[H]
+    \includegraphics[width=0.9\columnwidth]{conop2.png}\\
+    \caption{Concept of Operations, Mission Phase}
+    \label{fig:conop2}
+\end{figure}
+
+Figure \ref{fig:conop2} displays the mission concept of operations phase of the STARS mission. This stage focuses on collecting scientific data on the inner Van Allen radiation belt, the main objective of the STARS mission. The mission phase can be broken down into four main functionalities: High-Energy particle detection, GNC telemetry, power, and communication. They may all occur simultaneously. 
+
+The High-Energy particle detection is the main purpose of the STARS mission as it collects scientific data on the inner Van Allen belt radiation. This particle collection is not detailed any further in the mission phase as the engineering focus of the project is on the supporting subsystems, in which they treat the payload as a "black box".     
+
+GNC telemetry is actively working throughout the mission phase as the GNC system is responsible for aligning the CubeSat to fit pointing and maneuver requirements from the other subsystems. The main systems of consideration are the power, thermal, and communication systems as each need varied orientations for optimal performance. The avionics, or “brains,” receive data from each of these subsystems about their attitude needs, which in turn will dictate how the actuator of the GNC system will adjust the CubeSat's attitude. The GNC system is on and actively working with the other main functionalities for the duration of the mission phase. 
+
+The power management system is also on for the duration of the mission phase as it is responsible for supplying each subsystem with the power to function. The solar panels collect energy from the sun, which is sent to the power management system. Extra charge stored in the battery is also sent to the power management system. The main power supply for the CubeSat is the solar panels. Power is drawn from the battery only when the solar panels cannot supply the needed amount of power for all the subsystems. The power management system draws power from the appropriate source and sends it to each required subsystem as necessary.   
+
+The communication system consists of the hardware on the CubeSat and the ground station. The data collected from the payload is transmitted to the ground station during each available communication window and processed on the ground. Further information needed from the ground station, such as an area where more data is required for further analysis, may also be transmitted to the CubeSat during the communication window. The communication system is not active for most of the mission phase as the communication window is small and occurs 2-3 times daily. It is only active when necessary and is not on during particle collection to conserve power. 
+
+The activity of each subsystem during the mission phase is shown in Table \ref{tab:on2}. The mission phase has the most activity amongst the subsystems compared to the other CONOPS phases. Systems remain on to assist other subsystems as necessary and off when they are not needed to conserve power. Many of the subsystems are interdependent and require that multiple subsystems properly function, resulting in most systems remaining active throughout the mission phase. The end of the mission phase will occur when all necessary data is collected or when the CubeSat can no longer properly function to complete the STARS mission, after at least a minimum of a three-month period.
+
+% MISSION Phase on/off chart
+\begin{table}[htbp]
+  \centering
+  \caption{Mission Phase Activity}
+    \begin{tabular}{|c|c|c|c|c|}
+    \hline 
+    \textbf{Subsystem} & \multicolumn{4}{c|}{\textbf{Mission Phase }} \\
+          & \multicolumn{1}{c}{Particle Detection } & \multicolumn{1}{c}{GNC Telemetry} & \multicolumn{1}{c}{Power} & Communication \\
+    GNC   & \cellcolor[rgb]{ .573,  .816,  .314}ON & \cellcolor[rgb]{ .573,  .816,  .314}ON & \cellcolor[rgb]{ .573,  .816,  .314}ON & \cellcolor[rgb]{ .573,  .816,  .314}ON \\
+ Communication & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .573,  .816,  .314}ON \\
+   Ground Station & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .573,  .816,  .314}ON \\
+   Solar Panels  & \cellcolor[rgb]{ .573,  .816,  .314}ON & \cellcolor[rgb]{ .573,  .816,  .314}ON & \cellcolor[rgb]{ .573,  .816,  .314}ON & \cellcolor[rgb]{ .573,  .816,  .314}ON \\
+   Batteries  & \cellcolor[rgb]{ .573,  .816,  .314}ON & \cellcolor[rgb]{ .573,  .816,  .314}ON & \cellcolor[rgb]{ .573,  .816,  .314}ON & \cellcolor[rgb]{ .573,  .816,  .314}ON \\
+   End-Off-Life & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .753,  0,  0}OFF \\
+    Thermal  & \cellcolor[rgb]{ .573,  .816,  .314}ON & \cellcolor[rgb]{ .573,  .816,  .314}ON & \cellcolor[rgb]{ .573,  .816,  .314}ON & \cellcolor[rgb]{ .573,  .816,  .314}ON \\
+   Payload & \cellcolor[rgb]{ .573,  .816,  .314}ON & \cellcolor[rgb]{ .573,  .816,  .314}ON & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .753,  0,  0}OFF \\
+   Avionics & \cellcolor[rgb]{ .573,  .816,  .314}ON & \cellcolor[rgb]{ .573,  .816,  .314}ON & \cellcolor[rgb]{ .573,  .816,  .314}ON & \cellcolor[rgb]{ .573,  .816,  .314}ON \\
+    \hline 
+    \end{tabular}
+  \label{tab:on2}
+\end{table}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Post-Mission Phase
+\begin{figure}[H]
+    \includegraphics[width=0.9\columnwidth]{conop3.png}\\
+    \caption{Concept of Operations, Post-Mission Phase}
+    \label{fig:conop3}
+\end{figure}
+
+Figure \ref{fig:conop3} displays the post-mission concept of operations phase of the STARS mission.  The focus of this phase is to comply with federal regulations for end-of-life. The main requirements of the federal NASA regulation are to exhaust and disconnect the battery and deorbit the CubeSat to burn up upon re-entry.      
+
+To follow these regulations, the STARS CubeSat will begin its end-of-life plan with a signal from the ground station, which will initiate the end-of-life plan, setting the CubeSat on a deorbit trajectory.  There will also be a built-in fail-safe timer to start the deorbit of the CubeSat in case communication is lost or the CubeSat is dead on arrival. To ensure the CubeSat is on the correct trajectory, a systems check will be run to confirm the trajectory path. Once it is confirmed, all systems of the CubeSat will be turned off except the end-of-life system and the battery, as the other subsystems are no longer needed. The end-of-life system is on for the remainder of the post-mission phase as it functions independently from the CubeSat. The activity of each subsystem during the post-mission phase is shown in Table \ref{tab:on3}. 
+
+After the deorbit trajectory is confirmed, the discharge of the battery will begin, fully draining the charge of the battery. This is done to help prevent a potential explosion of the CubeSat from a buildup of charge. Once the battery is fully discharged, the battery will be disconnected from the bus, therefore disconnecting all power from the CubeSat. The CubeSat will continue on its deorbit trajectory until it burns up completely on re-entry. 
+
+% POST-MISSION Phase on/off chart
+\begin{table}[htbp]
+  \centering
+  \caption{Post-Mission Phase Activity}
+    \begin{tabular}{|c|c|c|c|c|}
+    \hline
+    \textbf{Subsystem} & \multicolumn{4}{c|}{\textbf{Post-Mission Phase}} \\
+          & \multicolumn{1}{c}{Signal} & \multicolumn{1}{c}{Deorbit} & \multicolumn{1}{c}{Discharging} & Disconnect \\
+    GNC   & \cellcolor[rgb]{ .573,  .816,  .314}ON & \cellcolor[rgb]{ .573,  .816,  .314}ON & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .753,  0,  0}OFF \\
+Communication & \cellcolor[rgb]{ .573,  .816,  .314}ON & \cellcolor[rgb]{ .573,  .816,  .314}ON & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .753,  0,  0}OFF \\
+  Ground Station & \cellcolor[rgb]{ .573,  .816,  .314}ON & \cellcolor[rgb]{ .573,  .816,  .314}ON & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .753,  0,  0}OFF \\
+    Solar Panels  & \cellcolor[rgb]{ .573,  .816,  .314}ON & \cellcolor[rgb]{ .573,  .816,  .314}ON & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .753,  0,  0}OFF \\
+    Batteries  & \cellcolor[rgb]{ .573,  .816,  .314}ON & \cellcolor[rgb]{ .573,  .816,  .314}ON & \cellcolor[rgb]{ .573,  .816,  .314}ON & \cellcolor[rgb]{ .753,  0,  0}OFF \\
+End-Off-Life & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .573,  .816,  .314}ON & \cellcolor[rgb]{ .573,  .816,  .314}ON & \cellcolor[rgb]{ .573,  .816,  .314}ON \\
+Thermal  & \cellcolor[rgb]{ .573,  .816,  .314}ON & \cellcolor[rgb]{ .573,  .816,  .314}ON & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .753,  0,  0}OFF \\
+  Payload & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .753,  0,  0}OFF \\
+  Avionics & \cellcolor[rgb]{ .573,  .816,  .314}ON & \cellcolor[rgb]{ .573,  .816,  .314}ON & \cellcolor[rgb]{ .573,  .816,  .314}ON & \cellcolor[rgb]{ .753,  0,  0}OFF \\
+    \hline
+    \end{tabular}%
+  \label{tab:on3}%
+\end{table}%
+%%%%%%%%%%%%%%%%%%%%%%% Functional Block Diagram
+\subsection{Functional Block Diagram}
+STARS will be comprised of two different systems: the satellite and the ground station. The satellite will hold multiple other subsystems enabling it to be self-sufficient for the duration of the mission.  Figure \ref{fig:Functional} displays the relationship between these two systems as well as the information transferred internally between the satellite subsystems. The ground station will receive data from the communication system. This includes scientific data from the payload as well as data logs of the spacecraft’s condition. The ground station will analyze this data and send information to the CubeSat to perform needed readjustments. The power system distributes power to each subsystem as necessary. Both batteries and solar panels will provide power to the spacecraft while the flight computer will periodically check for potential issues on-board. The avionics system functions as the “brain” of the system, directing all data and information between each subsystem. The GNC system receives information from all subsystems for attitude adjustments.  
+
+\begin{figure}[H]
+    \includegraphics[width=0.9\columnwidth]{Functional_Block_Diagram.pdf}
+    \caption{Functional Block Diagram}
+    \label{fig:Functional}
+\end{figure}
+
+%-------------------------------------------------------------------------------------------------------------------CRITICAL PROJECT ELEMENTS
+%---------------------------------------------------------------------------
+\subsection{Critical Project Elements}
+The Critical Project Elements focus the PDR analysis to six main areas of concern: Launch, Control, Power, Thermal, Communication, and End of Life. The STARS mission has many components and could have many requirements for the design to follow. To hone in on the analysis of the design, six critical areas were identified and focused on. Each area covers a major subsystem within the CubeSat, and each is influential to the success of the mission.  While every subsystem of the CubeSat is important, only these six areas will undergo an in-depth analysis for this project. The other systems will also undergo analysis, yet less in-depth in comparison to the six critical areas. The six critical systems, in addition to the non-critical systems will make up the baseline design, outlining basic requirements for all other subsystems. 
+
+\begin{figure}[H]
+    \includegraphics[width=0.9\columnwidth]{Functional_Block_Diagram.pdf}
+    \caption{Functional Block Diagram}
+    \label{fig:Functional}
+\end{figure}
+
+\subsubsection{Launch}
+In order for the CubeSat to collect the scientific data and complete the required mission, it first needs to successfully survive launch and utilize the Poly Picosatellite Orbital Deployer, or P-POD, launcher for deployment. The main consideration during launch is the structural integrity of the CubeSat. During launch, the CubeSat structure and its interior components will undergo different static, dynamic, and random vibration loads, such as 8 – 13 G’s and 20 – 2000 HZ \cite{Falcon9}. Therefore, the CubeSat structure will need to be constructed from an aluminum alloy, stated in the CubeSat Design Standard \cite{CSS}, to withstand these loads. To fit the CubeSat inside the P-POD launcher, the CubeSat also needs to adhere to 3U/3U+ standard size. Structural integrity requirements are listed in more detail, with a few more requirements in the Project Requirements section, with specific Function Requirements \textbf{FR.1}, \textbf{FR.2} and \textbf{FR.3}. 
+
+\subsubsection{Control}
+One of the main elements to mission success is the attitude alignment of the CubeSat throughout the mission. The GNC system is responsible for adjusting the attitude control and alignment of the CubeSat.  Information from the GNC sensors, as well as information from the different subsystems, will provide the GNC system with how the attitude will need to be adjusted by the actuators. For example, the CubeSat will need to be aligned with the ground station antenna to communicate, and therefore will need a slight attitude adjustment conducted by the actuators. To focus the design and analysis of the GNC system, Functional Requirement \textbf{FR.4} details some requirements in which the GNC system must follow.
+
+\subsubsection{Power}
+To be able to collect the scientific data or perform any task during the mission phase, the power system must maintain an effective power distribution amongst each subsystem to complete mission tasks. The solar panels will collect energy from the sun to distribute throughout the CubeSat by the power management system. The battery shall be charged by the solar panels and used only when the power management system cannot distribute enough power harnessed from the solar panels. To focus the design and analysis of the power system, Functional Requirement \textbf{FR.5} details some requirements that the power system must follow. 
+
+\subsubsection{Thermal}
+There are various factors that will cause the CubeSat structure and its components to overheat and fail. Therefore, the CubeSat will require thermal protection and a way to dissipate heat from internal components. The CubeSat must sustain a temperature between –5\degree  and 20\degree  Celsius for the entire spacecraft by using passive thermal control methods throughout the mission. Moreover, the CubeSat structure will also function as a passive thermal heat sink by absorbing heat from critical components through conduction to protect against solar radiation.  To focus the design and analysis of the power system, Functional Requirement \textbf{FR.6} details some requirements that the thermal management system must follow. 
+\subsubsection{Communication}
+Once the scientific data is collected by the payload during the mission phase, the CubeSat will communicate with the ground station, at least twice in 24 hours, to transmit the data for processing. Communication with the ground station is essential for data processing since the CubeSat will not return to Earth’s surface. Since the communication system requires a lot of power, the CubeSat will not collect scientific data while transmitting or receiving data from the ground station and will also be turned off when not transmitting or receiving data. The ground station will also send a signal to start the end-of-life plan and send software updates to the CubeSat.  Without communication, data from the STARS mission would not make it to Earth for further processing, defeating the purpose of the mission. To focus the design and analysis of the communication system, Functional Requirement \textbf{FR.7} details some requirements that the thermal management system must follow. 
+\subsubsection{End of Life}
+After completing the pre-mission and mission phase successfully, the CubeSat will reach its last mission phase, the post-mission phase. The post-mission phase focuses on conducting an End of life plan that will comply with NASA-STD-8719.14B\cite{STD8719} standards for end of life (EoL). In other words, the CubeSat will disintegrate upon re-entering the earth's atmosphere within 25 years of the mission's end, leaving no orbital debris. To accomplish this, the EoL plan starts by sending a signal from the ground station to the CubeSat to exhaust the battery and power system of any remaining power, followed by disconnecting the power system. Functional Requirement \textbf{FR.8} discusses this NASA standard in more detail, guiding the EoL design and analysis. 

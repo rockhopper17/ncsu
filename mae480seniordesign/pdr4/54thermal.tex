@@ -1,0 +1,120 @@
+\subsection{Thermal}
+\subsubsection{Metrics}
+
+\begin{itemize}
+   \item Mass \\
+   \\
+CubeSats must meet a certain mass requirement based on the design requirements. For the thermal CPE, this means collaborating with the other subsystems in order to make sure the final CubeSat comes in under the mission required weight. Systems that weigh more will be ranked lower on this metric.
+\\
+   \item Cost \\
+   \\
+When designing anything, cost is always an important factor. For the thermal CPE, this means maximizing the thermal precision while also trying to stay under the  defined budget. Systems that cost more will be ranked lower based on this metric.
+\\
+   \item Power Required \\
+   \\
+CubeSats need to meet a defined power budget. For the thermal CPE, this means minimizing the power consumption of active thermal systems by using more passive thermal systems and/or finding active thermal systems that consume less power. Systems that require more power will be ranked lower on this metric.
+\\
+   \item Thermal Precision \\
+   \\
+Thermal precision is the most important thermal CPE metric. The goal of the thermal CPE is to maintain a temperature range within the CubeSat where all sensors and batteries can operate efficiently throughout the lifetime of the mission. Systems with less precise temperature management will be ranked lower for this metric.
+\end{itemize}
+
+Table \ref{tbl:Thermal_Metric_Scores} below provides a description for how different values would be assigned to each design option in regards to each metric. 
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|c|c|c|c|c|} 
+\hline
+    \textbf{Metric} & \textbf{5} & \textbf{4} & \textbf{3} & \textbf{2} & \textbf{1}
+    \\
+\hline
+    \textbf{Mass} & <100g & 100-150g & 150-200g & 200-300g & >300g 
+    \\
+\hline
+    \textbf{Cost} & <\$10,000 & \$10,000-40,000 & \$40,000-\$70,000 & \$70,000-\$100,000 & >\$100,000
+    \\
+\hline
+    \textbf{Power Required} & <1W & 1-5W & 5-10W & 10-25W & >25W 
+    \\
+\hline
+    \textbf{Thermal Precision} & <25$^{\circ}$  & 30$^{\circ}$-50$^{\circ}$ & 50$^{\circ}$-70$^{\circ}$ & 70$^{\circ}$-90$^{\circ}$ & >90$^{\circ}$ 
+    \\
+\hline
+\end{tabular}
+\caption{Thermal Trade Study Metric Values}
+\label{tbl:Thermal_Metric_Scores}
+\end{table}
+
+\subsubsection{Weights}
+
+\begin{itemize}
+    \item Mass - 0.25
+    \item Cost - 0.10
+    \item Power Required - 0.25
+    \item Thermal Precision - 0.40
+\end{itemize}
+
+Thermal precision is given the highest weight of 0.40 because it is the most important factor to be achieved by the thermal subsystem.  The entire mission is based on a precise sensor that can only operate at a certain temperature range.  Due to this strict temperature requirement, it is paramount that the Cubesat adhere to this in order to avoid complete mission failure.  The highest weight was given to this metric to help assure that thermal devices that cannot provide this firm temperature range are ranked lower in the trade study.\\
+
+Power required and mass are given the same weighting of 0.25.  This is because they are both very key metric based on two design requirement.  The thermal devices that are chosen must fit the power budget.  This means that they cannot consume more power than is allocated to the thermal subsystem.  If the devices consume too much power, than the mission would fail.  These devices must also fit into the required mass allotment.  Similarly to power required, the thermal subsystem will be given an amount of mass that can be used specifically for thermal protection on the Cubesat.  The devices chosen cannot exceed this mass.  Due to the likeness of these two metrics, they were weighted the same.\\
+
+The smallest weight of 0.10 was given to cost.  While a lot of factors, including mass, power, and thermal protection, are mission critical, meaning that the Cubesat would not work without these, cost is not.  Cost is still a very important metric and it is necessary to compare lots of different options cost-wise before choosing one.  It is ranked lowest due to its relative importance compared to other metrics though.\\
+
+\paragraph{Potential Pugh Matrix} ~\\~\\
+Table \ref{tbl:thermal_pugh1} and \ref{tbl:thermal_pugh2} gives an outline of what potential scores could be given to each of the thermal systems. These scores are preliminary and in order to make final decisions, testing and feasibility studies must be conducted. 
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|c|c|c|c|c|} 
+\hline
+    \textbf{Category} & \textbf{Weight} & \textbf{MLI Blanket} & \textbf{Tapes/Paints} & \textbf{Sunshields} & \textbf{Thermal Louvers}
+    \\
+\hline
+    \textbf{Mass} & 0.25 & 3 & 5 & 3 & 2 
+    \\
+\hline
+    \textbf{Cost} & 0.10 & 4 & 5 & 4 & 3 
+    \\
+\hline
+    \textbf{Power Required} & 0.25 & 5 & 5 & 5 & 5
+    \\
+\hline
+    \textbf{Thermal Precision} & 0.40 & 2 & 1 & 2 & 3
+    \\
+\hline
+    \textbf{Total} & 1 & 3.20 & 3.40 & 3.20 & 3.25
+    \\
+\hline
+\end{tabular}
+\caption{Example Thermal Pugh Matrix Part 1 }
+\label{tbl:thermal_pugh1}
+\end{table}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|c|c|c|c|} 
+\hline
+    \textbf{Category} & \textbf{Weight} & \textbf{Deployable Radiators} & \textbf{Electric Heaters} & \textbf{Mini Cryocoolers}
+    \\
+\hline
+    \textbf{Mass} & 0.25 & 2 & 1 & 1
+    \\
+\hline
+    \textbf{Cost} & 0.10 &  3 & 2 & 2
+    \\
+\hline
+    \textbf{Power Required} & 0.25 & 5 & 1 & 1
+    \\
+\hline
+    \textbf{Thermal Precision} & 0.40 & 3 & 5 & 5
+    \\
+\hline
+    \textbf{Total} & 1 & 3.25 & 2.70 & 2.70
+    \\
+\hline
+\end{tabular}
+\caption{Example Thermal Pugh Matrix Part 2 }
+\label{tbl:thermal_pugh2}
+\end{table}
+
+With these preliminary, predicted values, the Tape/Paint option has the highest score, making it theoretically, the most ideal thermal system for the STARS mission.  When thinking about the mission itself, the fact that heaters and coolers are ranked the lowest does not necessarily eliminate them from consideration.  Thermal is a system of systems and so no trade study of single systems is going to determine a perfect thermal solution. Further analysis must be conducted to confirm these scores and determine which combination of thermal systems is best to meet the requirements laid out for the mission. 
+

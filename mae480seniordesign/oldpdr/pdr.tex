@@ -1,0 +1,399 @@
+% `template.tex', a bare-bones example employing the AIAA class.
+%
+% For a more advanced example that makes use of several third-party
+% LaTeX packages, see `advanced_example.tex', but please read the
+% Known Problems section of the users manual first.
+%
+% Typical processing for PostScript (PS) output:
+%
+%  latex template
+%  latex template   (repeat as needed to resolve references)
+%
+%  xdvi template    (onscreen draft display)
+%  dvips template   (postscript)
+%  gv template.ps   (onscreen display)
+%  lpr template.ps  (hardcopy)
+%
+% With the above, only Encapsulated PostScript (EPS) images can be used.
+%
+% Typical processing for Portable Document Format (PDF) output:
+%
+%  pdflatex template
+%  pdflatex template      (repeat as needed to resolve references)
+%
+%  acroread template.pdf  (onscreen display)
+%
+% If you have EPS figures, you will need to use the epstopdf script
+% to convert them to PDF because PDF is a limmited subset of EPS.
+% pdflatex accepts a variety of other image formats such as JPG, TIF,
+% PNG, and so forth -- check the documentation for your version.
+%
+% If you do *not* specify suffixes when using the graphicx package's
+% \includegraphics command, latex and pdflatex will automatically select
+% the appropriate figure format from those available.  This allows you
+% to produce PS and PDF output from the same LaTeX source file.
+%
+% To generate a large format (e.g., 11"x17") PostScript copy for editing
+% purposes, use
+%
+%  dvips -x 1467 -O -0.65in,0.85in -t tabloid template
+%
+% For further details and support, read the Users Manual, aiaa.pdf.
+
+
+% Try to reduce the number of latex support calls from people who
+% don't read the included documentation.
+%
+\typeout{}\typeout{If latex fails to find aiaa-tc, read the README file!}
+%
+
+
+\documentclass[]{aiaa-tc}% insert '[draft]' option to show overfull boxes
+
+\graphicspath{ {figures/} }
+%\usepackage{float}
+\usepackage{caption}
+\usepackage[table]{xcolor}
+\usepackage{amsmath}
+\usepackage{filecontents}
+\usepackage[numbered,framed]{matlab-prettifier}
+\usepackage[T1]{fontenc}
+\usepackage{adjustbox}
+\usepackage{tabularx}
+\usepackage{floatrow}
+\usepackage[margin=1in]{geometry} % this shaves off default margins which are too big
+\usepackage{array}
+\usepackage{bm}
+\usepackage{subcaption}
+\usepackage[english]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{fancyhdr}
+
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=blue,
+	citecolor=black,
+}
+\urlstyle{same}
+
+\restylefloat{table}
+
+% use this for centering wrapped text using tabularx package
+\newcolumntype{Y}{>{\centering\arraybackslash}X}
+
+ \title{Lab 3: Propeller Analysis}
+
+ \author{Andrew Navratil%
+    \thanks{Undergraduate Student, Department of Mechanical and Aerospace Engineering}\\
+ {\normalsize\itshape
+  North Carolina State University, Raleigh, NC, 27606, United States}
+ }
+
+ % Data used by 'handcarry' option if invoked
+ \AIAApapernumber{YEAR-NUMBER}
+ \AIAAconference{Conference Name, Date, and Location}
+ \AIAAcopyright{\AIAAcopyrightD{YEAR}}
+
+ % Define commands to assure consistent treatment throughout document
+ \newcommand{\eqnref}[1]{(\ref{#1})}
+ \newcommand{\class}[1]{\texttt{#1}}
+ \newcommand{\package}[1]{\texttt{#1}}
+ \newcommand{\file}[1]{\texttt{#1}}
+ \newcommand{\BibTeX}{\textsc{Bib}\TeX}
+
+ % commands to format an entire row of a table
+\newcolumntype{+}{>{\global\let\currentrowstyle\relax}}
+\newcolumntype{^}{>{\currentrowstyle}}
+\newcommand{\rowstyle}[1]{\gdef\currentrowstyle{#1}%
+#1\ignorespaces
+}
+
+\begin{document}
+
+\begin{center}
+
+\includegraphics[width=.6\columnwidth]{ncsulogo.jpg}\\
+
+\bigskip
+
+{\huge \textbf{College of Engineering}}\\
+\bigskip
+{\Large \textbf{Department of Mechanical and Aerospace Engineering}}\\
+\bigskip
+\bigskip
+
+\includegraphics[width=.18\columnwidth]{ncsulogoround.jpg}\\
+
+\bigskip
+\bigskip
+
+\large
+MAE 480\\
+\bigskip
+Preliminary Design Review\\
+\bigskip
+\textbf{Satellite for Telemetric Acquisitions of Radioactive Statistics}\\
+\textbf{(STARS)}\\
+\bigskip
+
+\includegraphics[width=1\columnwidth]{nasc.png}\\
+\bigskip
+
+\end{center}
+\normalsize
+\pagebreak
+
+%----------------------------------------------------------------------------------------
+%	INTRODUCTION
+%----------------------------------------------------------------------------------------
+\section{Introduction}
+
+Here is some text in LaTeX.  It's just regular text, but to do pretty much anything you need to use markup, similar to html.  You write in the Source window of whatever editor you want (vim!), or here on Overleaf, then hit Compile to see all the fancy formatting in action.  The markup you can use in this document will be part of a package, which is loaded by the compiler from the listing at the top of this document, such as \verb!\usepackage{floatrow}!.  For a markup example, the two backslashes at the end of this line in the source marks the end of this line and starts a new one.\\
+If you want a bigger gap in between you need to use \verb!\bigskip!.
+\bigskip
+
+\textbf{Here is some bold text}. \textit{Here is some in italics.}  Here is a citation, with the reference at the bottom of this file, cited using the corresponding label \cite{handout}.\\
+
+Check out the document on Overleaf in our MAE 480 Senior Design folder entitled "A quick guide to LaTeX" for all the fun.  The help docs on Overleaf are good too: \href{https://www.overleaf.com/learn/latex/Main_Page}{Overleaf Documentation}\\
+\bigskip
+
+
+%----------------------------------------------------------------------------------------
+%	Methodology
+%----------------------------------------------------------------------------------------
+\section{This is a section header}
+
+\subsection{Subsection header 1}
+
+Here is some math, using the \verb!\begin{align*}! tag.  Check out the source.  If you want to do some math in text, you need to use dollar signs, like this $C_{P}=1$.
+
+\begin{align*}
+	J &= \frac{V_{\infty}}{nD} \\
+	C_{T} &= \frac{T}{\rho n^{2} D^{4}} \\
+	\eta &= \frac{C_{T}J}{2\pi C_{Q}} \\
+	\text{where}\\
+	n &= \text{rate of rotation (rpm converted to rotations per sec)}\\
+	V_{\infty} &= \text{freestream velocity}\\
+\end{align*}
+
+Here is some more.
+
+\begin{align*}
+	T_{corr} &= \sqrt\frac{T_{wire} - T_{ref}}{T_{wire} - T_{POS,acq}}\\
+	E_{corr} &= T_{corr}*E_{acq}\\
+	Tu (\%) &= \frac{V_{\infty,std}}{V_{\infty,mean}}*100\\
+	Re &= \frac{\rho_{air}*V_{\infty}*d}{\mu}\\
+\end{align*}
+
+Here's a bullet list.\\
+\begin{itemize}
+	\item propeller diameter (APC propellers: 10 x 8, 13 x 8, 15 x 8, 16 x 8)
+	\item propeller pitch (APC propellers: 10 x 6, 10 x 7, 10 x 8)
+	\item number of blades (APC propellers: 10 x 8 (2 blades), 10.5 x 8 (4 blades)
+\end{itemize}
+
+\subsection{Subsection header 2}
+
+Here's one kind of table:\\
+
+\begin{tabular}{r r}
+	\textbf{Lab Partner:} & First Last\\
+	\textbf{Lab Partner:} & Second Third\\
+	\textbf{Lab Partner:} & Neo\\\\
+	\textbf{Date Experiment Performed:} & November 27, 2018 \\ % Date the experiment was performed
+	\textbf{Date Report Submitted:} & December 4, 2018\\
+\end{tabular}
+
+\bigskip
+
+\noindent
+	Here's another table, in table \ref{tablename}, referenced with \verb!\ref{tablename}!.  And here are some links to help create tables:\\
+	\href{https://www.overleaf.com/learn/latex/Tables}{www.overleaf.com/learn/latex/Tables}\\
+	\href{http://www.tablesgenerator.com/}{www.tablesgenerator.com}\\
+
+\begin{table}[H]
+\centering
+\begin{tabular}{| +c | ^c | ^c | ^c | ^c | }
+	\hline
+	\rowstyle{\bfseries}%
+	Can & \shortstack{Diameter (in) \\ ($\pm$0.001in)} & \shortstack{Thickness (in) \\ ($\pm$0.0005in)} & \shortstack{Strain ($\bm{\mu\epsilon}$) \\ ($\bm{\pm5\%}$)} & \shortstack{Hoop (H) or \\ Longitudinal (L)} \\ \hline
+	Sprite & 2.591 & 0.005 & -190 $\pm9.50$& L \\ \hline
+	Monster & 2.524 & 0.006 & -317 $\pm15.9$ & L \\ \hline
+	Diet Dr. Pepper & 2.574 & 0.005 & -213 $\pm10.7$ & L \\ \hline
+	Coke & 2.597 & 0.005 & -218 $\pm10.9$ & L \\ \hline
+	Diet Dr. Pepper & 2.686 & 0.006 & -340 $\pm17.0$ & L \\ \hline
+
+\end{tabular}
+\caption{Data from strain and can dimensions}
+\label{tablename}
+\end{table}
+\pagebreak
+
+%----------------------------------------------------------------------------------------
+%	RESULTS
+%----------------------------------------------------------------------------------------
+\section{Results}
+
+\subsection{Parametric Study: Propeller Diameter}
+
+\begin{figure}[H]
+	\begin{floatrow}
+		\includegraphics[width=.5\columnwidth]{PropDiamCT.jpg}
+		\includegraphics[width=.5\columnwidth]{PropDiamCQ.jpg}
+	\end{floatrow}
+	\begin{floatrow}
+		\includegraphics[width=.5\columnwidth]{PropDiamCP.jpg}
+		\includegraphics[width=.5\columnwidth]{PropDiamEta.jpg}
+	\end{floatrow}
+	\caption{Parametric study on Propeller Diameter}
+	\label{propdiam}
+\end{figure}
+
+Above are some figures side by side.  All figures need to be uploaded to the Overleaf folder, see picture below for upload button, which is also a single figure, and then you just type the file name in the correct place in the source at the end of the includegraphis tag like so \verb!\includegraphics[width=.5\columnwidth]{yourfigurename.jpg}!.  You reference Figure \ref{propdiam} using the label you gave to the figure and the \verb!\ref{yourfigurelabelhere}! tag.  The \verb![H]! in the source after \verb!\begin{figure}[H]! tells the compiler to put these figures in the same place in the document that they are in the source.  You can take this out and let LaTeX figure out the best place to put the figures.  I pretty much always use the \verb![H]!.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=.4\columnwidth]{overleafupload.png}
+	\caption{Overleaf upload button}
+	\label{overleafupload}
+\end{figure}
+
+The appendix has some Matlab code using a package to do some syntax coloring.\\
+
+%----------------------------------------------------------------------------------------
+%	APPENDIX
+%----------------------------------------------------------------------------------------
+\newpage
+\section*{Appendix A: Matlab Code}
+
+\begin{lstlisting}[
+  style      = Matlab-editor,
+  basicstyle = \mlttfamily,
+]
+% Andrew Navratil
+% MAE 451 Expr Aero 3 Fall 2019
+% Lab 3 Propeller Analysis
+% Due 2019-10-18
+
+% clear all vars and plots
+close all; clear all; clc;
+
+% constants
+rho = 1.18; % air density [kg/m^3]
+
+in_to_m = 0.0254; % conversion in to m [m/in]
+lb_to_N = 4.4482; % conversion lb to N [N/lb]
+inlb_to_Nm = 0.113; % conversion in-lb to Nm [in-lb/Nm]
+psf_to_pa = 47.88; % conversion for psf to Pascal [Pa/psf]
+%ms_to_ins = 39.37; % velocity conversion [m/s] to [in/s]
+
+% load data
+data = load('data/Lab-3_prop_data_all_sessions.dat');
+
+% get list of unique propellers before converting to SI units
+combocols = [data(:,1) data(:,2) data(:,3)];
+[B,~,ib] = unique(combocols,'rows');
+%numoccurrences = accumarray(ib,1);
+propsidx = accumarray(ib, find(ib), [], @(rows){rows});
+
+propnum = data(:,1); % no. of props
+propdiam = data(:,2) * in_to_m; % prop diam [in]
+proppitch = data(:,3) * in_to_m; % prop pitch [in]
+throttle = data(:,4);
+uinf = sqrt(2*data(:,5)*psf_to_pa/rho); % vel from qpsf [psf]
+volts = data(:,6);
+amps = data(:,7);
+thrust = data(:,8) * lb_to_N; % thrust [lb]
+torque = data(:,9) * inlb_to_Nm; % torque [in-lb]
+rotpersec = data(:,10)/60; % rpm to rotations/sec
+material = data(:,11); % material (1 - APC, 2 - Wood)
+
+% calculate characteristics
+J = uinf ./ (rotpersec .* propdiam); % advanced ratio
+CT = thrust ./ (rho * rotpersec.^2 .* propdiam.^4); % thrust coeff
+CQ = torque ./ (rho * rotpersec.^2 .* propdiam.^5); % torque coeff
+CP = (volts .* amps) ./ (rho * rotpersec.^3 .* propdiam.^5); % power coeff
+
+etaCT = CT;
+etaCT(etaCT<0) = 0; % set negative thrusts to zero for efficiency calculation
+eta = etaCT .* J ./ (2*pi * CQ);
+
+% plots for each propeller (7 plots)
+for idx = 1:length(B)
+	figure;
+	plot(J(propsidx{idx}),CT(propsidx{idx}),'bo','DisplayName','C_{T}','LineWidth',2);
+	hold on; grid on;
+	plot(J(propsidx{idx}),CQ(propsidx{idx})*10,'g*','DisplayName','C_{Q} (x10)','LineWidth',2);
+	plot(J(propsidx{idx}),CP(propsidx{idx}),'r+','DisplayName','C_{P}','LineWidth',2);
+	plot(J(propsidx{idx}),eta(propsidx{idx}),'cv','DisplayName','\eta','LineWidth',2);
+	ylabel('C_{T}/C_{Q}/C_{P}/\eta');
+	xlabel('J');
+	title(['APC Propeller: ' num2str(B(idx,2)) ' x ' num2str(B(idx,3)) ' ('...
+		num2str(B(idx,1)) ' blades)']);
+	set(gca,'FontSize',14);
+	legend('location','northeast');
+end
+
+% plots for parametric study (4 characteristics x 3 variations = 12 plots)
+for variation = 1:3
+	for characteristic = 1:4
+		if variation == 1
+			idxB = find(B(:,1)==2 & B(:,3)==8);
+			dtitle = 'Propeller Diameter';
+		elseif variation == 2
+			idxB = find(B(:,1)==2 & B(:,2)==10);
+			dtitle = 'Propeller Pitch';
+		else
+			idxB = find(B(:,3)==8 & (B(:,2)==10 | B(:,2)==10.5));
+			dtitle = 'Number of Blades';
+		end
+
+		figure;
+		for idxBn = 1:length(idxB)
+			idx = idxB(idxBn);
+			if variation == 3
+				dname = [num2str(B(idx,2)) ' x ' num2str(B(idx,3))...
+					' (' num2str(B(idx,1)) ' blades)'];
+			else
+				dname = [num2str(B(idx,2)) ' x ' num2str(B(idx,3))];
+			end
+
+			if characteristic == 1
+				plot(J(propsidx{idx}),CT(propsidx{idx}),'o','DisplayName',dname,'LineWidth',2);
+				ylabel('C_{T}');
+			elseif characteristic == 2
+				plot(J(propsidx{idx}),CQ(propsidx{idx})*10,'*','DisplayName',dname,'LineWidth',2);
+				ylabel('C_{Q} (x10)');
+			elseif characteristic == 3
+				plot(J(propsidx{idx}),CP(propsidx{idx}),'+','DisplayName',dname,'LineWidth',2);
+				ylabel('C_{P}');
+			else
+				plot(J(propsidx{idx}),eta(propsidx{idx}),'v','DisplayName',dname,'LineWidth',2);
+				ylabel('\eta');
+			end
+			hold on; grid on;
+		end
+		xlabel('J');
+		title(dtitle);
+		set(gca,'FontSize',14);
+		legend('location','northeast');
+	end
+end
+
+\end{lstlisting}
+
+%----------------------------------------------------------------------------------------
+%	BIBLIOGRAPHY
+%----------------------------------------------------------------------------------------
+\begin{thebibliography}{9}% maximum number of references (for label width)
+
+\bibitem{handout} Lab 3 Handout, MAE451\_Lab-3\_Handout.pdf, Dr. Shreyas Narsipur \\
+
+\end{thebibliography}
+
+\end{document}
+
+% - Release $Name:  $ -

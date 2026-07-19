@@ -1,0 +1,170 @@
+
+\subsection{Communication}
+The communication system of the STARS mission is necessary to be able to communicate with the satellite from the ground and to be able to receive data from the CubeSat. Data must be able to be both sent and received by the CubeSat to be fully operational. Data that is collected from the payload will be sent from CubeSat to the ground station, and the ground station will send information such as software updates, additional commands, and eventually the signal to begin the end-of-life procedure. The communication system involves making decisions on what frequency or frequencies to use for uplink and downlink and the antenna that should be used on the CubeSat. 
+
+\subsubsection{Transmitter Frequency}
+The frequency used by the communication system in the STARS mission will affect several other systems and is in an important aspect in designing the mission. The following ranges of frequencies are commonly used in satellite systems and have the technology in place to begin using them on the STARS mission if they are determined to be the best option for the mission. The selection of the frequency has significant effects on the ground station and its operations including the beam width for that frequency range and the uplink and downlink speeds. 
+
+\paragraph{VHF and UHF} ~\\~\\
+VHF and UHF communication systems often act in tandem, especially in ground station design, so for purposes of this analysis, they will be looked at as a single option for the transmitter frequency. VHF describes the frequencies in the range between 30 and 300 MHz while UHF describes the frequencies between 300 and 3000 MHz \cite{ITU}. Using a VHF/UHF system would allow for both uplink and downlink between the satellite and the ground station. The VHF ground station antenna has a beam width of 52$\degree$ and the UHF antenna on the ground station has a beam width of 30$\degree$. This system utilizing VHF and UHF would allow for downlink speeds between 1.2 and 9.6 kbps \cite{isis_ground}.
+
+\paragraph{S-Band} ~\\~\\
+S-Band describes the frequencies between 2 and 4GHz \cite{ITU}. An S-Band ground station has a smaller beam width of 5.1$\degree$, but for the design of the STARS mission it would only allow for downlink with an S-Band frequency. S-Band's biggest advantage is its downlink speeds that are much higher that those of VHF/UHF. An S-Band communication system can have downlink speeds between 14.4 and 114.2 kbps \cite{isis_ground}. These higher communication speeds would allow for much more data downlink during communication windows between the CubeSat and the ground station. 
+
+\paragraph{VHF, UHF, and S-Band} ~\\~\\
+The option exists of using a combination of both VHF/UHF and S-Band communication systems. This would allow for both uplink and downlink between the CubeSat and the ground station. Uplink could be conducted with VHF or UHF while downlink would most likely be conducted in an S-Band frequency but could also conducted in VHF or UHF frequencies, just at a slower speed.  The biggest issue with a combination system of the three frequency is the high cost. For the ground station, there are the options of either purchasing individual ground stations for both VHF/UHF or to purchase a combination system of VHF/UHF/S-Band. 
+
+\paragraph{Summary of Transmitter Frequency Pros and Cons} ~\\~\\
+Table \ref{tbl:transmitter_procon} provides a summary for the pros and cons for each of the three system options for the transmitter frequency. 
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{0.2\textwidth}|p{.4\textwidth}|p{.4\textwidth}|} 
+\hline
+\textbf{Transmitter} & \textbf{Pros} & \textbf{Cons}
+\\
+\hline
+     VHF/UHF
+     &
+    \begin{itemize}
+        \item Uplink and downlink
+        \item Least expensive
+        \item Beam width 52$\degree$ (VHF), 30$\degree$ (UHF)
+    \end{itemize}
+    &
+    \begin{itemize}
+        \item Slower downlink speeds (1.2 - 9.6 kbps)
+    \end{itemize}
+    \\
+\hline
+     S-Band
+     &
+    \begin{itemize}
+        \item Faster downlink speeds (14.4 - 115.2 kbps)
+    \end{itemize}
+    &
+        \begin{itemize}
+        \item Downlink only
+        \item Beam width 5.1$\degree$
+    \end{itemize}
+    \\
+\hline
+    VHF/UHF/S-Band
+    &
+    \begin{itemize}
+        \item Uplink and downlink
+        \item Faster Downlink Speeds (1.2 - 9.6 kbps, 14.4 - 115.2 kbps) 
+        \item Beam Width: 52$\degree$ (VHF), 30$\degree$ (UHF), 5.1$\degree$ (S-Band)
+    \end{itemize}
+    &
+    \begin{itemize}
+        \item Most expensive
+    \end{itemize}
+    \\
+\hline
+\end{tabular}
+\caption{Transmitter Pros and Cons \cite{isis_ground}}
+\label{tbl:transmitter_procon}
+\end{table}
+\subsubsection{Antenna}
+
+The antenna is a vital component of the communications system, as it will determine both the range of the satellite, effecting the available communication window, and the pointing requirements of the communications system. In order to minimize pointing requirements of the satellite, the antennae compared are chosen from the wire antennae class, as these antennae tend to be the most omnidirectional options, and are commercially readily available for small satellites. The four wire antenna configurations considered in this document are quarter wavelength monopole, half wavelength dipole, turnstile antenna arrays, and a Vertical Monopole Array.
+
+\paragraph{Quarter Wavelength Monopole} ~\\ ~\\
+The quarter wavelength monopole antenna is a wire antenna which is often used to transmit radio signals, as when it is vertically grounded the antenna provides omnidirectional coverage of the target areas. \cite{Mono} The radiation pattern of a monopole antenna can be seen in figure \ref{fig:monopole radiation pattern} below. It is important to note that, the larger the ground plane is, the closer the maximum power of the monopole radiation is to the ground plane.
+
+\begin{figure}[H]
+    \includegraphics[width=0.8\columnwidth]{monorad.jpg}\\
+    \caption{A three dimensional visualisation of the radiation pattern of a monopole antenna with a finite ground plane\cite{Mono}}
+    \label{fig:monopole radiation pattern}
+\end{figure}
+
+Since a monopole antenna is essentially a dipole antenna with its bottom half replaced with a ground plane, the directivity of a monopole antenna is known to be double that of a dipole antenna of twice the length of the monopole \cite{Mono}, giving the quarter wavelength monopole a directivity of 3.28.\cite{Half} While this antenna has the smallest overall wire length of any of the antenna options, it is the most directive of the options, and would place a heavier load on the GNC system than the other antenna options.   
+
+\paragraph{Half Wavelength Dipole Antenna} ~\\ ~\\
+The half wavelength dipole antenna is similar to the quarter wavelength monopole, however the ground plane present in the quarter wavelength monopole antenna is replaced with another quarter wavelength of wire, which creates the effect of mirroring the radiation of a monopole with an infinitely large ground plane across the ground plane.\cite{Dipole} An example of this can be seen in figure \ref{fig:dipole radiation pattern} below.
+
+\begin{figure}[H]
+    \includegraphics[width=0.8\columnwidth]{dipolerad.jpg}\\
+    \caption{A three dimensional visualisation of the radiation pattern of a dipole antenna\cite{Dipole}}
+    \label{fig:dipole radiation pattern}
+\end{figure}
+
+The half wavelength dipole is known to have a directivity value of 1.6, or half the value of a quarter wavelength monopole antenna. This means that, while the dipole cannot be pointed on a single direction as effectively as a monopole antenna, its radiation pattern is more omnidirectional than that of the monopole, meaning that the dipole antenna would produce significantly less load on the GNC system.\cite{Dipole} However, the dipole antenna has double the overall wire length of the monopole antenna, which means that it will consume twice as much power as the monopole during deployment.
+
+\paragraph{Turnstile Antenna Array} ~\\ ~\\
+The turnstile antenna array consists of two dipole antennas mounted perpendicularly to each other, as seen in figure \ref{fig:turnt} below, and is meant to create what is practically an isotropic antenna system, which radiates the signal in all directions with an equal strength.\cite{Wong} this array is very useful for small satellites, as it requires little to no pointing precision on behalf of the GNC system. 
+
+\begin{figure}[H]
+    \includegraphics[width=0.8\columnwidth]{turnt.png}\\
+    \caption{A deployable turnstile antenna system\cite{turnt}}
+    \label{fig:turnt}
+\end{figure}
+
+The turnstile antenna system is considered to be practically isotropic, and therefore the Directivity value of a turnstile array can be assumed to be 1.\cite{Wong} While this antenna has the lowest directivity, and therefore would require the least pointing precision, the turnstile antenna system has a total wire length which is four times that of a monopole designed for the same frequency, and would drastically increase the power draw of the antenna system at deployment.
+
+\paragraph{Vertical Monopole Array}~\\ ~\\
+The vertical monopole array consists of two monopoles, with one vertically mounted to each of the 10 cm by 10 cm faces of the satellite. When properly implemented, the radiation pattern created by this array is similar to that of a dipole. however, unlike the dipole antenna previously discussed, the dead zones in the radiation pattern will be along the axis of the satellite, which, provided that the GNC system maintains the satellite's orientation to the ground, will provide full ground coverage of the signal. The Directivity of the array is comparable to that of the half wavelength dipole \cite{Dipole}, and given that the legnth of the satellite is included in the antenna length, the deployed section of the antenna can be shortened by approximated 30 centimeters, reducing the overall wire length relative to the dipole antenna.
+
+\paragraph{Pros and Cons Summary}~\\ ~\\
+The pros and cons of each antenna option have been tabulated in table \ref{tbl:antenna_procon}.
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{0.2\textwidth}|p{.4\textwidth}|p{.4\textwidth}|} 
+\hline
+\textbf{Antenna} & \textbf{Pros} & \textbf{Cons}
+\\
+\hline
+     Monopole
+     &
+    \begin{itemize}
+        \item lowest total wire length
+        \item partial radiation symmetry
+    \end{itemize}
+    &
+    \begin{itemize}
+        \item Requires ground plane
+        \item Most rigorous GNC requirements
+    \end{itemize}
+    \\
+\hline
+     Dipole
+     &
+    \begin{itemize}
+        \item Low total wire length
+    \end{itemize}
+    &
+        \begin{itemize}
+        \item Blind spot along axis of antenna
+    \end{itemize}
+    \\
+\hline
+    Turnstile
+    &
+    \begin{itemize}
+        \item full radiation coverage
+        \item no pointing requirements
+    \end{itemize}
+    &
+    \begin{itemize}
+        \item Most expensive
+        \item highest total wire length
+    \end{itemize}
+    \\
+    \hline
+    Vertical Monopoles
+    &
+    \begin{itemize}
+        \item Full radiation ground coverage
+        \item Low total wire length 
+    \end{itemize}
+    &
+    \begin{itemize}
+        \item Blind Spot along axis of antenna array
+    \end{itemize}
+    \\
+\hline
+\end{tabular}
+\caption{Transmitter Pros and Cons \cite{isis_ground}}
+\label{tbl:antenna_procon}
+\end{table}

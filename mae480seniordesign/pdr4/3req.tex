@@ -1,0 +1,301 @@
+
+%----------------------------------------------------------------------------------------
+%	Design Requirements
+%----------------------------------------------------------------------------------------
+\section{Project Requirements}
+
+\renewcommand{\labelenumi}{\theenumi}
+\renewcommand{\labelenumii}{\theenumii}
+\renewcommand{\labelenumiii}{\theenumiii}
+\renewcommand{\labelenumiv}{\theenumiv}
+%\renewcommand{\labelitemv}{$\bullet$}
+%\renewcommand{\labelitemvi}{$\bullet$}
+%\renewcommand{\theenumii}{\theenumi.\arabic{enumii}.}
+\renewcommand{\theenumi}{\textbf{FR.\arabic{enumi}}}
+\renewcommand{\theenumii}{\textbf{DR.\arabic{enumi}.\arabic{enumii}}}
+\renewcommand{\theenumiii}{\textbf{DR.\arabic{enumi}.\arabic{enumii}.\arabic{enumiii}}}
+\renewcommand{\theenumiv}{\textbf{DR.\arabic{enumi}.\arabic{enumii}.\arabic{enumiii}.\arabic{enumiv}}}
+
+\begin{enumerate} % FR 1  (CPE 1)
+    \item The final design of the CubeSat shall conform to the 3U and 3U+ standard.
+    \begin{enumerate}
+        \item The 3U or 3U+ standards dictate that the CubeSat shall have dimensions of 10x10x30.00 cm with a maximum mass under 4.00 kg.
+        \begin{enumerate}
+            \item The 3U+ standard also has an optional 3.6 cm cylindrical extension from the 34.05 cm dimension with a 6.4 cm diameter.  
+            \begin{enumerate}
+                \item “3U or 3U+ CubeSats’ centers of gravity shall be located within 7 cm from its geometric center in the Z direction.” \cite{CSS} 
+                \begin{itemize}
+                    \item Motivation: Direct requirement from CubeSat Design Specifications. 
+                    \item Verification: Design the CubeSat for this parameter, then test and modify the structure as necessary to get the desired center of gravity location. 
+                \end{itemize}
+                \item “Rails shall have a minimum width of 8.5mm... Rails will have a surface roughness less than 1.6 µm...The edges of the rails will be rounded to a radius of at least 1 mm.” \cite{CSS} 
+                \begin{itemize}
+                    \item Motivation: Direct requirements regarding CubeSat rails interfacing the P-POD launcher.  
+                    \item Verification: Design rails around these parameters and test and modify to get desired roughness. 
+                \end{itemize}
+            \end{enumerate}
+        \end{enumerate}
+
+    \end{enumerate} % FR 2  (CPE 1)
+    \item The CubeSat shall utilize a ride share on an existing domestic commercial launch vehicle.
+    \begin{enumerate}
+        \item The CubeSat shall be able to withstand the structural requirements and conform to any chemical or non-chemical restrictions imposed by the chosen launch provider.  
+        \begin{enumerate}
+            \item The CubeSat shall resist against launch static and dynamics loads. 
+            \begin{enumerate}
+                \item The CubeSat structure shall survive the 8.5 - 13 G’s from launch. \cite{Falcon9}. 
+                    \begin{itemize}
+                        \item Motivation: Catastrophic failure of the sensor or important structural elements during launch would result in immediate mission failure.  
+                        \item Verification: Construct a CAD model and run a SolidWorks simulation using the Gravity Property Manager tool to test the structure under different gravity loading conditions.
+                    \end{itemize}
+                \item CubeSat shall utilize Aluminum 7075, 6061, 5005, and/or 5052 for both the main CubeSat structure and the rails.” \cite{CSS}
+                    \begin{itemize}
+                        \item Motivation: Requirement regarding the CubeSat and rails materials. Dictates usable materials.   
+                        \item Verification: Design using strictly these materials or submit a deviation waiver request to use a different material. 
+                    \end{itemize}
+            \end{enumerate}
+        \item The CubeSat’s components shall resist vibrational loads and avoid resonance. 
+        \begin{enumerate}
+            \item The CubeSat shall withstand any vibrational frequency between 20–2000 HZ 
+                \begin{itemize}
+                        \item Motivation: Delicate components such as PCBs and antenna have natural frequencies which must be avoided to avoid resonance. Resonance could result in the failure of components.
+                        \item Verification: Use ANSYS’s model analysis features on specific parts and on the assembled CAD model.
+                    \end{itemize}
+        \end{enumerate}
+        \end{enumerate}
+    \end{enumerate}  % FR 3 (CPE 1)
+    \item CubeSat shall utilize the Poly Picosatellite Orbital Deployer (P-POD) launcher.
+    \begin{enumerate}
+        \item CubeSat shall meet the container hold requirement size of 10 x 10 x 34.0 cm. 
+        \begin{enumerate}
+            \item  “Deployables shall be constrained by the CubeSat, not the P-POD." \cite{CSS} 
+                \begin{enumerate}
+                    \item “All deployables such as booms, antennas, and solar panels shall wait to deploy a minimum of 30 minutes after the CubeSat's deployment switch(es) are activated from P-POD ejection.” \cite{CSS} 
+                        \begin{itemize}
+                            \item Motivation: Direct Requirement
+                            \item Verification:Design release program to wait 30 minutes after detecting deployment. 
+                        \end{itemize}
+                \end{enumerate}
+            \item  “The CubeSat rails, which contact the P-POD rails and adjacent CubeSat standoffs, shall be hard anodized aluminum to prevent any cold welding within the P-POD.” \cite{CSS} 
+                \begin{enumerate}
+                    \item CubeSat shall be able to withstand an exit velocity of 1.6 m/s [1] 
+                           \begin{itemize}
+                                \item Motivation: Meeting the P-POD standard
+                                \item Verification:Test rig should be constructed to mimic the pusher plate and spring ejection system, with full functional verification of CubeSat performed afterwards along with manual inspection to ensure all parts remain in place 
+                            \end{itemize}
+                \end{enumerate}
+        \end{enumerate}
+    \end{enumerate} % FR 4 (CPE 2)
+    \item The CubeSat shall maintain its attitude, meeting pointing requirements to complete mission tasks.
+    \begin{enumerate}
+        \item The CubeSat shall meet maneuver requirements for each subsystem.
+        \begin{enumerate}
+            \item The CubeSat shall maintain control by using actuators. 
+                \begin{itemize}
+                    \item Motivation: Meeting the scientific requirements and allow subsystems to function during mission-phase.
+                    \item Verification: Testing sensors in a micro-g environment.
+                \end{itemize}
+        \end{enumerate}
+        \item The CubeSat shall meet pointing requirements for each subsystem.
+        \begin{enumerate}
+            \item The CubeSat shall determine attitude by using sensors.
+                \begin{itemize}
+                    \item Motivation: Meeting the scientific mission requirements
+                    \item Verification: Testing actuators in a micro-g environment.
+                \end{itemize}
+            \item CubeSat shall record orbital location information every 30 seconds
+            \begin{itemize}
+                \item Motivation: Monitoring location and use as a ping to ensure CubeSat is operational 
+                \item Verification: Installation and setup of software decoding package, executing transmit from onboard CubeSat while on the ground, and ensuring the signal is received properly \cite{CSS}. 
+            \end{itemize}
+        \end{enumerate}
+    \end{enumerate} % FR 5 (CPE 3)
+    \item The CubeSat shall maintain an effective power distribution to complete all mission tasks by powering each subsystem. 
+    \begin{enumerate}
+        \item The solar panels shall collect energy from the sun to distribute throughout the CubeSat by the power management system.
+        \begin{enumerate}
+            \item The battery shall be charged by the solar panels and used only when the power management system cannot distribute enough power harnessed from the solar panels. 
+                \begin{itemize}
+                    \item Motivation: Maintaining the power required needed for all subsystems of the CubeSat
+                    \item Verification: Environmental test chamber facility focuses on power management
+                \end{itemize}
+        \end{enumerate}
+    \end{enumerate} % FR 6 (CPE 4)
+    \item The CubeSat shall withstand radiation and high-energy particle interactions without any failure events. 
+    \begin{enumerate}
+        \item The CubeSat shall withstand thermal loads from the sun and keep internal components within their operational range. 
+        \begin{enumerate}
+            \item The CubeSat shall maintain a temperature between –5 °C to 20 °C for the entire CubeSat [2].  
+                \begin{itemize}
+                    \item Motivation: Meeting the conditions of the operating environment
+                    \item Verification: Environmental test chamber facility 
+                \end{itemize}
+        \end{enumerate}
+    \end{enumerate} % FR 7
+    \item The CubeSat shall have the ability to communicate with a ground station and send down the gathered data.
+    \begin{enumerate}
+        \item The CubeSat shall have the ability to transmit data to the ground station.
+        \begin{enumerate}
+            \item The CubeSat shall not collect the scientific data while transmitting data.
+                \begin{itemize}
+                    \item Motivation: While power system analysis has yet to be performed, it is not reasonable to assume that the satellite will have a power budget capable of running the 1Watt sensor (as described in the design requirements) and a 4-13 Watt [6] transmitter simultaneously. Therefore, the satellite should have times allocated for data collection, and times allocated for data transmission. 
+                    \item Verification: An analysis of the power system will either confirm or deny the need for allocated data transmission times. 
+                \end{itemize}
+            \item The CubeSat shall transmit data at least twice every 24 hours. 
+                \begin{itemize}
+                    \item Motivation: The orbit selection dictates the frequency at which the CubeSat will be within communication range 
+                    \item Verification: Simulation of the data size captured over 24 hours, and perform the communication to ground station test
+                \end{itemize}
+        \end{enumerate}
+    \item The CubeSat shall have the ability to receive data from the ground station 
+        \begin{enumerate}
+            \item The ground station shall be able to target the CubeSat with of a maximum error of 0.2°.
+                \begin{itemize}
+                    \item Motivation: Orientation with the magnetic field is required by scientific payload and pointing accuracy gives margin of error from current state-of-the-art GNC systems which can produce point accuracy of better than 0.2° 
+                    \item Verification: Engaging GNC system in vacuum chamber test facility. 
+                \end{itemize}
+            \item The CubeSat shall be able to receive information from the ground station at a minimum rate of 2 kb/s.
+                \begin{itemize}
+                    \item Motivation: Ability to retrieve scientific data during operation and allow for less computational resources required to store data onboard. 
+                    \item Verification: Communications system turned on and sample data packets sent from the CubeSat at a separate location to the ground station with decoding software showing the expected data.  
+                \end{itemize}
+        \end{enumerate}
+    \end{enumerate} % FR 8 (CPE 6)
+    \item The CubeSat shall meet NASA standards for end-of-life.
+    \begin{enumerate}
+        \item CubeSat EoL plan shall comply with Standard NASA-STD-8719.14B \cite{STD8719}. 
+        \begin{enumerate}
+            \item The CubeSat shall re-enter the earth’s atmosphere within 25 years of the missions’ end. 
+               \begin{itemize}
+                    \item Motivation: Meeting NASA-STD-8719.14B.
+                    \item Verification: Ground tracking of the CubeSat
+                \end{itemize}
+            \item The CubeSat shall disintegrate upon reentry, leaving no orbital debris. 
+                \begin{itemize}
+                    \item Motivation: A crucial characteristic of the End of Life requirements is to ensure a complete disintegration of all parts of the satellite upon re-entry. Failure to do so can lead to parts of the craft landing back on the Earth’s surface and causing damage to buildings or people.
+                    \item Verification: Literature review of the materials to ensure disintegration.
+                \end{itemize}
+        \end{enumerate}
+        \item The CubeSat shall be designed, produced and operated so that, at the conclusion of mission operations all reserves of energy on board are exhausted in a permanent way.
+        \begin{enumerate}
+            \item The Power system will exhaust any remaining power after deploying the EoL system 
+                \begin{itemize}
+                    \item Motivation: Reducing the stored energy inside of the battery will prevent an overcharge, which could lead to an explosion before the satellite has re-entered the Earth’s atmosphere
+                    \item Verification: The battery will be monitored to ensure depletion of energy level
+                \end{itemize}
+            \item The power system shall be safed. (The means of production of energy on board shall be deactivated in a permanent way.) 
+                \begin{itemize}
+                    \item Motivation: Battery overpressure is a leading cause of satellite breakup upon re-entry. In order to avoid this, the power generation must be stopped during the end-of-life operations as the amount of power draw from other core systems will be diminished.
+                    \item Verification: The solar panels shall be physically detached from the battery via a pneumatic actuator 
+                \end{itemize}
+             \end{enumerate} 
+            \item The CubeSat shall be capable of deploying the EoL system in the event of extended loss of communication or a DoA (Dead on Arrival) scenario. 
+            \begin{enumerate}
+                \item The EoL system shall have a failsafe timer in place to activate the system if communications are lost 
+                \begin{itemize}
+                    \item Motivation: The satellite will need to de-orbit whether or not communication is established in order to comply with safety standards
+                    \item Verification: A test will be conducted before launch where contact will be severed with the failsafe to determine if it will deploy
+                \end{itemize}
+                \item The EoL system will be capable of activation in the event of a DoA scenario. 
+                    \begin{itemize}
+                        \item Motivation: The satellite will need to de-orbit even in the DoA scenario in order to comply with safety standards
+                        \item Verification: A test will be conducted before launch where all external energy sources, such as the battery,  will be severed from the failsafe to determine if it will deploy
+                    \end{itemize}
+         \end{enumerate}
+    \end{enumerate} % FR 9
+    \item The CubeSat shall orbit in LEO close to the edge of the inner Van Allen radiation belt, which starts around 640km, to enable successful detection of high-energy particles.  
+    \begin{enumerate}
+        \item Orbit shall be 500km Sun-Synchronous with an inclination angle of 97.4 degrees.
+        \begin{enumerate}
+            \item The CubeSat shall reach the ascending node at 06:00 or 18:00
+                \begin{itemize}
+                        \item Motivation: Maintain a dusk dawn orbit, keeping the CubeSat constantly in the light of the sun throughout the mission.
+                        \item Verification: STK simulation with these orbital parameters to show that the orbit will satisfy the subsystem needs of the CubeSat. 
+                    \end{itemize}
+        \end{enumerate}
+    \end{enumerate} % FR 10
+    \item The CubeSat shall maintain a functional orbit for a minimum of 3 months.
+        \begin{enumerate}
+            \item The components of CubeSat shall be tested to assure they are functioning initially, function throughout a normal cycle, and functioning before launch. 
+                \begin{enumerate}
+                    \item The CubeSat shall rectify electronic problems caused by radiation or alert the team of known errors. 
+                        \begin{itemize}
+                            \item Motivation:  In the case of a SEE, the CubeSat must either fix itself by resetting hardware or signal the error so it can be accounted for in data processing.
+                            \item Verification: If proton beam testing is available, then the system can be tested to assure solutions exist. If not, then the systems for repair must be put in place and tested synthetically. 
+                        \end{itemize}
+                \end{enumerate}
+        \end{enumerate} % FR 11
+        \item The CubeSat shall detect the presence of High-Energy particles that traverse the Inner Van-Allen belt.
+            \begin{enumerate}
+                \item Sensor on the payload shall determine the direction of the detected high-energy particle measurement.
+                    \begin{enumerate}
+                        \item The sensor shall detect and distinguish between high-energy protons and high-energy electrons of flux ranges 0.5-40 MeV through three levels of detection, shown in Table \ref{tab:mev}.
+                        \begin{table}[H]
+                        \centering
+                        \begin{tabular}{|l|c|c|} 
+                        \hline
+                        \textbf{Level} & \textbf{Electrons} & \textbf{Protons}
+                        \\
+                        \hline
+                        \textbf{1} & 0.5-1.5 MeV & 8.5-20 MeV
+                        \\
+                        \hline
+                        \textbf{2} & 1.5-2.5 Mev & 20-40 MeV
+                        \\
+                        \hline
+                        \textbf{3} & >2.5 MeV & >40 MeV
+                        \\
+                        \hline
+                        \end{tabular}
+                        \caption{High-Energy Detection Range}
+                        \label{tab:mev}
+                        \end{table}
+                            \begin{itemize}
+                        \item Motivation:The University of Colorado Boulder helped develop the REPT sensors used on the NASA Van Allen Probes, which studied the outer Van Allen belt. Gathering data on the radiation of the inner belt will further the understanding of the Van Allen radiation belts. 
+                        \item Verification: Test the radiation detection sensors for desired range of detection.
+                    \end{itemize}
+                    \item  Basic sensor requirements shall follow as described in the Table \ref{tab:blackbox}.
+                        \begin{itemize}
+                            \item Motivation: In order meet other requirements, such as Design requirement D1, the parameters of the payload and its encompassed sensor must fit in a 1U sized box to allow space for the other crucial components to make the CubeSat operational 
+                            \item Verification: Test to ensure the chosen sensor and its accompanying components are within the design specifications in the Table \ref{tab:blackbox}.
+                            \begin{table}[H]
+                            \centering
+                            \begin{tabular}{|l|c|} 
+                            \hline
+                            \textbf{Mass} & 1.25 kg
+                            \\
+                            \hline
+                            \textbf{Power} & 1W 
+                            \\
+                            \hline
+                            \textbf{Size} & 1U unit
+                            \\
+                            \hline
+                            \textbf{FOV} & 32\degree -50\degree
+                            \\
+                            \hline
+                            \end{tabular}
+                            \caption{Payload Black Box Goals}
+                            \label{tab:blackbox}
+                            \end{table}
+                        \end{itemize}
+                    \end{enumerate}
+            \end{enumerate}
+    \item The design shall utilize the Goddard Golden Rules (GSFC-STD-1000) for design margin guidance.
+        \begin{enumerate}
+            \item The design shall abide by pre-phase A margins for the PDR analysis.
+                \begin{enumerate}
+                \item "ACS actuators (including propulsion) shall be sized for the current best estimate of spacecraft mass properties with 100\% design margin." [Table 1.31]
+                        \begin{itemize}
+                            \item Motivation: Determining the design margin for different phases of the design cycle of a space vehicle design is key to ensure mission success and Goddard Golden Rules serve as a guide to how much margin to include in a specified subsystem for satellite or spacecraft. This margin will enable future revisions of the design to take advantage of the margin for additional capabilities and mission requirements. 
+                            \item Verification: Validation will be conducted by observing the margin of each subsystem in following the standards set by Goddard Golden Rules.   \end{itemize}
+                \end{enumerate}
+            \item The design shall abide by phase A margins for the CDR analysis.
+                \begin{enumerate}
+                    \item The thermal design concept produces shall have "minimum 5C margins, except for heater controlled elements which have a maximum 70\% heater duty cycle, and two-phase flow systems which have a minimum 30\% heat transport margin. For Phase A, larger margins advisable". [GODDARD Table 4.25] 
+                        \begin{itemize}
+                            \item Motivation: Determining the design margin for different phases of the design cycle of a space vehicle design is key to ensure mission success and Goddard Golden Rules serve as a guide to how much margin to include in a specified subsystem for satellite or spacecraft. This margin will enable future revisions of the design to take advantage of the margin for additional capabilities and mission requirements. 
+                            \item Verification: Validation will be conducted by observing the margin of each subsystem in following the standards set by Goddard Golden Rules.   \end{itemize}
+                \end{enumerate}
+        \end{enumerate}
+\end{enumerate}

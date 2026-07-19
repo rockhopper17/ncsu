@@ -1,0 +1,129 @@
+
+\subsection{End of Life}
+
+Space debris has become a large concern to the international community. Additionally, LEO is becoming more and more and more crowded, and as it does so the risk of a collision increases. The event of a orbital collision would create a cloud of fast moving debris which could potentially cause a runaway cascade of collisions known as Kessler Syndrome.\cite{Kessler_Syndrome}  This has lead to the development of strict regulations regarding orbital debris mitigation. In order to comply with international standards set by NASA and the Inter-Agency Space Debris Coordination Committee (IADC), a satellite must be capable of either deorbiting, or transferring to a graveyard orbit within 25 years of the end of its mission.\cite{STD8719} A large propulsion device capable of moving the STARS satellite from LEO to a graveyard orbit is not feasible. As such, the four potential End of Life (EoL) systems outlined will focus on deorbiting the satellite. The four methods considered here are cold gas thrusters, drag chutes, electromagnetic thrusters, and deployable booms. Drag chutes, electromagnetic tethers, and deployable booms are all passive systems. Meaning that once deployed, they require no additioanl power or control input in order to function as necessary. 
+\subsubsection{Cold Gas Propulsion (CGP)}
+
+Cold Gas Propulsion (CGP) systems have played critical roles in small satellites since the 1960's.A CGP generates thrust through the process of controlled ejection of a compressed liquid or gas propellant through a nozzle. A CGP system is typically very simple, consisting of only one propellant due to the absence of any combustion. Additionally, the only main components are the propellant storage container and a nozzle. An average cold gas system uses numerous thrusters placed along the trailing sides of the spacecraft to give control along several axes. This simple design allows the system to operate successfully while maintaining a small mass and power requirement. However, due to the nature of its operation, the thrust profile of a CGP system decreases over time, as thrust is directly proportional to the pressure of the propellant in storage.\cite{Passive_Deorbit} Additionally, A CGP system will put a significant load on the GNC system during operation. It will require a robust and active GNC suite to keep the satellite pointed along the correct trajectory during use. A diagram of a simple CGP system can be seen in Figure \ref{fig:CGP Diagram} below.
+
+\begin{figure}[H]
+    \includegraphics[width=0.8\columnwidth]{CGPDiagram.PNG}\\
+    \caption{Diagram of a CGP System\cite{Passive_Deorbit}}
+    \label{fig:CGP Diagram}
+\end{figure}
+
+A large variety of both propellants can be used in a CGP system including argon, methane, liquid butane, and even refrigerant R134a. Using a liquid propellant can lead to a reduction in storage volume, and, due to lower storage pressure, containers are less likely to rupture.\cite{Passive_Deorbit} However, liquid propellants can create a de-stabilizing effect due to sloshing of the liquid within the storage container.\cite{Slosh} CGP systems can offer a relatively compact and low power option for satellite propulsion. They can generate significant thrust, between 10 mN and 50 mN, and can utilize a wide range of propellants\cite{Passive_Deorbit}. However, they generally operate with a very low specific impulse (Isp), cannot produce a constant thrust profile, require constant GNC control during operation, and run the risk of de-stabilizing the satellite if a liquid propellant is used.  
+\subsubsection{Drag Chute}
+
+Passive options require no further active control or communication after deployment. NASA estimates that small satellites such as STARS orbiting at an altitude of around 400 km will naturally decay and deorbit within the requisite 25 years. However, for orbits beyond 600 km, uncertainties in the density of the atmosphere remove the guarantee of natural decay and so another passive deorbit method, beyond the natural atmospheric drag of the satellite itself will be necessary.\cite{Passive_Deorbit} The most common and most well tested passive deorbit systems are drag sails or drag chutes. Functioning much like a parachute, once deployed the chute increases drag in the thin atmosphere in LEO resulting in the eventual reentry of the craft.
+
+\begin{figure}[H]
+    \includegraphics[width=0.8\columnwidth]{EXO-Brake.PNG}\\
+    \caption{Model of a deployed Exo-Brake. A drag chute designed and implemented by NASA\cite{Passive_Deorbit}}
+    \label{fig:Exo-Brake}
+\end{figure}
+
+Drag chutes such as the Exo-brake pictured above have a technology readiness level (TRL) of 9 and have heritage on a wide variety of satellites including 3U CubeSats. Drag Chutes, like all passive options do not require power or control once deployed and can even be made to deploy if communications are lost or in the event of a Dead on Arrival (DoA) scenario. 
+\subsubsection{Electromagnetic Tether}
+
+An electromagnetic tether is another potential passive deorbit method. An electromagnetic tether uses a conductive tether, pulled taut by gravitational tidal forces, to generate an electromagnetic force via Lorentz-force interactions as it moves through the Earth's magnetic field.\cite{Passive_Deorbit} The produced current interacts with the magnetic field, creating a force in the opposite direction of motion, effectively slowing the spacecraft. This interaction thus can be used to reduce the orbital radius of the satellite until reentry is guaranteed. 
+
+\begin{figure}[H]
+    \includegraphics[width=0.8\columnwidth]{NanoTermTape.PNG}\\
+    \caption{Nano Terminator Tape, An Electromagnetic Tether Designed for CubeSats by Tethers Unlimited\cite{Term_Tape_Presentation}}
+    \label{fig:NanoTermTape}
+\end{figure}
+
+\begin{figure}[H]
+    \includegraphics[width=0.8\columnwidth]{TermTapeDeploy.PNG}\\
+    \caption{Microgravity deployment of Terminator Tape\cite{Term_Tape_Presentation}}
+    \label{fig:TermTapeDeploy}
+\end{figure}
+
+Electromagnetic tethers take up very little volume and mass, often around 50 cm\textsuperscript{3} and 100 g, and are mounted on the outside of the CubeSat.\cite{Term_Tape_Datasheet} This makes it rather easy to incorporate into the CubeSat design as it takes up very little internal volume. However, it could potentially interfere with solar panel placement. Additionally, there are currently no TRL 9 electromagnetic tethers in use on CubeSats. Nano Terminator Tape, pictured in Figure \ref{fig:NanoTermTape} above does have heritage on the Aerocube-V, a CubeSat that launched in 2015, but has not yet been activated.\cite{Passive_Deorbit}
+\subsubsection{Deployable Boom}
+Deployable booms have a large variety of potential uses in space craft beyond EoL systems. Deployable booms are being investigated by many different companies and organizations such as Northrop Grumman\cite{NG_Deployables} and NASA.\cite{Small_Sat_Deployables} Deployable booms are being developed for use in solar arrays, communication antennas, radar antennas, Solar and drag sails, and as instrument booms.\cite{Small_Sat_Deployables} Deployable booms are considered for all of these uses because not only are they light weight and volume efficient, they can be designed to be very strong as well. Below is a figure depicting one of the ways that a deployable boom can extend from its stowed state. 
+
+\begin{figure}[H]
+    \includegraphics[width=0.8\columnwidth]{StemBoom.PNG}\\
+    \caption{Variations of the STEM boom concept\cite{Small_Sat_Deployables}}
+    \label{fig:StemBoom}
+\end{figure}
+
+Deployable booms have also been designed with the express intent to be used as a deorbiting device. One such device, called the Roll-Out DE-Orbiting device, or RODEO, was developed by Composite Technology Development, Inc. in 2015.\cite{Passive_Deorbit} When signaled, RODEO deploys a long boom with thin mylar wings attached at 120\degree angles. Once deployed, the boom and mylar wings provide a significant increase in total area for the CubeSat, about 0.15 m\textsuperscript{2}, resulting in an increase in overall drag reducing the spacecraft's velocity and eventually resulting in reentry.\cite{RODEO_Presentation} A model of the RODEO system in both its deployed and stowed configurations can be seen in Figure \ref{fig:Rodeo_Deployed} below.
+\begin{figure}[H]
+    \includegraphics[width=0.8\columnwidth]{RODEODeployed.PNG}\\
+    \caption{RODEO Flight Configurations\cite{RODEO_Presentation}}
+    \label{fig:Rodeo_Deployed}
+\end{figure}
+
+Deployable booms, specifically those designed to act as deorbit devices, such as RODEO mentioned above, are an excellent potential option for an EoL system. They are small and light weight, Rodeo has a total volume of 137 cm\textsuperscript{3} and a mass of only 96g, and like the previous passive systems only require power at the time of deployment.\cite{RODEO_Presentation} However there have been some issues with deployment and larger/ heavier CubeSats can sometimes require two deployable booms set orthogonally in order to create enough surface area to reliably deorbit. 
+
+\subsubsection{Summary of Pros and Cons}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{0.2\textwidth}|p{.4\textwidth}|p{.4\textwidth}|} 
+\hline
+\textbf{EoL System} & \textbf{Pros} & \textbf{Cons}
+\\
+\hline
+     Cold Gas Propulsion
+     &
+    \begin{itemize}
+        \item High TRL (9)
+        \item Simple 
+    \end{itemize}
+    &
+    \begin{itemize}
+        \item Requires Propellant
+        \item Strains GNC System
+        \item Requires Constant Power
+        \item Larger Volume (250 cm\textsuperscript{3})\cite{CGP_Datasheet}
+    \end{itemize}
+    \\
+\hline
+     Drag Chute
+     &
+    \begin{itemize}
+        \item High TRL (9)
+        \item Low Power
+    \end{itemize}
+    &
+        \begin{itemize}
+        \item No Control
+        \item Can be difficult to deploy
+    \end{itemize}
+    \\
+\hline
+    Electromagnetic Tether
+    &
+    \begin{itemize}
+        \item Low Power
+        \item Very Low Volume (50 cm\textsuperscript{3})\cite{Term_Tape_Datasheet}
+    \end{itemize}
+    &
+    \begin{itemize}
+        \item Moderate TRL (7)
+        \item No Control
+    \end{itemize}
+    \\
+\hline
+    Deployable Boom
+    &
+    \begin{itemize}
+        \item Low Power
+        \item Simple
+        \item Low Volume (150 cm\textsuperscript{3})\cite{RODEO_Presentation}
+    \end{itemize}
+    &
+    \begin{itemize}
+        \item Moderate TRL (7)
+        \item No Control
+    \end{itemize}
+    \\
+\hline
+\end{tabular}
+\caption{EoL Systems Pros and Cons}
+\label{tbl:Eol_ProCon}
+\end{table}

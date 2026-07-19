@@ -1,0 +1,84 @@
+
+%%% Control Metrics Section %%%
+\subsection{Control}
+\subsubsection{Metrics}
+\paragraph{Actuator Control Metrics}
+\begin{itemize}
+\item{Mass}\\ 
+\\
+CubeSats must meet a certain mass requirement based on the design requirements. For the control key design systems, this means collaborating with the other subsystems in order to ensure the final CubeSat comes in underweight. This mass requirement is important for ensuring subsystem efficiency. Systems that weigh more will be ranked lower on this metric.
+\item{Volume} \\
+\\
+The total volume is limited inside a CubeSat. To maximize the operation of the systems and subsystems, these systems must minimize total volume consumed. For the overall design, the more volume consumed by the system the lower the system will be ranked on this metric.
+\item{Control Authority} \\
+\\
+The driving factor into choosing a GNC actuator system is what kind of control authority it offers to the system. Other systems but not limited to such as thermal, communication, and payload depend on this controllability for mission success. For the STARS mission, the payload pointing is key to ensure that it is pointed towards the Van Allen belts for observation of the belts. Additional maneuvers may be required dependent on subsystem requirements. Due to this being a qualitative measure versus a quantitative measure, a score of 3 indicates that all maneuvers are capable of being met and values higher and lower than 3 are qualitative measures. The restricted and unrestricted 3DoF control is in reference to the reaction wheels becoming saturated after being used. 
+\item{Heritage} \\ 
+\\ 
+Choosing a system from the control key design systems will rely on previous vehicle deployments and documented system lifespans. Actual deployments will help determine the feasibility and survivability for the system. Systems that do not have previous deployment or are not currently in space will have a lower ranking on this metric. The ranking of theses systems is based on their Technology Readiness Level. Technology Readiness Level or TRL is a scale of one through nine to indicate the maturity of a technology as defined by NASA\cite{TRL}. A TRL value of nine means that it has successfully flown in space and completed mission objectives and a TRL value of one means that it is a preliminary concept.
+\end{itemize}
+% Metric Values Control table
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{0.1\textwidth}|p{0.15\textwidth}|p{0.15\textwidth}|p{0.15\textwidth}|p{0.15\textwidth}|p{0.15\textwidth}|}
+\hline
+    \textbf{Metric} & \textbf{5} & \textbf{4} & \textbf{3} & \textbf{2} & \textbf{1}
+    \\
+\hline
+    \textbf{Mass} & <0.10kg & 0.10-0.40kg & 0.40-0.70kg & 0.70-1.0kg & >1.0kg 
+    \\   
+\hline
+    \textbf{Volume} & <50cm\textsuperscript{3} & 50-75cm\textsuperscript{3} & 100-150cm\textsuperscript{3} & 150-200cm\textsuperscript{3} & >200cm\textsuperscript{3} 
+    \\    
+\hline
+    \textbf{Control Authority} & Full unrestricted 3DoF control  & Full restricted 3DoF Control & Able to meet all maneuver requirements & Able to meet half of maneuver requirements & Unable to meet any maneuver requirements  
+    \\
+\hline
+    \textbf{Heritage} & TRL 9 & TRL 8 & TRL 7 & TRL 6 & <TRL 6 
+    \\
+\hline
+\end{tabular}
+\caption{Actuator Control Study Metric Values}
+\label{tbl:Control_Metric_Scores}
+\end{table}
+% Weight of Metrics
+\subsubsection{Weight}
+\begin{itemize}
+    \item Mass – 0.15
+    \item Volume – 0.15
+    \item Control Authority – 0.50
+    \item Heritage – 0.20
+\end{itemize}
+
+In order to have mission success of any spacecraft, proper GNC actuators must be selected for robust control of the system. As GNC actuators provide control the system, the control authority of a system is crucial. Heritage is crucial for a GNC system to validate its use. Mass and Volume are last but equally important due to the constraints of fitting within a 3U CubeSat system as used by STARS. As a side comment, the system possibilities are the following, torque rods independently, reaction wheels with torque rods, or reaction control system, reaction wheels, and torque rods. On the potential Pugh matrix, these combinations are implied but are not written out. 
+
+\subsubsection{Potential Pugh Matrix}
+% insert text here
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|c|c|c|c|c|} 
+\hline
+    \textbf{Category} & \textbf{Weight} & \textbf{Torque Rod} & \textbf{Reaction Wheel} & \textbf{Reaction Control System}
+    \\
+\hline
+    \textbf{Mass} & 0.15 & 5 & 3 & 2
+    \\
+\hline
+    \textbf{Volume} & 0.15 & 5 & 3 & 2 
+    \\
+\hline
+    \textbf{Control Authority} & 0.5 & 3 & 4 & 5
+    \\
+\hline
+    \textbf{Heritage} & 0.2 & 5 & 5 & 3
+    \\
+\hline
+    \textbf{Total} & 1 & 4.0 & 4.5 &  3.4
+    \\
+\hline
+\end{tabular}
+\caption{Preliminar Control Pugh Matrix }
+\label{tbl:Control_Pugh}
+\end{table}
+%%%%% End Control Metrics %%%% 

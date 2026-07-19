@@ -1,0 +1,717 @@
+\typeout{}\typeout{If latex fails to find aiaa-tc, read the README file!}
+
+\documentclass[]{aiaa-tc}% insert '[draft]' option to show overfull boxes
+
+\graphicspath{ {figures/} }
+%\usepackage{float}
+\usepackage{caption}
+\usepackage[table]{xcolor}
+\usepackage{amsmath}
+\usepackage{filecontents}
+\usepackage[numbered,framed]{matlab-prettifier}
+\usepackage[T1]{fontenc}
+\usepackage{adjustbox}
+\usepackage{tabularx}
+\usepackage{floatrow}
+\usepackage[margin=1in]{geometry} % this shaves off default margins which are too big
+
+\usepackage{amstext} % for \text macro
+\usepackage{array}   % for \newcolumntype macro
+\newcolumntype{L}{>{$}l<{$}} % math-mode version of "l" column type
+
+\restylefloat{table}
+
+% use this for centering wrapped text using tabularx package
+\newcolumntype{Y}{>{\centering\arraybackslash}X}
+
+ \title{MAE 458 Fall 2019 Final Design Project}
+
+ \author{Andrew Navratil,%
+    \thanks{Undergraduate Student, Department of Mechanical and Aerospace Engineering}
+ \ Paul Neil IV,\thanksibid{1}
+ \ Kirby Hullender,\thanksibid{1}\\
+ {\normalsize\itshape
+  North Carolina State University, Raleigh, NC, 27606, United States}
+ }
+
+ % Data used by 'handcarry' option if invoked
+ \AIAApapernumber{YEAR-NUMBER}
+ \AIAAconference{Conference Name, Date, and Location}
+ \AIAAcopyright{\AIAAcopyrightD{YEAR}}
+
+ % Define commands to assure consistent treatment throughout document
+ \newcommand{\eqnref}[1]{(\ref{#1})}
+ \newcommand{\class}[1]{\texttt{#1}}
+ \newcommand{\package}[1]{\texttt{#1}}
+ \newcommand{\file}[1]{\texttt{#1}}
+ \newcommand{\BibTeX}{\textsc{Bib}\TeX}
+
+\begin{document}
+
+\maketitle
+
+%----------------------------------------------------------------------------------------
+%	INTRODUCTION
+%----------------------------------------------------------------------------------------
+\section{Operating Parameters and Assumptions}
+
+This report compares the performance of a turbojet, turbofan, and turboprop at the following operating parameters\cite{handout}:
+
+\begin{itemize}
+	\item Mach \# (M) = 0.8
+	\item Altitude ($h_{G}$) = 25000 ft (7620 m) $\implies T_{0} = 238.82K$\cite{anderson}
+	\item Turbine inlet temperature ($T_{04}$) = 1667K
+	\item Fuel heating value ($h_{R}$) = 42798.4 kJ/kg
+	\item Fan total pressure ratio ($\pi_{f}$) = 3
+\end{itemize}
+
+\noindent
+Ideal engine analysis was performed, with the following assumptions:
+
+\begin{itemize}
+	\item variation of specific heatsjkk
+	\item jet engines with single inlet and single exhaust
+	\item isentropic compression and expansion
+	\item air is calorically perfect gas $\implies \gamma = 1.4$
+	\item constant pressure combustion $\implies c_{p} = 1004$ J/(kg*K)
+	\item nozzle expands exhaust to ambient pressure
+	\item efficiency valued above performance (flight conditions resemble cruise conditions for a passenger jet, as opposed to a military fighter)
+	\item propeller efficiency of 80\%
+\end{itemize}
+
+\noindent
+Based on analytical comparison, a choice was made for which engine is most preferable at this given operating point, and further analysis was performed on that choice.
+
+%----------------------------------------------------------------------------------------
+%	Equations
+%----------------------------------------------------------------------------------------
+\section{Equations}
+
+\subsection{All Engines}
+
+\begin{align*}
+	a_{0} &= \sqrt{(\gamma-1)c_{p}T_{0}} \text{ (speed of sound)}\\
+	\theta_{r} &= 1 + \frac{\gamma-1}{2}M_{0}^{2} \text{ (freestream temp ratio)}\\
+	\theta_{\lambda} &= \frac{T_{04}}{T_{0}} \text{ (burner enthalpy ratio)}\\
+	\theta_{c} &= \pi_{c}^{(\gamma-1)/\gamma} \text{ (compressor temp ratio)}\\
+	(\theta_{c})_{max\frac{\tau}{\dot{m}_{0}}} &= \frac{\sqrt{\theta_{\lambda}}}{\theta_{r}} 
+		\text{ (optimum compressor temp ratio)}\\
+	(\pi_{c})_{max\frac{\tau}{\dot{m}_{0}}} &= 
+		(\theta_{c})_{max\frac{\tau}{\dot{m}_{0}}}^{\gamma/(\gamma-1)}
+		\text{ (optimum compressor pressure ratio)}\\
+	f &= \frac{c_{p}T_{0}}{h_{R}}(\theta_{\lambda}-\theta_{r}\theta_{c})
+		\text{ (fuel-air mass flow ratio)}\\
+	\eta_{T} &= 1 - \frac{1}{\theta_{r}\theta_{c}} \text{ (thermal efficiency)}\\	
+	\eta_{O} &= \eta_{P}\eta_{T} \text{ (overall efficiency)}\\
+\end{align*}
+
+\subsection{Turbojet}
+
+\begin{align*}
+	\theta_{t} &= 1 - \frac{\theta_{r}}{\theta_{\lambda}}(\theta_{c}-1)
+		\text{ (turbine temp ratio)}\\
+	\frac{V_{9}}{a_{0}} &= \sqrt{\frac{2}{\gamma-1}\frac{\theta_{\lambda}}{\theta_{r}\theta_{c}}
+		(\theta_{r}\theta_{c}\theta_{\lambda})} \text{ (velocity ratio)}\\
+	\frac{\tau}{\dot{m}_{0}} &= a_{0}\left(\frac{V_{9}}{a_{0}}-M_{0}\right)
+		\text{ (specific thrust)}\\
+	TSFC &= \frac{f}{\tau/\dot{m}_{0}} \text{ (thrust specific fuel consumption)}\\
+	\eta_{P} &= \frac{2M_{0}}{V_{9}/a_{0}+M_{0}} \text{ (propulsive efficiency)}\\	
+\end{align*}
+
+\subsection{Turbofan}
+
+\begin{align*}
+	\theta_{f} &= \pi_{f}^{(\gamma-1)/\gamma} \text{ (fan temp ratio)}\\
+	\alpha* &= \frac{1}{\theta_{r}(\theta_{f}-1)}\left[\theta_{\lambda}-\theta_{r}(\theta_{c}-1)
+		- \frac{\theta_{\lambda}}{\theta_{r}\theta_{c}} - \frac{1}{4}(\sqrt{\theta_{r}\theta_{c}
+		- 1} + \sqrt{\theta_{r}-1})^{2}\right] \text{ (optimum bypass ratio)}\\
+	\frac{V_{9}}{a_{0}} &= \sqrt{\frac{2}{\gamma-1}\left(\theta_{\lambda}-\theta_{r}[\theta_{c}
+		-1+\alpha(\theta_{f}-1)]-\frac{\theta_{\lambda}}{\theta_{r}\theta_{c}} \right) }
+		\text{ (core stream velocity ratio)}\\
+	\frac{V_{19}}{a_{0}} &= \sqrt{\frac{2}{\gamma-1}(\theta_{r}\theta_{f}-1)}
+		\text{ (fan stream velocity ratio)}\\
+	\frac{\tau}{\dot{m}_{0}} &= a_{0}\frac{1}{1+\alpha}\left[\frac{V_{9}}{a_{0}}-M_{0}
+		+ \alpha(\frac{V_{19}}{a_{0}}-M_{0}) \right] \text{ (specific thrust)}\\
+	TSFC &= \frac{f}{(1+\alpha)(\tau/\dot{m}_{0})} \text{ (thrust specific fuel consumption)}\\
+	\eta_{P} &= 2M_{0}\frac{V_{9}/a_{0}-M_{0}+\alpha(V_{19}/a_{0}-M_{0})}
+		{V_{9}^{2}/a_{0}^{2}-M_{0}^{2}+\alpha(V_{19}^{2}/a_{0}^{2}-M_{0}^{2})}
+		\text{ (propulsive efficiency)}\\	
+	FR &= \frac{V_{9}/a_{0}-M_{0}}{V_{19}/a_{0}-M_{0}} \text{ (thrust ratio)}\\
+\end{align*}
+
+\subsection{Turboprop}
+
+\begin{align*}
+	\theta_{t*} &= \frac{1}{\theta_{r}\theta_{c}} + \frac{[(\gamma-1)/2]M_{0}^{2}
+		}{\theta_{\lambda}\eta_{prop}^{2}} \text{ (optimum turbine temp ratio)}\\
+	\theta_{tH} &= 1 - \frac{\theta_{r}}{\theta_{\lambda}}(\theta_{c}-1)
+		\text{ (high pressure turbine temp ratio)}\\
+	\theta_{tL} &= \frac{\theta_{t}}{\theta_{tH}} \text{ (low pressure turbine temp ratio)}\\
+	\frac{V_{9}}{a_{0}} &= \sqrt{\frac{2}{\gamma-1}\left(\theta_{\lambda}\theta_{t}-
+		\frac{\theta_{\lambda}}{\theta_{r}\theta_{c}} \right) } \text{(velocity ratio)}\\
+	C_{C} &= (\gamma-1)M_{0}\left(\frac{V_{9}}{a_{0}}-M_{0}\right)
+		\text{ (core stream (high pressure) work output coeff)}\\
+	C_{prop} &= \eta_{prop}\theta_{\lambda}\theta_{tH}(1-\theta_{tL})
+		\text{ (propeller stream (low pressure) work output coeff)}\\
+	C_{tot} &= C_{prop} + C_{C} \text{ (total work output coeff)}\\
+	\frac{\tau}{\dot{m}_{0}} &= \frac{C_{tot}c_{p}T_{0}}{M_{0}a_{0}} \text{ (specific thrust)}\\
+	TSFC &= \frac{f}{\tau/\dot{m}_{0}} \text{ (thrust specific fuel consumption)}\\
+	\eta_{O} &= \frac{C_{tot}}{\theta_{\lambda}-\theta_{r}\theta_{c}}
+		\text{ (overall efficiency)}\\
+	\eta_{P} &= \eta_{O}\eta_{T} \text{ (propulsive efficiency)}\\
+\end{align*}
+
+\newpage
+
+%----------------------------------------------------------------------------------------
+%	Engine Comparison
+%----------------------------------------------------------------------------------------
+\section{Engine Comparison}
+
+Most preferable engine chosen was the \textbf{turbofan with optimum bypass ratio}.  The goal was to maximize specific thrust while minimizing TSFC, resulting in the best efficiency at the given conditions, which was achieved by the turbofan when calculated with optimum bypass ratio.
+\bigskip
+
+In general, the turbofan improves on the turbojet by recovering excess kinetic energy, using that to drive a fan (ducted propeller) which increases the mass flow rate while reducing the propellant exit velocity for a given thrust requirement, which increases propulsive efficiency.  Figure \ref{fig:all} shows that the overall efficiency of the turbofan is greater than that of the turbojet at the optimum compressor pressure ratio ($\pi_{c}$), which was the driving factor in the decision.
+
+According to Mattingly, turboprops do not work above Mach 0.7 due to supersonic effects at the tips of the propeller blades, and so it was not considered an option\cite{mattingly}.  If the technology for efficient unducted propellers advances to Mach 0.8, then the turboprop could be the best choice at these design parameters.  A search of current literature shows there is continuing research on this front and seems a likely possibility in the near future.
+
+An argument could also have been made for the turbojet if performance was the key factor, as the maximum specific thrust is greater than the turbofan at all compressor pressure ratios investigated.  The specific thrust of the the turbofan stays constant beyond the optimum compressor pressure ratio however, while it's minimum TSFC continues to decrease with increasing $\pi_{c}$.  The optimum $\pi_{c}$ value could even be increased to the limits of the compressor material technology for the turbofan to achieve even greater efficiency without sacrificing performance.  
+
+\bigskip
+
+\noindent
+Calculated performance data:
+\begin{itemize}
+	\item optimum compressor pressure ratio: $(\pi_{c})_{max\frac{\tau}{\dot{m}_{0}}} = 19.66$
+	\item fuel-air mass flow ratio @$(\pi_{c})_{max\frac{\tau}{\dot{m}_{0}}}$: 
+		$f = 0.0243$
+\end{itemize}
+\bigskip
+\begin{itemize}
+	\item turbojet specific thrust @$(\pi_{c})_{max\frac{\tau}{\dot{m}_{0}}}$: 
+		$\frac{\tau}{\dot{m}_{0}} = 916.0$ [N/(kg/s)]
+	\item turbofan specific thrust @$(\pi_{c})_{max\frac{\tau}{\dot{m}_{0}}}$: 
+		$\frac{\tau}{\dot{m}_{0}} = 244.4$ [N/(kg/s)]
+	\item turboprop specific thrust @$(\pi_{c})_{max\frac{\tau}{\dot{m}_{0}}}$: 
+		$\frac{\tau}{\dot{m}_{0}} = 2094$ [N/(kg/s)]
+\end{itemize}
+\bigskip
+\begin{itemize}
+	\item turbojet thrust specific fuel consumption @$(\pi_{c})_{max\frac{\tau}{\dot{m}_{0}}}$: 
+		$TSFC = 26.52$ [mg/(N*s)]
+	\item turbofan thrust specific fuel consumption @$(\pi_{c})_{max\frac{\tau}{\dot{m}_{0}}}$: 
+		$TSFC = 14.07$ [mg/(N*s)]
+	\item turboprop thrust specific fuel consumption @$(\pi_{c})_{max\frac{\tau}{\dot{m}_{0}}}$:
+		$TSFC = 11.60$ [mg/(N*s)]
+\end{itemize}
+\bigskip
+\begin{itemize}
+	\item turbojet overall efficiency @$(\pi_{c})_{max\frac{\tau}{\dot{m}_{0}}}$: 
+		$\eta_{O} = 21.82\%$
+	\item \textbf{turbofan overall efficiency @}$\pmb{(\pi_{c})_{max\frac{\tau}{\dot{m}_{0}}}}$:
+		$\pmb{\eta_{O} = 41.16\%}$
+	\item turboprop overall efficiency @$(\pi_{c})_{max\frac{\tau}{\dot{m}_{0}}}$: 
+		$\eta_{O} = 49.88\%$
+\end{itemize}
+\bigskip
+\begin{itemize}
+	\item turbofan optimum bypass ratio @$(\pi_{c})_{max\frac{\tau}{\dot{m}_{0}}}$:
+		$\alpha* = 6.069$
+\end{itemize}
+
+
+\begin{figure}[H]
+	\begin{floatrow}
+		\includegraphics[width=.5\columnwidth]{specthrustall.jpg}
+		\includegraphics[width=.5\columnwidth]{tsfcall.jpg}
+	\end{floatrow}
+	\begin{floatrow}
+		\includegraphics[width=.5\columnwidth]{effall.jpg}
+		\includegraphics[width=.5\columnwidth]{fall.jpg}
+	\end{floatrow}
+	\caption{Performance comparison plots for all three engines}
+	\label{fig:all}
+\end{figure}
+
+\begin{itemize}
+	\item Plot of Specific Thrust versus $\pi_{c}$ (top left) shows turboprop (with $\eta_{prop}=80\%$) having a significantly larger value at $(\pi_{c})_{max\frac{\tau}{\dot{m}_{0}}}$, followed by turbojet then followed by turbofan (with $\alpha* = 6.069$ @ $(\pi_{c})_{max\frac{\tau}{\dot{m}_{0}}}$).  Both the turboprop and turbojet curves start to decrease after $(\pi_{c})_{max\frac{\tau}{\dot{m}_{0}}}$, while the turbofan value stays essential constant after about $\pi_{c}=15$.  The $(\pi_{c})_{max\frac{\tau}{\dot{m}_{0}}}$ value is marked on each curve with the asterisk.
+
+	\item Plot of TSFC versus $\pi_{c}$ (top right) shows all three engines continue to decrease even after $(\pi_{c})_{max\frac{\tau}{\dot{m}_{0}}}$, which is again marked with the asterisk.  Turboprop again has the best value here, with the minimum, this time followed by turbofan and turbojet having the greatest TSFC.
+
+	\item Plot of efficiencies versus $\pi_{c}$ (bottom left) shows the key value in determining which engine is preferable.  The turboprop again has the best value here, but due to it's inability to function well at the given Mach number in reality, it was not considered.  The turbofan has an overall efficiency of 41.16\%, with the turbojet at 21.82\%, at the optimum compressor pressure ratio.  All the curves continue to increase through the range of compressor pressure ratios values shown here, however both the turboprop and turbojet will see a decrease in performance (decrease in specific thrust) if $\pi_{c}$ is increased, while the turbofan will see no change to performance but would see a decrease in TSFC, thereby giving more value to it's increase in efficiency.
+
+	\item Plot of fuel-air ratio (bottom right) is the same for all three engines, shown here decreasing as $\pi_{c}$ increases.
+
+\end{itemize}
+
+%----------------------------------------------------------------------------------------
+%	TURBOFAN
+%----------------------------------------------------------------------------------------
+\section{Turbofan Additional Analysis}
+
+\begin{center}
+\begin{tabular}{ |L|L|L|L| } 
+	\hline
+	\multicolumn{4}{|c|}{\textbf{Cases Run}}\\
+	\hline
+	\pmb{\pi_{c}} & \pmb{M} & \pmb{\pi_{f}} & \pmb{\alpha} \\ 
+	\hline
+	1:100 & \pmb{0.8} & \pmb{3} & \alpha*,0.5,1,1.5,2,3,4,5\\
+	\hline
+	1:100 & \pmb{2.4} & \pmb{3} & \alpha*,0.5,1,1.5,2,3,4,5\\
+	\hline
+	\pmb{24} & 0:3 & \pmb{2} & \alpha*,0.5,1,1.5,2,3,4,5\\
+	\hline
+	%\pmb{(\pi_{c})_{max\frac{\tau}{\dot{m}_{0}}}} & 0:3 & 3 & \alpha*,0.5,1,1.5,2,3,4,5\\
+	\pmb{24} & 0:3 & \pmb{3} & \alpha*,0.5,1,1.5,2,3,4,5\\
+	\hline
+	\pmb{24} & \pmb{0.8} & 1:6 & \alpha*,0.5,1,1.5,2,3,4,5\\
+	\hline
+	\pmb{24} & \pmb{2.4} & 1:6 & \alpha*,0.5,1,1.5,2,3,4,5\\
+	\hline
+\end{tabular}
+\end{center}
+
+\begin{figure}[H]
+	\begin{floatrow}
+		\includegraphics[width=.5\columnwidth]{specthrusttfM8pf3.jpg}
+		\includegraphics[width=.5\columnwidth]{tsfctfM8pf3.jpg}
+	\end{floatrow}
+	\begin{floatrow}
+		\includegraphics[width=.5\columnwidth]{efftfM8pf3.jpg}
+		\includegraphics[width=.5\columnwidth]{tfalphaoptM8pf3.jpg}
+	\end{floatrow}
+	\caption{Performance comparison plots for turbofan $M_{0}=0.8,\pi_{f}=3$}
+	\label{fig:case1}
+\end{figure}
+
+\begin{itemize}
+	\item Plots vary $\pi_{c}$ and $\alpha$ keeping constant $M_{0}=0.8,\pi_{f}=3$.
+	\item The optimum compressor pressure ratio $(\pi_{c})_{max\frac{\tau}{\dot{m}_{0}}} = 19.66$.
+	\item Specific thrust for the optimum bypass ratio, which varies for each $\pi_{c}$, stays essentially constant after reaching the optimum compressor pressure ratio, while it starts to decrease for all other values.  Increasing bypass ratio results in a decrease of specific thrust.
+	\item TSFC is at a minimum for the optimum bypass ratio (by definition), and decreases as bypass ratio is increased.
+	\item Efficiency values are optimized at the optimum bypass ratio, and continue to increase with an increase in $\pi_{c}$.  It is this increase which would allow the compressor pressure ratio to be continually increased until the material failure point for peak efficiency without losing performance.
+	\item Optimum bypass ratio increases with $\pi_{c}$ until reaching max value of $\alpha* = 6.069$ also at $(\pi_{c})_{max\frac{\tau}{\dot{m}_{0}}}$, after which it starts to decrease.
+\end{itemize}
+
+
+\begin{figure}[H]
+	\begin{floatrow}
+		\includegraphics[width=.5\columnwidth]{specthrusttfM24pf3.jpg}
+		\includegraphics[width=.5\columnwidth]{tsfctfM24pf3.jpg}
+	\end{floatrow}
+	\begin{floatrow}
+		\includegraphics[width=.5\columnwidth]{efftfM24pf3.jpg}
+		\includegraphics[width=.5\columnwidth]{tfalphaoptM24pf3.jpg}
+	\end{floatrow}
+	\caption{Performance comparison plots for turbofan $M_{0}=2.4,\pi_{f}=3$}
+	\label{fig:case2}
+\end{figure}
+
+\begin{itemize}
+	\item Plots vary $\pi_{c}$ and $\alpha$ keeping constant $M_{0}=2.4,\pi_{f}=3$.
+	\item The optimum compressor pressure ratio $(\pi_{c})_{max\frac{\tau}{\dot{m}_{0}}} = 2.05$.
+	\item Specific thrust for the optimum bypass ratio, which varies for each $\pi_{c}$, continually decreases at this higher Mach number.  Increasing bypass ratio again results in a decrease of specific thrust.
+	\item TSFC is at a minimum for the optimum bypass ratio (by definition), and again decreases as bypass ratio is increased.  Discontinuities are seen, as fuel consumption spikes as $\pi_{c}$ increases, occurring sooner for higher bypass ratios.  However, around $\pi_{c}=60$ we again see small values of TSFC for lower bypass values, but this looks like it may be a mathematical artifact and not physical.
+	\item Efficiency values are optimized at the optimum bypass ratio, and continue to increase with an increase in $\pi_{c}$.  There are significant dropoffs when the TSFC values spike, occurring earlier for high bypass values, suggesting again that low bypass values are needed at this higher Mach number of 2.4.
+	\item Optimum bypass ratio increases with $\pi_{c}$ early on until reaching max value of $\alpha* = 2.93$ at $(\pi_{c})_{max\frac{\tau}{\dot{m}_{0}}}$, after which it starts to decrease rapidly.
+\end{itemize}
+
+\begin{figure}[H]
+	\begin{floatrow}
+		\includegraphics[width=.5\columnwidth]{specthrusttfpc24pf2.jpg}
+		\includegraphics[width=.5\columnwidth]{tsfctfpc24pf2.jpg}
+	\end{floatrow}
+	\begin{floatrow}
+		\includegraphics[width=.5\columnwidth]{efftfpc24pf2.jpg}
+		\includegraphics[width=.5\columnwidth]{tfalphaoptpc24pf2.jpg}
+	\end{floatrow}
+	\caption{Performance comparison plots for turbofan $\pi_{c}=24,\pi_{f}=2$}
+	\label{fig:case3}
+\end{figure}
+
+\begin{itemize}
+	\item Plots vary $\pi_{c}$ and $\alpha$ keeping constant $\pi_{c}=24,\pi_{f}=2$.
+	\item Optimum Mach number $M_{0} = 2.80$, occurring at peak overall efficiency.
+	\item Specific thrust for the optimum bypass ratio, which varies for each $M_{0}$, decreases through about Mach 1.5, then stays fairly level until Mach 2.5 when it starts to decrease again.  Towards the higher Mach numbers, the optimum bypass ratio starts to give better specific thrust than other bypass ratios, whereas at lower Mach numbers it gives less performance.  Increasing bypass ratio results in a decrease of specific thrust.
+	\item TSFC is at a minimum for the optimum bypass ratio (by definition), and decreases as bypass ratio is increased through about Mach 2, where the trend reverses and we start to see higher bypass ratios rapidly increase with Mach number, with smaller bypass ratios holding off on the rapid increase until later.
+	\item Efficiency values are optimized at the optimum bypass ratio, and continue to increase with an increase in $M_{0}$.  Higher bypass ratio values start to drop off in efficiency dramatically after about Mach 2, with lower values holding off until larger Mach numbers before falling off, suggesting a low bypass ratio is better for high Mach numbers, with optimum bypass ratio always giving peak efficiency.
+	\item Optimum bypass ratio starts up near 12 for low Mach numbers and steadily decreases as Mach number increases, reaching it's minimum at the optimum Mach number of 2.8.
+\end{itemize}
+
+\begin{figure}[H]
+	\begin{floatrow}
+		\includegraphics[width=.5\columnwidth]{specthrusttfpc24pf3.jpg}
+		\includegraphics[width=.5\columnwidth]{tsfctfpc24pf3.jpg}
+	\end{floatrow}
+	\begin{floatrow}
+		\includegraphics[width=.5\columnwidth]{efftfpc24pf3.jpg}
+		\includegraphics[width=.5\columnwidth]{tfalphaoptpc24pf3.jpg}
+	\end{floatrow}
+	\caption{Performance comparison plots for turbofan $\pi_{c}=24,\pi_{f}=3$}
+	\label{fig:case4}
+\end{figure}
+
+\begin{itemize}
+	\item Plots vary $\pi_{c}$ and $\alpha$ keeping constant $\pi_{c}=24,\pi_{f}=3$.
+	\item Optimum Mach number $M_{0} = 2.80$, occurring at peak overall efficiency.
+	\item Trends from previous plot analysis at $\pi_{f}=2$ still hold here, with a couple differences.
+	\item Specific thrust values are higher.
+	\item Efficiencies start to drop off at earlier increases of Mach number for higher bypass ratios than for $\pi_{f}=2$, suggesting an increase in fan pressure ratio requires a decrease in the bypass ratio for running at higher Mach numbers.  Efficiencies are higher at lower Mach numbers, suggesting an increase in fan pressure ratio is better at lower Mach numbers.  Additional analysis could focus on the optimum fan pressure ratio at various compressor pressure ratios and Mach numbers.
+	\item Optimum bypass ratio starts lower, around 7, with the same steady decrease.
+\end{itemize}
+	
+\begin{figure}[H]
+	\begin{floatrow}
+		\includegraphics[width=.5\columnwidth]{specthrusttfM8pc24.jpg}
+		\includegraphics[width=.5\columnwidth]{tsfctfM8pc24.jpg}
+	\end{floatrow}
+	\begin{floatrow}
+		\includegraphics[width=.5\columnwidth]{efftfM8pc24.jpg}
+		\includegraphics[width=.5\columnwidth]{tfalphaoptM8pc24.jpg}
+	\end{floatrow}
+	\caption{Performance comparison plots for turbofan $M_{0}=0.8,\pi_{c}=24$}
+	\label{fig:case5}
+\end{figure}
+
+\begin{itemize}
+	\item Plots vary $\pi_{f}$ and $\alpha$ keeping constant $M_{0}=0.8,\pi_{c}=24$.
+	\item Compressor pressure ratio and Mach number are kept constant, no optimum values calculated.
+	\item Specific thrust is at a maximum and TSFC at a minimum for close to the same value of fan pressure ratio $\pi_{f}$ for each bypass ratio, suggesting there is an optimal fan pressure ratio at each bypass ratio.  The value also occurs at the peak efficiency.  The trend is mainly seen for the higher bypass ratios 4 and 5 in these plots for this operating condition.
+	\item Optimum bypass ratio deviates significantly from the range of values plotted on the efficiency plot near the 1:1 fan pressure ratio, confirmed by the large spike seen in the $\alpha*$ plot itself, where the value continues to decrease with increasing $\pi_{f}$.
+\end{itemize}
+
+\begin{figure}[H]
+	\begin{floatrow}
+		\includegraphics[width=.5\columnwidth]{specthrusttfM24pc24.jpg}
+		\includegraphics[width=.5\columnwidth]{tsfctfM24pc24.jpg}
+	\end{floatrow}
+	\begin{floatrow}
+		\includegraphics[width=.5\columnwidth]{efftfM24pc24.jpg}
+		\includegraphics[width=.5\columnwidth]{tfalphaoptM24pc24.jpg}
+	\end{floatrow}
+	\caption{Performance comparison plots for turbofan $M_{0}=2.4,\pi_{c}=24$}
+	\label{fig:case6}
+\end{figure}
+
+\begin{itemize}
+	\item Plots vary $\pi_{f}$ and $\alpha$ keeping constant $M_{0}=2.4,\pi_{c}=24$.
+	\item Compressor pressure ratio and Mach number are kept constant, no optimum values calculated.
+	\item Optimum fan pressure ratio at max specific thrust and minimum TSFC is again seen. Values drop off dramatically on all plots after this value, most noticeably at higher bypass ratios, which were seen earlier to be not as good at this higher Mach number of 2.4.
+	\item Lower values of bypass ratio are required in general for higher fan pressure ratios at this Mach number and compressor pressure ratio condition.
+\end{itemize} 
+
+%----------------------------------------------------------------------------------------
+%	CONCLUSION
+%----------------------------------------------------------------------------------------
+\section{Conclusion}
+
+Analysis in this report focused on an ideal engine with many assumptions about the machinery and thermodynamics.  A real engine will suffer from losses, some of which may be as follows:
+
+\begin{itemize}
+	\item Pressure losses can occur across the diffuser, turbine, or compressor due to isentropic efficiency values and flow not being truly reversible
+	\item Combustion may not be perfect, and pressure loss can occur across the burner
+	\item Nozzle isentropic efficiency can cause loss
+	\item Drag and other forces in actual flight can cause differences in behavior leading to losses
+\end{itemize}
+
+%----------------------------------------------------------------------------------------
+%	APPENDIX
+%----------------------------------------------------------------------------------------
+\newpage
+\section*{Appendix A: Matlab Code}
+
+\begin{lstlisting}[
+  style      = Matlab-editor,
+  basicstyle = \mlttfamily,
+]
+% Andrew Navratil
+% MAE 458 Propulsion Fall 2019
+% Exam 1
+% Due 2019-10-07
+
+% clear all vars and plots
+close all; clear all; clc;
+
+% givens
+M0 = 0.8; % flight mach num
+T04 = 1667; % turbine inlet temp [K]
+hR = 42798.4; % fuel heating value [kJ/kg]
+pf = 3; % turbofan fan total pressure ratio
+
+% lookup constants using Anderson - Fundamentals of Aerodynamicsd 5th ed
+% using geometric altitude above mean sea level (hG) in appendix D
+%   at 25000 ft = 7620 m (using values at hG = 7600m)
+T0 = 238.82; % temp [K]
+
+gamma = 1.4; % ratio of specific heats, assume calorically perfect gas
+cp = 1004; % spec heat const pressure
+
+% freestream conditions
+a0 = sqrt((gamma-1)*cp*T0); % speed of sound
+
+% theta r and theta lambda
+tr = 1 + ((gamma-1)/2)*M0^2; % temp ratio freestream (theta r)
+tl = T04/T0; % ratio burner exit enthalpy to ambient enthalpy (theta lambda)
+
+%*****************************************************************************%
+% COMPARISON
+%*****************************************************************************%
+
+% compressor ratios
+pc = 1:0.1:50; % pressure ratio
+tc = pc.^((gamma-1)/gamma); % temp ratio
+
+% fuel-air mixture and thermal efficiency same for all engines
+f = (cp*T0/(hR*1e-3)) * (tl - tr*tc); % fuel-air mass ratio
+efft = 1 - 1./(tr*tc); % thermal efficiency
+
+% optimum compressor pressure ratio
+tctjopt = sqrt(tl) / tr; % optimum compressor temp ratio
+pctjopt = tctjopt^(gamma/(gamma-1)) % optimum compressor pressure ratio
+idxopt = find(abs(pc-round(pctjopt,1))<1e-6);
+
+% turbojet
+tt = 1 - (tr/tl)*(tc-1); % temp ratio turbine (turbojet)
+v9a0 = sqrt( (2/(gamma-1)) * (tl./(tr*tc)) .* (tr*tc.*tt - 1) ); % vel ratio
+spttj = a0 * (v9a0 - M0); % specific thrust
+tsfctj = f./spttj; % TSFC (thrust specific fuel consumption)
+effptj = 2*M0./(v9a0+M0); % propulsive efficiency
+efftj = efft.*effptj; % overall efficiency
+%sptopt = a0 * ( sqrt( (2/(gamma-1)) * ( (sqrt(tl)-1)^2 + tr - 1) ) - M0);
+%fopt = (cp * T0 / (hR*1000)) * (tl - sqrt(tl));
+%tsfcopt = fopt/sptopt;
+
+% turbofan
+tf = pf^((gamma-1)/gamma); % temp ratio fan (turbofan)
+alpha = (1/(tr*(tf-1))) * ( tl - tr*(tc-1) - tl./(tr*tc)...
+	- 0.25*( sqrt((tr*tf-1)) + sqrt(tr-1))^2); 
+alpha(alpha<0) = NaN; % don't use negative values
+v9a0 = sqrt( (2/(gamma-1)) * ( tl - tr.*(tc - 1 + alpha*(tf-1)) - (tl./(tr*tc)) ) );
+v19a0 = sqrt( (2/(gamma-1)) * (tr*tf - 1));
+spttf = a0 * (1./(1+alpha)) .* (v9a0 - M0 + alpha.*(v19a0 - M0));
+tsfctf = f./((1+alpha).*spttf);
+effptf = 2*M0*(v9a0-M0+alpha*(v19a0-M0))./(v9a0.^2-M0^2+alpha*(v19a0^2-M0^2));
+efftf = efft.*effptf;
+
+% turboprop
+effprop = 0.8; % assume 80% propellar efficience
+%Mattingly book had error for tt*: should be 1/tr*tc not tl/tr*tc
+tt = (1./(tr*tc)) + (((gamma-1)/2)*M0^2)/(tl*effprop^2); % optimal turbine temp
+tth = 1 - (tr/tl)*(tc-1); % high pressure turbine temp ratio
+ttl = tt./tth; % low pressure turbine temp ratio
+v9a0 = sqrt( (2/(gamma-1)) * (tl*tt - (tl./(tr*tc))) );
+cc = (gamma-1)*M0*(v9a0-M0); % core stream work coefficient
+cprop = effprop*tl*tth.*(1-ttl); % prop work coefficient
+ctot = cc+cprop; % total work coefficient
+spttp = (ctot*cp*T0)/(M0*a0);
+tsfctp = f./spttp;
+efftp = ctot./(tl-tr*tc);
+effptp = efftp./efft;
+
+% plot: spec thrust vs pi_c
+figure(1);
+ph(1) = plot(pc,spttj,'b','DisplayName','turbojet');
+hold on;
+ph(2) = plot(pc,spttf,'r','DisplayName','turbfan');
+ph(3) = plot(pc,spttp,'k','DisplayName','turbprop');
+plot(pctjopt,spttj(idxopt),'b*');
+plot(pctjopt,spttf(idxopt),'r*');
+plot(pctjopt,spttp(idxopt),'k*');
+ylabel('Specific Thrust [N/(kg/sec)]');
+xlabel('\pi_{c}');
+set(gca,'FontSize',14);
+legend(ph,'location','northeast');
+
+% plot: tsfc vs pi_c
+figure(2);
+ph(1) = plot(pc,tsfctj,'b','DisplayName','turbojet');
+hold on;
+ph(2) = plot(pc,tsfctf,'r','DisplayName','turbfan');
+ph(3) = plot(pc,tsfctp,'k','DisplayName','turbprop');
+plot(pctjopt,tsfctj(idxopt),'b*');
+plot(pctjopt,tsfctf(idxopt),'r*');
+plot(pctjopt,tsfctp(idxopt),'k*');
+ylabel('TSFC [mg/(N*sec)]');
+xlabel('\pi_{c}');
+set(gca,'FontSize',14);
+legend(ph,'location','northeast');
+
+% plot: efficiency (overall and propulsive) vs pi_c
+figure(3);
+ph(1) = plot(pc,efftj*100,'b','DisplayName','turbojet \eta_{O}');
+hold on;
+ph(2) = plot(pc,efftf*100,'r','DisplayName','turbfan \eta_{O}');
+ph(3) = plot(pc,efftp*100,'k','DisplayName','turbprop \eta_{O}');
+ph(4) = plot(pc,effptj*100,'b--','DisplayName','turbojet \eta_{P}');
+ph(5) = plot(pc,effptf*100,'r--','DisplayName','turbfan \eta_{P}');
+ph(6) = plot(pc,effptp*100,'k--','DisplayName','turbprop \eta_{P}');
+plot(pctjopt,efftj(idxopt)*100,'b*');
+plot(pctjopt,efftf(idxopt)*100,'r*');
+plot(pctjopt,efftp(idxopt)*100,'k*');
+ylabel('\eta_{O}               [%]               \eta_{P}');
+xlabel('\pi_{c}');
+set(gca,'FontSize',14);
+legend(ph,'location','northeast');
+
+% plot: fuel-air ratio vs pi_c
+figure(4);
+plot(pc,f*1e-6); % adjust to correct units
+hold on;
+plot(pctjopt,f(idxopt)*1e-6,'b*');
+ylabel('f');
+xlabel('\pi_{c}');
+set(gca,'FontSize',14);
+
+%*****************************************************************************%
+% TURBOFAN
+%*****************************************************************************%
+
+% alpha=12 showed greater than 100% efficiencies, don't use
+% alpha=8 also appeared to show invalid effiency greater than optimum
+alphavals = [0 0.5 1 1.5 2 3 4 5];
+
+for casenum=1:6
+	switch casenum
+		case 1
+			pc = 1:0.1:100;
+			M0 = 0.8;
+			pf = 3;
+			x = pc;
+			xlbl = '\pi_{c}';
+		case 2
+			pc = 1:0.1:100;
+			M0 = 2.4;
+			pf = 3;
+			x = pc;
+			xlbl = '\pi_{c}';
+		case 3
+			pc = 24;
+			M0 = 0.1:0.1:3;
+			pf = 2;
+			x = M0;
+			xlbl = 'M_{0}';
+		case 4
+			pc = 24;
+			M0 = 0.1:0.1:3;
+			pf = 3;
+			x = M0;
+			xlbl = 'M_{0}';
+		case 5
+			pc = 24;
+			M0 = 0.8;
+			pf = 1:0.1:6;
+			x = pf;
+			xlbl = '\pi_{f}';
+		case 6
+			pc = 24;
+			M0 = 2.4;
+			pf = 1:0.1:6;
+			x = pf;
+			xlbl = '\pi_{f}';
+	end
+
+	tr = 1 + ((gamma-1)/2)*M0.^2; % temp ratio freestream (theta r)
+	tc = pc.^((gamma-1)/gamma); % temp ratio
+	tf = pf.^((gamma-1)/gamma); % temp ratio fan (turbofan)
+
+	f = (cp*T0/(hR*1e-3)) * (tl - tr*tc); % fuel-air mass ratio
+	efft = 1 - 1./(tr*tc); % thermal efficiency
+
+	for alpha = alphavals
+		if alpha == 0
+			% optimal bypass ratio at each tc
+			alpha = (1./(tr.*(tf-1))) .* ( tl - tr.*(tc-1) - tl./(tr.*tc)...
+				- 0.25*( sqrt((tr.*tf-1)) + sqrt(tr-1)).^2); 
+			alpha(alpha<0) = NaN; 
+
+			figure(casenum*4+1);
+			plot(x,alpha,'b-');
+			ylabel('optimum bypass ratio');
+			xlabel(xlbl);
+			set(gca,'FontSize',14);
+		end
+		v9a0 = sqrt( (2/(gamma-1)) * ( tl - tr.*(tc - 1 + alpha.*(tf-1)) - (tl./(tr*tc)) ) );
+		v19a0 = sqrt( (2/(gamma-1)) * (tr*tf - 1));
+		spttf = a0 * (1./(1+alpha)) .* (v9a0 - M0 + alpha.*(v19a0 - M0));
+		tsfctf = f./((1+alpha).*spttf);
+		effptf = 2*M0.*(v9a0-M0+alpha.*(v19a0-M0))./(v9a0.^2-M0.^2+alpha.*(v19a0.^2-M0.^2));
+		efftf = efft.*effptf;
+
+		spttf(imag(spttf) ~= 0 | spttf < 0) = NaN;	
+		tsfctf(imag(tsfctf) ~= 0 | tsfctf < 0 | tsfctf == inf) = NaN;	
+		effptf(imag(effptf) ~= 0 | effptf < 0) = NaN;	
+		efftf(imag(efftf) ~= 0 | efftf < 0) = NaN;	
+
+		if numel(alpha) > 1
+			figure(casenum*4+2);
+			hold on;
+			plot(x,spttf,'k-','DisplayName','\alpha*');
+			figure(casenum*4+3);
+			hold on;
+			plot(x,tsfctf,'k-','DisplayName','\alpha*');
+			figure(casenum*4+4);
+			hold on;
+			plot(x,efftf*100,'k-','DisplayName','\alpha* \eta_{O}');
+			plot(x,effptf*100,'k--','DisplayName','\alpha* \eta_{P}');
+
+			% optimum compressor pressure ratio or mach number
+			if casenum==1 | casenum==2 | casenum==5 | casenum==6
+				tctjopt = sqrt(tl) / tr; % optimum compressor temp ratio
+				pctjopt = tctjopt^(gamma/(gamma-1)) % optimum compressor pressure ratio
+				idxopt = find(abs(pc-round(pctjopt,1))<1e-6);
+				alpha(idxopt) % display opt bypass ratio value
+			else
+				[~,idxm] = max(efftf);
+				Mopt = M0(idxm) % display optimum Mach number
+			end
+
+		else
+			figure(casenum*4+2);
+			hold on;
+			plot(x,spttf,'DisplayName',['\alpha = ' num2str(alpha)]);
+			figure(casenum*4+3);
+			hold on;
+			plot(x,tsfctf,'DisplayName',['\alpha = ' num2str(alpha)]);
+			figure(casenum*4+4);
+			hold on;
+			plot(x,efftf*100,'DisplayName',['\alpha = ' num2str(alpha) ' \eta_{O}']);
+			plot(x,effptf*100,'--','DisplayName',['\alpha = ' num2str(alpha) ' \eta_{P}']);
+		end
+	end
+
+	figure(casenum*4+2);
+	ylabel('Specific Thrust [N/(kg/sec)]');
+	xlabel(xlbl);
+	set(gca,'FontSize',14);
+	legend show;
+
+	figure(casenum*4+3);
+	ylabel('TSFC [mg/(N*sec)]');
+	xlabel(xlbl);
+	set(gca,'FontSize',14);
+	legend show;
+
+	figure(casenum*4+4);
+	ylabel('\eta_{O}               [%]               \eta_{P}');
+	xlabel(xlbl);
+	set(gca,'FontSize',14);
+	legend('location','eastoutside');
+end
+
+\end{lstlisting}
+
+%----------------------------------------------------------------------------------------
+%	BIBLIOGRAPHY
+%----------------------------------------------------------------------------------------
+\begin{thebibliography}{9}% maximum number of references (for label width)
+
+\bibitem{handout} MAE 458 Midterm 1-2019.pdf, Dr. Srinath Ekkad \\
+\bibitem{mattingly}Mattingly, Jack D. \textit{Elements of gas turbine propulsion.} New York: McGraw-Hill, 1996.\\
+\bibitem{anderson}Anderson, John D. \textit{Fundamentals of Aerodynamics 5th ed.} New York: McGraw-Hill, 2011.\\
+
+\end{thebibliography}
+
+\end{document}
+
+% - Release $Name:  $ -

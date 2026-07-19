@@ -1,0 +1,92 @@
+\ProvidesPackage{preamble}
+
+\loadglsentries{gls}
+\glsaddall
+%\addbibresource{pdrbib}
+
+%\usepackage{float}
+%\usepackage{caption}
+\usepackage[table]{xcolor}
+\usepackage{amsmath}
+\usepackage{filecontents}
+\usepackage[numbered,framed]{matlab-prettifier}
+\usepackage[T1]{fontenc}
+\usepackage{adjustbox}
+\usepackage{tabularx}
+\usepackage{floatrow}
+%\usepackage[margin=1in]{geometry} % this shaves off default margins which are too big
+\usepackage{array}
+\usepackage{bm}
+%\usepackage{subcaption}
+\usepackage[english]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{fancyhdr}
+%\usepackage{titlesec}
+\usepackage{indentfirst}
+\usepackage{gensymb}
+\usepackage{booktabs}
+%\usepackage[shortlabels]{enumitem}
+%\usepackage{fancyhdr}
+%\usepackage{url}
+\usepackage{csquotes}
+\usepackage{microtype}
+
+\graphicspath{ {figures/} }
+\newgeometry{left=0.8in,right=0.8in,top=1in,bottom=1in}
+
+%\newcommand{\HT}{\textsc{\raisebox{0.1em}{h}\raisebox{-0.1em}{i}%
+%	\raisebox{0.1em}{t}\raisebox{-0.1em}{e}\raisebox{0.1em}{c} }}
+	
+%\titleformat{\paragraph}
+%{\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
+
+\setcounter{secnumdepth}{5}
+\setcounter{tocdepth}{2}
+
+\usepackage{listings}
+\usepackage{color} %red, green, blue, yellow, cyan, magenta, black, white
+\definecolor{mygreen}{RGB}{28,172,0} % color values Red, Green, Blue
+\definecolor{mylilas}{RGB}{170,55,241}
+
+\usepackage{hyperref}
+\hypersetup{colorlinks=false}
+%\hypersetup{
+%    colorlinks=true,
+%    linkcolor=black,
+%    filecolor=black,      
+%    urlcolor=black,
+%	citecolor=black,
+%}
+\urlstyle{same}
+
+\renewcommand{\numberline}[1]{#1~}
+
+\restylefloat{table}
+
+% use this for centering wrapped text using tabularx package
+\newcolumntype{Y}{>{\centering\arraybackslash}X}
+
+ % Define commands to assure consistent treatment throughout document
+ \newcommand{\eqnref}[1]{(\ref{#1})}
+ \newcommand{\class}[1]{\texttt{#1}}
+ \newcommand{\package}[1]{\texttt{#1}}
+ \newcommand{\file}[1]{\texttt{#1}}
+% \newcommand{\BibTeX}{\textsc{Bib}\TeX}
+
+ % commands to format an entire row of a table
+\newcolumntype{+}{>{\global\let\currentrowstyle\relax}}
+\newcolumntype{^}{>{\currentrowstyle}}
+\newcommand{\rowstyle}[1]{\gdef\currentrowstyle{#1}%
+#1\ignorespaces
+}
+
+%\usepackage[backend=biber,style=numeric,sorting=none]{biblatex}
+%\bibliography{nascpdrbibliography}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{PDR}
+\chead{NASC}
+\rhead{MAE480}
+\lfoot{\today}
+\rfoot{Page \thepage}

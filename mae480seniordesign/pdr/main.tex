@@ -1,0 +1,65 @@
+%\documentclass[]{aiaa-tc}% insert '[draft]' option to show overfull boxes
+%\documentclass[3p]{elsarticle}
+%\documentclass{hitec}
+\documentclass{ece}
+
+\usepackage{import}
+\usepackage{preamble}
+
+\begin{document}
+
+\import{./}{frontmatter.tex}
+\import{./}{1projinfo.tex}
+\import{./}{2projdesc.tex} 
+\import{./}{3req.tex}
+
+%----------------------------------------------------------------------------------------
+%	Key Design Alternatives
+%----------------------------------------------------------------------------------------
+\section{Key Design Alternatives}
+\import{./}{41launch.tex}
+\import{./}{42control.tex}
+\import{./}{43power.tex}
+\import{./}{44thermal.tex}
+\import{./}{45comm.tex}
+\import{./}{46eol.tex}
+
+%----------------------------------------------------------------------------------------
+%	Trade Study Processes and Results
+%----------------------------------------------------------------------------------------
+\section{Trade Study Processes and Results}
+
+\import{./}{51launch.tex}
+\import{./}{52control.tex}
+\import{./}{53power.tex}
+\import{./}{54thermal.tex}
+\import{./}{55comm.tex}
+\import{./}{56eol.tex}
+
+\import{./}{6feasibility.tex}
+
+\import{./}{7baseline.tex}
+
+\import{./}{8schedule.tex}
+
+\import{./}{9budget.tex}
+
+\import{./}{conclusion.tex}
+
+%----------------------------------------------------------------------------------------
+%	BIBLIOGRAPHY
+%----------------------------------------------------------------------------------------
+\pagebreak
+%\printbibliography
+% put entries in this file: pdrbib
+% or we can create separate .bib files, and just separate the names with comma
+%  \bibliography{pdrbib,avionicsbib,cpebib} 
+%\bibliography{pdrbib}
+%\bibliographystyle{unsrt}
+%\bibliographystyle{model1-num-names}
+%\bibliographystyle{elsarticle-num}
+\printbibliography[heading=none]
+
+\end{document}
+
+% - Release $Name:  $ -

@@ -1,0 +1,1782 @@
+\documentclass{ece}
+
+\usepackage{import}
+\usepackage{preamble}
+
+\begin{document}
+
+\import{./}{1projdesc.tex}
+
+%----------------------------------------------------------------------------------------
+%	Project Description
+%----------------------------------------------------------------------------------------
+\section{Project Description}
+\subsection{Project Overview}
+
+The Van Allen Belts are a two regions of space around Earth in which charged particles are trapped by Earth's magnetic field. The inner Van Allen belt is located between approximately 640 to 96000 kilometers (100-6,000 miles), in altitude and the outer Van Allen belt is located between approximately 13,440 to 57600 kilometers (8,400 to 36,000 miles) in altitude. \cite{VanAllen_1} Both the inner and outer Van Allen belts pose a potential threat to the astronauts, satellites, and space probes that pass through them. Additionally, the Van Allen belts are not static, they fluctuate and change over time and the exact mechanisms by which they function are not fully understood.STARS will focus on developing our understanding of the inner Van Allen belt
+
+STARS will use a 3U/3U+ CubeSat or CubeSat constellation located in Low Earth Orbit (LEO) to observe the inner Van Allen belt and further develop our understanding of the mechanisms by which particles become trapped. STARS will gather data on the particles relative density and distribution and frequency of radioactive events. This data will then be transmitted to the ground station where it will be processed and analyzed.
+
+%-------------------------------------------------------------------------------------------------------------------CONOPS
+%---------------------------------------------------------------------------
+\subsection{Concept of Operations}
+
+% PRE-MISSION Phase on/off chart
+\begin{table}[htbp]
+  \centering
+  \caption{Pre-Mission Phase Activity}
+    \begin{tabular}{|c|c|c|c|c|c|}
+    \hline
+    \textbf{Subsystem} & \multicolumn{5}{c|}{\textbf{Pre-Mission Phase}} \\
+\midrule
+          & \multicolumn{1}{c}{Launch} & \multicolumn{1}{c}{Deployment} & \multicolumn{1}{c}{Detumble} & \multicolumn{1}{c}{Charging} & System Checks \\
+    GNC   & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .573,  .816,  .314}ON & \cellcolor[rgb]{ .573,  .816,  .314}ON & \cellcolor[rgb]{ .573,  .816,  .314}ON \\
+    Communication & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .573,  .816,  .314}ON \\
+    Ground Station & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .573,  .816,  .314}ON \\
+    Solar Panels  & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .573,  .816,  .314}ON & \cellcolor[rgb]{ .573,  .816,  .314}ON \\
+   Batteries  & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .573,  .816,  .314}ON & \cellcolor[rgb]{ .573,  .816,  .314}ON & \cellcolor[rgb]{ .573,  .816,  .314}ON & \cellcolor[rgb]{ .573,  .816,  .314}ON \\
+    End-Off-Life & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .753,  0,  0}OFF \\
+   Thermal  & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .573,  .816,  .314}ON & \cellcolor[rgb]{ .573,  .816,  .314}ON & \cellcolor[rgb]{ .573,  .816,  .314}ON \\
+   Payload & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .573,  .816,  .314}ON \\
+    Avionics & \cellcolor[rgb]{ .753,  0,  0}OFF & \cellcolor[rgb]{ .573,  .816,  .314}ON & \cellcolor[rgb]{ .573,  .816,  .314}ON & \cellcolor[rgb]{ .573,  .816,  .314}ON & \cellcolor[rgb]{ .573,  .816,  .314}ON \\
+    \hline
+    \end{tabular}
+  \label{tab:on1}
+\end{table}
+
+
+
+
+
+\subsection{Functional Block Diagram}
+
+\begin{figure}[H]
+    \includegraphics[width=0.8\columnwidth]{Functional_Block_Diagram.pdf}\\
+    \caption{Functional Block Diagram}
+    \label{fig:Functional}
+\end{figure}
+%-------------------------------------------------------------------------------------------------------------------CRITICAL PROJECT ELEMENTS
+%---------------------------------------------------------------------------
+\subsection{Critical Project Elements}
+% fancy intro paragraph about what CPEs are, how they focus analysis, break down into FRs & how they other FRs feed into the baseline design
+
+\subsubsection{Launch}
+\subsubsection{Control}
+\subsubsection{Power}
+\subsubsection{Thermal}
+\subsubsection{Communication}
+\subsubsection{End of Life}
+
+
+%----------------------------------------------------------------------------------------
+%	Design Requirements
+%----------------------------------------------------------------------------------------
+\section{Project Requirements}
+
+\renewcommand{\labelenumi}{\theenumi}
+\renewcommand{\labelenumii}{\theenumii}
+\renewcommand{\labelenumiii}{\theenumiii}
+\renewcommand{\labelenumiv}{\theenumiv}
+%\renewcommand{\labelitemv}{$\bullet$}
+%\renewcommand{\labelitemvi}{$\bullet$}
+%\renewcommand{\theenumii}{\theenumi.\arabic{enumii}.}
+\renewcommand{\theenumi}{\textbf{FR.\arabic{enumi}}}
+\renewcommand{\theenumii}{\textbf{DR.\arabic{enumi}.\arabic{enumii}}}
+\renewcommand{\theenumiii}{\textbf{DR.\arabic{enumi}.\arabic{enumii}.\arabic{enumiii}}}
+\renewcommand{\theenumiv}{\textbf{DR.\arabic{enumi}.\arabic{enumii}.\arabic{enumiii}.\arabic{enumiv}}}
+
+\begin{enumerate} % FR 1  (CPE 1)
+    \item The final design of the CubeSat shall conform to the 3U and 3U+ standard.
+    \begin{enumerate}
+        \item 3U or 3U+ standard dictate that the CubeSat shall have dimensions of 10x10x30.00 cm with a maximum mass under 4.00 kg.
+        \begin{enumerate}
+            \item The 3U+ standard also have an optional 3.6 cm cylindrical extension from the 34.05 cm dimension with a 6.4 cm diameter.  
+            \begin{enumerate}
+                \item “3U or 3U+ CubeSats’ center of gravity shall be located within 7 cm from its geometric center in the Z direction.” [5]  
+                \begin{itemize}
+                    \item Motivation:Direct requirement from CubeSat Design Specifications. 
+                    \item Verification: Design the CubeSat for this parameter, then test and modify the structure as necessary to get the desired center of gravity location. 
+                \end{itemize}
+                \item “Rails shall have a minimum width of 8.5mm... Rails will have a surface roughness less than 1.6 µm...The edges of the rails will be rounded to a radius of at least 1 mm.” [5] 
+                \begin{itemize}
+                    \item Motivation:Direct requirements regarding CubeSat rails interfacing the P-POD launcher.  
+                    \item Verification: Design rails around these parameters and test and modify to get desired roughness. 
+                \end{itemize}
+            \end{enumerate}
+        \end{enumerate}
+
+    \end{enumerate} % FR 2  (CPE 1)
+    \item The CubeSat shall utilize a ride share on an existing domestic commercial launch vehicle.
+    \begin{enumerate}
+        \item The CubeSat shall be able to withstand the structural requirements and conform to any chemical or non-chemical restrictions imposed by the chosen launch provider.  
+        \begin{enumerate}
+            \item The CubeSat shall resist against launch static and dynamics loads 
+            \begin{enumerate}
+                \item The CubeSat structure shall survive the 8.5 - 13 G’s from launch . 
+                    \begin{itemize}
+                        \item Motivation: Catastrophic failure of the sensor or important structural elements during launch would result in immediate mission failure.  
+                        \item Verification: Construct a CAD model and run a SolidWorks simulation using the Gravity Property Manager tool to test the structure under different gravity loading conditions.
+                    \end{itemize}
+                \item CubeSat shall utilize Aluminum 7075, 6061, 5005, and/or 5052 for both the main CubeSat structure and the rails.” [5]  
+                    \begin{itemize}
+                        \item Motivation: Requirement regarding the CubeSat and rails materials. Dictates usable materials.   
+                        \item Verification: Design using strictly these materials or submit a deviation waiver request to use a different material. 
+                    \end{itemize}
+            \end{enumerate}
+        \item The CubeSat’s components shall resist vibrational loads and avoid resonance. 
+        \begin{enumerate}
+            \item The CubeSat shall withstand any vibrational frequency between 20–2000 HZ 
+                \begin{itemize}
+                        \item Motivation: Delicate components such as PCBs and antenna have natural frequencies which must be avoided to avoid resonance. Resonance could result in the failure of components.
+                        \item Verification: Use ANSYS’s modal analysis features on specific parts and on the assembled CAD model.
+                    \end{itemize}
+        \end{enumerate}
+        \end{enumerate}
+    \end{enumerate}  % FR 3 (CPE 1)
+    \item CubeSat shall utilize the Poly Picosatellite Orbital Deployer (P-POD) launcher.
+    \begin{enumerate}
+        \item CubeSat shall meet the container hold requirement size of 10 x 10 x 34.0 cm. 
+        \begin{enumerate}
+            \item  “Deployables shall be constrained by the CubeSat, not the P-POD." [5] 
+                \begin{enumerate}
+                    \item “All deployables such as booms, antennas, and solar panels shall wait to deploy a minimum of 30 minutes after the CubeSat's deployment switch(es) are activated from P-POD ejection.” [5] 
+                        \begin{itemize}
+                            \item Motivation: Direct Requirement
+                            \item Verification:Design release program to wait 30 minutes after detecting deployment. 
+                        \end{itemize}
+                \end{enumerate}
+            \item  “The CubeSat rails, which contact the P-POD rails and adjacent CubeSat standoffs, shall be hard anodized aluminum to prevent any cold welding within the P-POD.” [5]
+                \begin{enumerate}
+                    \item CubeSat shall be able to withstand an exit velocity of 1.6 m/s [1] 
+                           \begin{itemize}
+                                \item Motivation: Meeting the P-POD standard
+                                \item Verification:Test rig should be constructed to mimic the pusher plate and spring ejection system, with full functional verification of CubeSat performed afterwards along with manual inspection to ensure all parts remain in place 
+                            \end{itemize}
+                \end{enumerate}
+        \end{enumerate}
+    \end{enumerate} % FR 4 (CPE 2)
+    \item The CubeSat shall maintain its attitude, meeting pointing requirements to complete mission tasks.
+    \begin{enumerate}
+        \item The CubeSat shall meet maneuver requirements for each subsystem.
+        \begin{enumerate}
+            \item The CubeSat shall maintain control by using actuators. 
+                \begin{itemize}
+                    \item Motivation: Meeting the scientific requirements and allow subsystems to function during mission-phase.
+                    \item Verification: Testing sensors in a micro-g environment.
+                \end{itemize}
+        \end{enumerate}
+        \item The CubeSat shall meet pointing requirements for each subsystem.
+        \begin{enumerate}
+            \item The CubeSat shall determine attitude by using sensors.
+                \begin{itemize}
+                    \item Motivation: Meeting the scientific mission requirements
+                    \item Verification: Testing actuators in a micro-g environment.
+                \end{itemize}
+        \end{enumerate}
+    \end{enumerate} % FR 5 (CPE 3)
+    \item The CubeSat shall maintain a functional orbit for a minimum of 3 months.
+    \begin{enumerate}
+        \item Design req info
+        \begin{enumerate}
+            \item Design req info
+        \end{enumerate}
+    \end{enumerate}
+    \item The CubeSat shall maintain its attitude, meeting pointing requirements to complete mission tasks.
+    \begin{enumerate}
+        \item Design req info
+        \begin{enumerate}
+            \item Design req info
+        \end{enumerate}
+    \end{enumerate}
+    \item The CubeSat shall detect the presence of High-Energy particles that traverse the Inner Van-Allen belt.
+    \begin{enumerate}
+        \item Design req info
+        \begin{enumerate}
+            \item Design req info
+        \end{enumerate}
+    \end{enumerate} % CPE 6 - End of life
+    \item The CubeSat shall meet NASA standards for end-of-life.
+    \begin{enumerate}
+        \item CubeSat EoL plan shall comply with Standard NASA-STD-8719.14B. 
+        \begin{enumerate}
+            \item The CubeSat shall re-enter the earth’s atmosphere within 25 years of the missions’ end. 
+           \begin{itemize}
+                \item Motivation: meeting standard requirements
+                \item Verification: ground tracking the CubeSat
+            \end{itemize}
+            \item The CubeSat shall disintegrate upon reentry, leaving no orbital debris. 
+            \begin{itemize}
+                \item Motivation: Safety thing
+                \item Verification: Literature review of the materials
+            \end{itemize}
+        \end{enumerate}
+        \item The CubeSat shall be designed, produced and operated so that, at the conclusion of mission operations all reserves of energy on board are exhausted in a permanent way.
+        \begin{enumerate}
+            \item The Power system will exhaust any remaining power after deploying the EoL system 
+                \begin{itemize}
+        \item Motivation: Reducing the stored energy inside of the battery will prevent an overcharge, which could lead to an explosion before the satellite has re-entered the Earth’s atmosphere
+        \item Verification: 
+                \end{itemize}
+            \item The power system shall be safed. (The means of production of energy on board shall be deactivated in a permanent way.) 
+                \begin{itemize}
+                        \item Motivation: Battery overpressure is a leading cause of satellite breakup upon re-entry. In order to avoid this, the power generation must be stopped during the end-of-life operations as the amount of power draw from other core systems will be diminished.
+                        \item Verification: The solar panels shall be physically detached from the battery via a pneumatic actuator 
+                \end{itemize}
+             \end{enumerate} 
+            \item The CubeSat shall be capable of deploying the EoL system in the event of extended loss of communication or a DoA (Dead on Arrival) scenario. 
+            \begin{enumerate}
+                \item The EoL system shall have a failsafe timer in place to activate the system if communications are lost 
+                \begin{itemize}
+                    \item Motivation:
+                    \item Verification: 
+                \end{itemize}
+                \item The EoL system will be capable of activation in the event of a DoA scenario. 
+                    \begin{itemize}
+                        \item Motivation:
+                        \item Verification: 
+                    \end{itemize}
+         \end{enumerate}
+    \end{enumerate} % FR 9
+    \item The design shall utilize the Goddard Golden Rules (GSFC-STD-1000) for design margin guidance.
+    \begin{enumerate}
+        \item Design req info
+        \begin{enumerate}
+            \item Design req info
+        \end{enumerate}
+    \end{enumerate}
+\end{enumerate}
+
+%----------------------------------------------------------------------------------------
+%	Key Design Alternatives
+%----------------------------------------------------------------------------------------
+\section{Key Design Alternatives}
+\subsection{Launch}
+For the CubeSat to succeed in its mission, it must first be achieve a steady orbit. For this to happen, the satellite shall utilize the Poly Picosatellite Orbital Deployer (P-POD) launcher and survive all launching loads. The assumed launch conditions are compressive loads ranging from 8 - 13 G's as well as any vibration loads that may occur. These vibration loads are estimated to appear within lower frequencies (20 - 200 Hz) with variable amplitudes. In additional to consideration of launching loads, the utilization of the P-POD leads to additional design considerations. P-POD usage requires that the CubeSat conforms to the 3U or 3U+ standard as well as requiring specific aluminum alloys to be used for the 
+CubeSat structure as well as the rails [Design Standards ref]. Assuring the CubeSat will withstand these loads and be compatible with the P-POD is critical to the early development of the CubeSat as the choice of a material and chassis dictates budgets for volume and mass as well as the amount of radiation shielding provided for CubeSat internals and the thermal behavior of the CubeSat.
+\subsubsection{Materials}
+The selection of a main material for a chassis is an important consideration as it will determine many attributes of the CubeSat. Physical, mechanical, and thermal  properties of the material will dictate what loads the CubeSat can withstand as well as the thermal behavior of the CubeSats internal envelope. Thus, the material required must be strong, lightweight, and provide favorable thermal performance as well as enough radiation shielding to assure the CubeSat survives for its desired lifespan. While it was previously decided that the CubeSat chassis shall be purchased, COTS chassis are not all made of the same material meaning some will be favorable to others given our mission criteria. Additionally, since a COTS chassis is not necessarily inexpensive, being able to perform simple tests on mock structure is invaluable meaning that a material choice for the chassis that is accessible to the Wolf\textsuperscript{3} team would allow for additional testing to assure the missions success. These include static loading, excessive vibration loading, and possible radiation shielding testing if possible.
+\paragraph{Aluminum 7075}
+Of the available alloys from the CubeSat Standard, Aluminum 7075 is a high zinc and copper aluminum alloy with creates a high strength material which is generally used as structural alloy. This alloy has been commonly used within the aerospace community as far back as World War II and has a large number of applications outside of that due to its high strength and relatively low density. In addition to its normal properties, processes such as overaging results in more resistant to stress corrosion cracking while only reducing the strength by 10 - 30\% while other processes such as tempering and annealing increase the strength and corrosion resistance. There are desirable properties for any CubeSat as it can be used to create a very sturdy chassis. 
+\paragraph{Aluminum 6061}
+Dissimilar to Aluminum 7075, Aluminum 6061 is an alloy largely comprised of magnesium and silicon and balanced with aluminum and made through precipitation-hardening. It is often used for medium to high strength applications given its strength and ability to be easily worked and its ability to be corrosion resistant after abrasion. This means that additional coating will not be needed strictly for corrosion protection. Similar to Aluminum 7075, there are several varieties of this alloy based on its temper which serve to increase strength and hardness at some cost to malleability. This alloy is very similar to Aluminum 7075 in its mechanical properties but under performs slightly when directly compared.
+\paragraph{Aluminum 5052}
+This alloy is largely comprised of magnesium and chromium balanced with Aluminum and is produced as a sheet product. The main draws of this alloy are its strength and corrosion resistance, making it quite similar to Al 6061. Due to its high corrosion resistance, it can be used in fuel lines and fuel tanks. There are also several available options for tempering this alloy which lead to changes in its mechanical and thermal properties. Comparatively, this options seems weaker but may still perform to the degree required for launching.
+\paragraph{Aluminum 5005}
+This alloy includes maximum tolerances for copper, chromium, and manganese as well as magnesium balanced with aluminum. Aside from the mechanical and physical properties, there is not a wide range of information available for this alloy nor a large number of applications. Given its relatively low strength and lack of applications in the aerospace community, this aluminum alloy appears to be the least favorable option for a main body but could have applications elsewhere in the CubeSat.
+\paragraph{Summary of Pros and Cons}
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{0.2\textwidth}|p{.4\textwidth}|p{.4\textwidth}|} 
+\hline
+\textbf{Material Option} & \textbf{Pros} & \textbf{Cons}
+\\
+\hline
+     Aluminum 7075
+     &
+    \begin{itemize}
+        \item Highest compressive, tensile, and shear strengths
+        \item Hardest material
+        \item High fatigue strength
+        \item Highest specific heat
+        \item Lowest thermal conductivity
+        \item Good radiation shield
+    \end{itemize}
+    &
+    \begin{itemize}
+        \item Most dense
+        \item Most expensive
+        \item Harder to machine
+    \end{itemize}
+    \\
+\hline
+     Aluminum 6061
+     &
+    \begin{itemize}
+        \item Commonly used for CubeSats
+        \item Comporable strengths to 7075
+        \item Comporable specific heat to 7075
+        \item Readily weldable
+    \end{itemize}
+    &
+        \begin{itemize}
+        \item More malleable
+        \item High thermal conductivity
+        \item Lowest fatigue strength
+    \end{itemize}
+    \\
+\hline
+    Aluminum 5052
+    &
+    \begin{itemize}
+        \item Least dense
+        \item Wide range of tempers
+        \item Easily workable
+        \item Easily weld
+    \end{itemize}
+    &
+    \begin{itemize}
+        \item Low shear strength
+        \item Less common in CubeSats
+    \end{itemize}
+    \\
+\hline
+    Aluminum 5005
+    &
+    \begin{itemize}
+        \item Wide range of tempers
+    \end{itemize}
+    &
+    \begin{itemize}
+        \item Highest thermal conductivity
+        \item Lowest shear strength
+        \item Little material on applications and performances
+    \end{itemize}
+    \\
+\hline
+\end{tabular}
+\caption{Material Options Pros and Cons}
+\label{tbl:Material_ProCon}
+\end{table}
+\subsubsection{Chassis}
+
+\paragraph{ISIS}
+The ISIS Cubesat chassis are built to be generic, modular satellite structures. Their designs allow for multiple mounting configurations, giving the buyer maximum flexibility when designing their chassis. The chassis also comes with detachable side shear panels to allow for maximum accessibility. Along with this, a dual kill-switch mechanism is provided with the chassis, the chassis is scalable in design to larger CubeSat forms, is compatible with most other products sold by ISIS, and is fully compliant with the CubeSat standard. \cite{isis2} 
+\paragraph{Pumpkin Space}
+The pumpkin space chassis structure is unique because it is formed from sheet metal. This unique approach to CubeSat structures allows for a better strength-to-weight ratio, internal volume availability, simplicity in design, and minimal use of fasteners. The options available from pumpkin space consist of solid-wall and skeletonized versions, with various Base Plate and Cover Plate Assemblies to help solve different switch, external payload, and antenna mounting options. The main structure of each chassis, or core, is a single piece of folded and rivited precision sheet metal. This chassis structure is available in different lengths to support a buyers needs.\cite{pumpkin_space} 
+\paragraph{Endurosat}
+The endurosat chassis is promoted as being a high tier structure. Similar to the other COTS options, this one has a modular design allowing the buyer to customize it. Also, the modularity allows for easy integration of other components and hardware. The chassis is manufactured with extreme precision on a CNC machine from space-grade aluminum alloys. The aluminum is hard anodized after pearl finishing to increase strength. Uniquely, this chassis includes its flight heritage upon purchase of the structure. Lastly, the 3U structure is fully compliant with the CubeSat standard.\cite{enduro_sat} 
+
+\paragraph{Summary of Pros and Cons}
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{0.2\textwidth}|p{.4\textwidth}|p{.4\textwidth}|} 
+\hline
+\textbf{Chassis Option} & \textbf{Pros} & \textbf{Cons}
+\\
+\hline
+     ISIS
+     &
+    \begin{itemize}
+        \item Shear Panels included
+        \item Larger thermal range
+        \item Largest internal envelope
+        \item Made from aluminum 6082
+    \end{itemize}
+    &
+    \begin{itemize}
+        \item Most expensive
+        \item largest total mass
+    \end{itemize}
+    \\
+\hline
+     Pumpkin Space
+     &
+    \begin{itemize}
+        \item Cheapest option
+        \item Solid-wall designs
+        \item Larger thermal range
+        \item Mid level internal envelope
+    \end{itemize}
+    &
+        \begin{itemize}
+        \item Made from aluminum 5052
+        \item Total mass unknown
+    \end{itemize}
+    \\
+\hline
+    Endurosat
+    &
+    \begin{itemize}
+        \item Lighter total mass
+        \item Uses Aluminum 6061
+        \item Has flight heritage
+        \item Kill switch included
+    \end{itemize}
+    &
+    \begin{itemize}
+        \item Smaller thermal range
+        \item Smaller internal envelope
+        \item No shielding included
+        \item Mid-level price
+    \end{itemize}
+    \\
+\hline
+\end{tabular}
+\caption{Chassis Options Pros and Cons}
+\label{tbl:Chassis_ProCon}
+\end{table}
+
+\subsection{Control}
+ The control system is designed to manipulate several actuators and sensor to adjust the vehicles orientation to Earth. There are an unlimited combination of systems that can be used to help prevent vehicle tumble. Once NASC is deployed from the PPOD specified in \textbf{FR.3}, the control system must immediately activate to ensure proper orbit altitude and attitude alignment for the mission. Stabilizing NASC is the primary objective for the attitude control system. The system must maintain a balance of control and tumble to prevent unnecessary power usage. To prevent useless power consumption a series of passive and active actuators will be used to stabilize the vehicle. A series of actuators and sensors were considered to maximize the development of a attitude control system for the NASC satellite.
+ %
+\subsubsection{Actuators}
+Every satellite is equipped with a series of actuators to create an internal torque onto the vehicle. In space the lack of atmosphere makes the use of traditional propulsion difficult to control and use. To produce moments along the vehicle axes, torque must be introduced or opposed using a serious of systems. The internal torque produced by the actuators works in conjunction with or opposed to the external moments along the satellites axes. The gravitational forces from Earth exert certain gravity gradients that can be estimated for LEO \cite{AttSim}. Without actuators the vehicle would enter a supersonic spin or tumble along its launched trajectory. To align with the missions trajectory and attitude, the actuators act in parallel to the designated sensors. The list of the actuators suitable for the desired design requirement are: torque rods, reaction wheels and reaction control systems . The actual design will include one or more of these systems to work along side the designated sensors. 
+%
+\paragraph{Torque Rods}
+A concept that has been growing in popularity among CubeSats and complex satellites is the use of a magnetic torque rods. Torque rods produce a moment by sending current through a coil across a specific area. Typically this area is in the form of a cylinder but can be designed to be any three-dimensional shape. As the current flows through the coil, a magnetic field is produced and creates a moment with the Earth's natural magnetic field. The magnetic field around Earth does vary with time in all three axes. For this reason, torque rods are mainly designed to passively rotate the vehicle orthogonal to the Earth's magnetic poles.
+The system will not provide a constant torque due to saturation between the rods and magnetic poles. However, the system will provide enough torque to slow or speed up the vehicle rotation.
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale = .18]{TorqueRod.png}
+    \caption{Torque rod system that was designed to test the magnetic force across a cylindrical area\cite{TRod}}
+    \label{fig:torque rods}
+\end{figure}
+Torque given by the rods is determined heavily on the number of coils and the length of the rod. The larger the torque rod, the larger control authority is present. Some smaller torque rods may provide enough torque and reduce the amount of power consumption. The amount of torque expected from a standard length and coil rotation is approximately 0.2 Am\textsuperscript{2}. The Earth's magnetic field generates approximately five micro-newton-meters in all three axes given the altitude and inclination. That gives the torque rod a relative range to maintain to actuate the vehicle.
+%
+\paragraph{Reaction Wheels}
+The reaction wheel is the most renown system used for deep space, LEO, and interplanetary space travel. The more reaction wheels aboard the vehicle, the more axes of rotation are present. By combining multiple  uni-directional reaction wheels into one vehicle, the axes will create multiple moments to reduce tumble. 
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale = 1.3]{ReationWheel.png}
+    \caption{CubeSat reaction wheel designed to produce torque in one axis \cite{Rwheel}}
+    \label{fig:RW}
+\end{figure}
+Due to the nature of the reaction wheel, once the system becomes orthogonal to the plane, the system will become saturated. Once the saturation point has been reached, it will take another reaction wheel to create other axes moments and so on. Eventually the bearings inside the reaction wheel could fail but the probability is relatively small. Reaction wheels have been aboard or are currently serving many space missions. They are extremely reliable but near double the cost of torque rods. They actuate about 500 to 600 micronewton meters in one direction. Multiple reactions wheels would produce more than enough torque along with other actuators.  
+
+\paragraph{Reaction Reaction Control Systems}
+jjj
+\subsubsection{Sensors}
+Sensor selection is based upon the pointing accuracy requirements from the other 
+
+\subsection{Power}
+The power systems within CubeSats are involved in two primary tasks: the collection and storage of power. The capacity of small batteries is not enough to sustain the CubeSat for a long-term mission. Thus, the CubeSat will need to collect power from an external source to keep the CubeSat’s electronic systems online. STARS shall collect this power from the sun using solar panels. The power collected by the solar panels will be stored safely in a battery, which will provide the power for the CubeSat when the system cannot generate power. Solar power generation is the predominant method of power generation on small spacecraft. As of 2010, approximately 85\% of all nanosatellite form factor spacecraft were equipped with solar panels and rechargeable batteries. Different battery and solar panel options are explored in the following sections. 
+\subsubsection{Solar Panels}
+   
+Lorem ipsum sit amet, consecutor adipiscing elit, sed do eisumod tempor incididunt ut labore et dolore magna aliqua.
+\paragraph{Solar Panel Config 1}
+Lorem ipsum sit amet, consecutor adipiscing elit, sed do eisumod tempor incididunt ut labore et dolore magna aliqua.
+\begin{figure}[H]
+    \includegraphics[width=0.5\columnwidth]{Solar_Panel_1.jpg}\\
+    \caption{90\degree\space Deployable Solar Panel}
+    \label{fig:Soalr Panel 1}
+\end{figure}
+\paragraph{Solar Panel Config 2}
+Lorem ipsum sit amet, consecutor adipiscing elit, sed do eisumod tempor incididunt ut labore et dolore magna aliqua.
+\begin{figure}[H]
+    \includegraphics[width=0.5\columnwidth]{Solar_Panel_2.jpg}\\
+    \caption{135\degree\space Deployable Solar Panel}
+    \label{fig:Soalr Panel 2}
+\end{figure}
+\paragraph{Solar Panel Config 3}
+Lorem ipsum sit amet, consecutor adipiscing elit, sed do eisumod tempor incididunt ut labore et dolore magna aliqua.
+\begin{figure}[H]
+    \includegraphics[width=0.15\columnwidth]{Solar_Panel_3.jpg}\\
+    \caption{Stationary Solar Panel}
+    \label{fig:Soalr Panel 3}
+\end{figure}
+\subsubsection{Batteries}
+
+\paragraph{Lithium Polymer}
+Lithium batteries are the most commonly used battery type in the small spacecraft industry. This is in large part due to their high capacity to weight ratio, which allows for flexibility when choosing parts for other subsystems on the spacecraft. Lithium polymer batteries are a variation of lithium batteries that use a polymer-based electrolyte as opposed to a liquid-based one \cite{vs}. This allows LiPo batteries to be stackable, so that less space must be allocated. Several companies have COTS options for LiPo batteries specifically tailored for small spacecraft, including AAC-Clyde's CubeSat battery shown in Figure 8. The AAC-Clyde battery has several features that can help improve performance, including a digital monitor that allows for tracking of the battery temperature, which would prove useful for thermal monitoring \cite{03Power}.
+\begin{figure}[H]
+    \includegraphics[width=0.4\columnwidth]{AAC-Clyde-battery-pack.png}\\
+    \caption{Lithium polymer battery pack (AAC-Clyde) \cite{03Power}}
+    \label{fig:BP1}
+\end{figure}
+\paragraph{Lithium Ion}
+Lorem ipsum sit amet, consecutor adipiscing elit, sed do eisumod tempor incididunt ut labore et dolore magna aliqua.
+\begin{figure}[H]
+    \includegraphics[width=0.4\columnwidth]{lithiumion.png}\\
+    \caption{Lithium ion battery pack (GomSpace) \cite{gomspace}}
+    \label{fig:BP2}
+\end{figure}
+\paragraph{Nickel Cadmium}
+Lorem ipsum sit amet, consecutor adipiscing elit, sed do eisumod tempor incididunt ut labore et dolore magna aliqua.
+\begin{figure}[H]
+    \includegraphics[width=0.4\columnwidth]{nickel.png}\\
+    \caption{Nickel cadmium battery pack (BatterySpace) \cite{batteryspace}}
+    \label{fig:BP3}
+\end{figure}
+\paragraph{Solar Panel Summary of Pros and Cons}
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{0.3\textwidth}|p{.35\textwidth}|p{.35\textwidth}|} 
+\hline
+\textbf{Solar Panel Option} & \textbf{Pros} & \textbf{Cons}
+\\
+\hline
+     90\degree\space Deployable Solar Panel
+     &
+    \begin{itemize}
+        \item Large solar panel area
+        \item Power generation under some degree of rotation
+    \end{itemize}
+    &
+    \begin{itemize}
+        \item Potential release mechanism failure
+        \item Complex design
+        \item Discontinues power generation when CubeSat is self-rotated
+        \item High cost
+        \item Large mass
+    \end{itemize}
+    \\
+\hline
+     135\degree\space Deployable Solar Panel
+     &
+    \begin{itemize}
+        \item Large solar panel area
+    \end{itemize}
+    &
+    \begin{itemize}
+        \item Potential release mechanism failure
+        \item Complex design
+        \item Discontinues power generation when CubeSat is self-rotated
+        \item High cost
+        \item Large mass
+    \end{itemize}
+    \\
+\hline
+    Stationary Solar Panel
+    &
+    \begin{itemize}
+        \item Simple design
+        \item Continuous power generation
+        \item Low Cost
+        \item Low mass
+        \item Can rotate to reduce thermal load
+        \item Provide shielding to internal components
+    \end{itemize}
+    &
+    \begin{itemize}
+        \item Limited amount of power generation
+    \end{itemize}
+    \\
+\hline
+\end{tabular}
+\caption{Solar Panel Options Pros and Cons}
+\label{tbl:SolarPanel_ProCon}
+\end{table}
+\paragraph{Batteries Summary of Pros and Cons}
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{0.3\textwidth}|p{.35\textwidth}|p{.35\textwidth}|} 
+\hline
+\textbf{Batteries Option} & \textbf{Pros} & \textbf{Cons}
+\\
+\hline
+     Lithium ion
+     &
+    \begin{itemize}
+        \item Low cost
+        \item High energy density
+        \item 100\% efficiency within lifetime
+    \end{itemize}
+    &
+    \begin{itemize}
+        \item Aging
+        \item Requires precise thermal control
+    \end{itemize}
+    \\
+\hline
+     Lithium-Polymer
+     &
+    \begin{itemize}
+        \item Safe
+        \item Thin
+        \item Light weight
+        \item Stackable
+    \end{itemize}
+    &
+    \begin{itemize}
+        \item High cost
+        \item Poor energy density
+    \end{itemize}
+    \\
+\hline
+    Nickel Cadmium (NiCd)
+    &
+    \begin{itemize}
+        \item Older and more proven technology
+        \item Low cost
+        \item More durable
+    \end{itemize}
+    &
+    \begin{itemize}
+        \item Short lifespan due to memory characteristic
+        \item Poor efficiency, so more space would have to be allocated
+    \end{itemize}
+    \\
+\hline
+\end{tabular}
+\caption{Batteries Options Pros and Cons}
+\label{tbl:Batteries_ProCon}
+\end{table}
+\subsection{Thermal}
+The thermal control system of the CubeSat ensures that the spacecraft can survive the hostile thermal environment of space. Each component can only survive a certain range of temperatures, and the failure of certain components--such as the battery--would result in a critical mission failure. Furthermore, a sun-synchronous orbit presents the challenge of constant thermal interaction with the sun. To facilitate mission success, the thermal control system must balance efficiency and effectiveness with the weight, space, and power constraints of a 3U CubeSat. 
+
+There are many different specific thermal control technologies, such as heaters, multi-layered insulation, etc. Many of these technologies are used in combinations with each other. There are two main configurations of thermal control: passive and active. Passive systems tend not to require power, and focus on altering the thermal properties of components or the CubeSat itself to achieve thermal control. Active systems tend to require power, and while they are general more dynamic and precise with their control, they do require power, and are usually more complicated to integrate into the CubeSat system. Note that there the two systems are not mutually exclusive in their implementation. Oftentimes a spacecraft will have thermal control technologies from both configurations, and larger spacecraft will have a good mix of both. The following sections outline the different types of technologies belonging to active and passive thermal control systems. 
+\subsubsection{MLI Blankets}
+Multi-layered insulation (MLI) blankets serve as a barrier to both protect against heat fluxes and limit excessive dissipation of heat. They are a common component of thermal control in large satellites, but not on small satellites, where the blankets run into a number of problems. Their effectiveness decreases with size, to the point where the volume they require might not worth the protection they provide. MLI blankets are also delicate and could get snagged during deployment. 
+
+\subsubsection{Paints/Tapes}
+Thermal coatings, including paints and tapes, are another common type of passive thermal control. Paints alter the thermal properties of the surface they are applied to, such as absorptivity and infared emissivity. Thermal tapes are good for insulating wires and cables, radiating internal and rejecting external heat. Thermal coatings in general are more easily implemented than MLI blankets, as they take up much less space, and aren't prone to problems such as snagging. 
+
+\subsubsection{Radiators}
+Radiators are passive thermal control devices used to eject heat from the spacecraft through IR radiation. Radiators can come in a number of different configurations. They can be built into structural panels, mounted to the spacecraft, or deployed after orbit is achieved. Radiators are also commonly given surface finishes to maximize radiation and decrease absorption. 
+
+\subsubsection{Thermal Louvers}
+Thermal louvers are thermal control devices that are both active and passive. Louvers require no power to operate but they provide dynamic heat rejection, allowing for more precise thermal control without the power and integration drawbacks of other active control components. They usually resemble window blinds, with blades that can be "opened" and "closed" to fully expose or obscure anything behind them. They are commonly placed over external radiators, but can also be used to control a spacecraft's internal heat transfer.
+
+\subsubsection{Electric Heaters}
+Heaters are active thermal control systems used to maintain temperatures for batteries and sensors to function during cold cycles of an orbit. These are electrical resistance heaters that require closed feedback loops and temperature sensors to precisely manage thermal balance. Unlike some of the passive control technologies, there is small spacecraft flight heritage for electric heaters. Several companies manufacture flexible strip heaters that have been implemented on small spacecraft. 
+
+\subsubsection{Mini Cryocoolers}
+Cryocoolers are active thermal control systems that maintain temperatures for sensitive components by protecting them from overheating. Cryocoolers are low mass, and extend instrument lifetimes, improve thermodynamic efficiency, and lower vibrations. They cycle gas to transport heat from objects or instruments to rejection surfaces. While cryocoolers have been effective on larger spacecraft, micro-cooler designs are still being perfected for smaller spacecraft.
+
+\subsubsection{Summary of Pros and Cons}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{0.2\textwidth}|p{.4\textwidth}|p{.4\textwidth}|} 
+\hline
+\textbf{Passive Thermal System} & \textbf{Pros} & \textbf{Cons}
+\\
+\hline
+     MLI Blankets
+     &
+    \begin{itemize}
+        \item Prevents excessive heat dissipation.
+    \end{itemize}
+    &
+    \begin{itemize}
+        \item Performance decreases greatly if compressed.
+        \item Snags easily on P-Pod launcher.
+    \end{itemize}
+    \\
+\hline
+     Paints/Tapes
+     &
+    \begin{itemize}
+        \item Easy to apply.
+    \end{itemize}
+    &
+        \begin{itemize}
+        \item Does not work well on curved surfaces.
+    \end{itemize}
+    \\
+\hline
+    Sunshields
+    &
+    \begin{itemize}
+        \item Provides a large area of thermal protection.
+    \end{itemize}
+    &
+    \begin{itemize}
+        \item Breaks down after a while.
+        \item Not tested extensively on Cubesats yet.
+    \end{itemize}
+    \\
+\hline
+    Thermal Louvers
+    &
+    \begin{itemize}
+        \item Good at maintaining precise temperature ranges.
+    \end{itemize}
+    &
+    \begin{itemize}
+        \item Not tested extensively on Cubesats yet.
+    \end{itemize}
+    \\
+\hline
+    Deployable Radiators
+    &
+    \begin{itemize}
+        \item Good at maintaining precise temperature ranges.
+    \end{itemize}
+    &
+    \begin{itemize}
+        \item Not tested extensively on Cubesats yet.
+    \end{itemize}
+    \\
+\hline
+\end{tabular}
+\caption{Passive Thermal Systems Pros and Cons}
+\label{tbl:Passive_Thermal_ProCon}
+\end{table}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{0.2\textwidth}|p{.4\textwidth}|p{.4\textwidth}|} 
+\hline
+\textbf{Active Thermal System} & \textbf{Pros} & \textbf{Cons}
+\\
+\hline
+     Electric Heaters
+     &
+    \begin{itemize}
+        \item High thermal precision.
+        \item Great for batteries and electronics.
+    \end{itemize}
+    &
+    \begin{itemize}
+        \item Requires closed-loop feedback with temperature sensor.
+        \item Requires power input.
+    \end{itemize}
+    \\
+\hline
+     Mini Cryocoolers
+     &
+    \begin{itemize}
+        \item Excellent for high precision sensors.
+        \item Improves instrument lifetimes.
+        \item Lower vibrations.
+        \item High thermodynamic efficiency.
+    \end{itemize}
+    &
+        \begin{itemize}
+        \item Requires power input.
+        \item Not tested extensively on Cubesats yet.
+    \end{itemize}
+    \\
+\hline
+\end{tabular}
+\caption{Active Thermal Systems Pros and Cons}
+\label{tbl:Active_Thermal_ProCon}
+\end{table}
+
+
+\subsection{Communication}
+The communication system of the STARS mission is necessary to be able to communicate with the satellite from the ground and to be able to receive data from the CubeSat. Data must be able to be both sent and received by the CubeSat to be fully operational. Data that is collected from the payload will be sent from CubeSat to the ground station, and the ground station will send information such as software updates, additional commands, and eventually the signal to begin the end-of-life procedure. The communication system involves making decisions on what frequency or frequencies to use for uplink and downlink and the antenna that should be used on the CubeSat. 
+
+\subsubsection{Transmitter Frequency}
+The frequency used by the communication system in the STARS mission will affect several other systems and is in an important aspect in designing the mission. The following ranges of frequencies are commonly used in satellite systems and have the technology in place to begin using them on the STARS mission if they are determined to be the best option for the mission. The selection of the frequency has significant effects on the ground station and its operations including the beam width for that frequency range and the uplink and downlink speeds. 
+
+\paragraph{VHF and UHF}
+
+
+\paragraph{S-Band}
+\paragraph{VHF, UHF, and S-Band}
+\paragraph{Summary of Transmitter Frequency Pros and Cons}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{0.2\textwidth}|p{.4\textwidth}|p{.4\textwidth}|} 
+\hline
+\textbf{Transmitter} & \textbf{Pros} & \textbf{Cons}
+\\
+\hline
+     VHF/UHF
+     &
+    \begin{itemize}
+        \item Uplink and downlink
+        \item Least expensive
+        \item Beam width 52$\degree$ (VHF), 30$\degree$ (UHF)
+    \end{itemize}
+    &
+    \begin{itemize}
+        \item Slower downlink speeds (1.2 - 9.6 kbps)
+    \end{itemize}
+    \\
+\hline
+     S-Band
+     &
+    \begin{itemize}
+        \item Faster downlink speeds (14.4 - 115.2 kbps)
+    \end{itemize}
+    &
+        \begin{itemize}
+        \item Downlink only
+        \item Beam width 5.1$\degree$
+    \end{itemize}
+    \\
+\hline
+    VHF/UHF/S-Band
+    &
+    \begin{itemize}
+        \item Uplink and downlink
+        \item Faster Downlink Speeds (1.2 - 9.6 kbps, 14.4 - 115.2 kbps) 
+        \item Beam Width: 52$\degree$ (VHF), 30$\degree$ (UHF), 5.1$\degree$ (S-Band)
+    \end{itemize}
+    &
+    \begin{itemize}
+        \item Most expensive
+    \end{itemize}
+    \\
+\hline
+\end{tabular}
+\caption{Transmitter Pros and Cons \cite{isis_ground}}
+\label{tbl:transmitter_procon}
+\end{table}
+\subsubsection{Antenna}
+
+\subsection{End of Life}
+
+Space debris has become a large concern to the international community. Additionally, LEO is becoming more and more and more crowded, and as it does so the risk of a collision increases. The event of a orbital collision would create a cloud of fast moving debris which could potentially cause a runaway cascade of collisions known as Kessler Syndrome.\cite{Kessler_Syndrome}  This has lead to the development of strict regulations regarding orbital debris mitigation. In order to comply with international standards set by NASA and the Inter-Agency Space Debris Coordination Committee (IADC), a satellite must be capable of either deorbiting, or transferring to a graveyard orbit within 25 years of the end of its mission.\cite{STD8719} A large propulsion device capable of moving the STARS satellite from LEO to a graveyard orbit is not feasible. As such, the four potential End of Life (EoL) systems outlined will focus on deorbiting the satellite. The four methods considered here are cold gas thrusters, drag chutes, electromagnetic thrusters, and deployable booms. Drag chutes, electromagnetic tethers, and deployable booms are all passive systems. Meaning that once deployed, they require no additioanl power or control input in order to function as necessary. 
+\subsubsection{Cold Gas Propulsion (CGP)}
+
+Cold Gas Propulsion (CGP) systems have played critical roles in small satellites since the 1960's.A CGP generates thrust through the process of controlled ejection of a compressed liquid or gas propellant through a nozzle. A CGP system is typically very simple, consisting of only one propellant due to the absence of any combustion. Additionally, the only main components are the propellant storage container and a nozzle. An average cold gas system uses numerous thrusters placed along the trailing sides of the spacecraft to give control along several axes. This simple design allows the system to operate successfully while maintaining a small mass and power requirement. However, due to the nature of its operation, the thrust profile of a CGP system decreases over time, as thrust is directly proportional to the pressure of the propellant in storage.\cite{Passive_Deorbit} Additionally, A CGP system will put a significant load on the GNC system during operation. It will require a robust and active GNC suite to keep the satellite pointed along the correct trajectory during use. A diagram of a simple CGP system can be seen in Figure \ref{fig:CGP Diagram} below.
+
+\begin{figure}[H]
+    \includegraphics[width=0.8\columnwidth]{CGPDiagram.PNG}\\
+    \caption{Diagram of a CGP System\cite{Passive_Deorbit}}
+    \label{fig:CGP Diagram}
+\end{figure}
+
+A large variety of both propellants can be used in a CGP system including argon, methane, liquid butane, and even refrigerant R134a. Using a liquid propellant can lead to a reduction in storage volume, and, due to lower storage pressure, containers are less likely to rupture.\cite{Passive_Deorbit} However, liquid propellants can create a de-stabilizing effect due to sloshing of the liquid within the storage container.\cite{Slosh} CGP systems can offer a relatively compact and low power option for satellite propulsion. They can generate significant thrust, between 10 mN and 50 mN, and can utilize a wide range of propellants\cite{Passive_Deorbit}. However, they generally operate with a very low specific impulse (Isp), cannot produce a constant thrust profile, require constant GNC control during operation, and run the risk of de-stabilizing the satellite if a liquid propellant is used.  
+\subsubsection{Drag Chute}
+
+Passive options require no further active control or communication after deployment. NASA estimates that small satellites such as STARS orbiting at an altitude of around 400 km will naturally decay and deorbit within the requisite 25 years. However, for orbits beyond 600 km, uncertainties in the density of the atmosphere remove the guarantee of natural decay and so another passive deorbit method, beyond the natural atmospheric drag of the satellite itself will be necessary.\cite{Passive_Deorbit} The most common and most well tested passive deorbit systems are drag sails or drag chutes. Functioning much like a parachute, once deployed the chute increases drag in the thin atmosphere in LEO resulting in the eventual reentry of the craft.
+
+\begin{figure}[H]
+    \includegraphics[width=0.8\columnwidth]{EXO-Brake.PNG}\\
+    \caption{Model of a deployed Exo-Brake. A drag chute designed and implemented by NASA\cite{Passive_Deorbit}}
+    \label{fig:Exo-Brake}
+\end{figure}
+
+Drag chutes such as the Exo-brake pictured above have a technology readiness level (TRL) of 9 and have heritage on a wide variety of satellites including 3U CubeSats. Drag Chutes, like all passive options do not require power or control once deployed and can even be made to deploy if communications are lost or in the event of a Dead on Arrival (DoA) scenario. 
+\subsubsection{Electromagnetic Tether}
+
+An electromagnetic tether is another potential passive deorbit method. An electromagnetic tether uses a conductive tether, pulled taut by gravitational tidal forces, to generate an electromagnetic force via Lorentz-force interactions as it moves through the Earth's magnetic field.\cite{Passive_Deorbit} The produced current interacts with the magnetic field, creating a force in the opposite direction of motion, effectively slowing the spacecraft. This interaction thus can be used to reduce the orbital radius of the satellite until reentry is guaranteed. 
+
+\begin{figure}[H]
+    \includegraphics[width=0.8\columnwidth]{NanoTermTape.PNG}\\
+    \caption{Nano Terminator Tape, An Electromagnetic Tether Designed for CubeSats by Tethers Unlimited\cite{Term_Tape_Presentation}}
+    \label{fig:NanoTermTape}
+\end{figure}
+
+\begin{figure}[H]
+    \includegraphics[width=0.8\columnwidth]{TermTapeDeploy.PNG}\\
+    \caption{Microgravity deployment of Terminator Tape\cite{Term_Tape_Presentation}}
+    \label{fig:TermTapeDeploy}
+\end{figure}
+
+Electromagnetic tethers take up very little volume and mass, often around 50 cm\textsuperscript{3} and 100 g, and are mounted on the outside of the CubeSat.\cite{Term_Tape_Datasheet} This makes it rather easy to incorporate into the CubeSat design as it takes up very little internal volume. However, it could potentially interfere with solar panel placement. Additionally, there are currently no TRL 9 electromagnetic tethers in use on CubeSats. Nano Terminator Tape, pictured in Figure \ref{fig:NanoTermTape} above does have heritage on the Aerocube-V, a CubeSat that launched in 2015, but has not yet been activated.\cite{Passive_Deorbit}
+\subsubsection{Deployable Boom}
+Deployable booms have a large variety of potential uses in space craft beyond EoL systems. Deployable booms are being investigated by many different companies and organizations such as Northrop Grumman\cite{NG_Deployables} and NASA.\cite{Small_Sat_Deployables} Deployable booms are being developed for use in solar arrays, communication antennas, radar antennas, Solar and drag sails, and as instrument booms.\cite{Small_Sat_Deployables} Deployable booms are considered for all of these uses because not only are they light weight and volume efficient, they can be designed to be very strong as well. Below is a figure depicting one of the ways that a deployable boom can extend from its stowed state. 
+
+\begin{figure}[H]
+    \includegraphics[width=0.8\columnwidth]{StemBoom.PNG}\\
+    \caption{Variations of the STEM boom concept\cite{Small_Sat_Deployables}}
+    \label{fig:StemBoom}
+\end{figure}
+
+Deployable booms have also been designed with the express intent to be used as a deorbiting device. One such device, called the Roll-Out DE-Orbiting device, or RODEO, was developed by Composite Technology Development, Inc. in 2015.\cite{Passive_Deorbit} When signaled, RODEO deploys a long boom with thin mylar wings attached at 120\degree angles. Once deployed, the boom and mylar wings provide a significant increase in total area for the CubeSat, about 0.15 m\textsuperscript{2}, resulting in an increase in overall drag reducing the spacecraft's velocity and eventually resulting in reentry.\cite{RODEO_Presentation} A model of the RODEO system in both its deployed and stowed configurations can be seen in Figure \ref{fig:Rodeo_Deployed} below.
+\begin{figure}[H]
+    \includegraphics[width=0.8\columnwidth]{RODEODeployed.PNG}\\
+    \caption{RODEO Flight Configurations\cite{RODEO_Presentation}}
+    \label{fig:Rodeo_Deployed}
+\end{figure}
+
+Deployable booms, specifically those designed to act as deorbit devices, such as RODEO mentioned above, are an excellent potential option for an EoL system. They are small and light weight, Rodeo has a total volume of 137 cm\textsuperscript{3} and a mass of only 96g, and like the previous passive systems only require power at the time of deployment.\cite{RODEO_Presentation} However there have been some issues with deployment and larger/ heavier CubeSats can sometimes require two deployable booms set orthogonally in order to create enough surface area to reliably deorbit. 
+
+\subsubsection{Summary of Pros and Cons}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{0.2\textwidth}|p{.4\textwidth}|p{.4\textwidth}|} 
+\hline
+\textbf{EoL System} & \textbf{Pros} & \textbf{Cons}
+\\
+\hline
+     Cold Gas Propulsion
+     &
+    \begin{itemize}
+        \item High TRL (9)
+        \item Simple 
+    \end{itemize}
+    &
+    \begin{itemize}
+        \item Requires Propellant
+        \item Strains GNC System
+        \item Requires Constant Power
+        \item Larger Volume (250 cm\textsuperscript{3})\cite{CGP_Datasheet}
+    \end{itemize}
+    \\
+\hline
+     Drag Chute
+     &
+    \begin{itemize}
+        \item High TRL (9)
+        \item Low Power
+    \end{itemize}
+    &
+        \begin{itemize}
+        \item No Control
+        \item Can be difficult to deploy
+    \end{itemize}
+    \\
+\hline
+    Electromagnetic Tether
+    &
+    \begin{itemize}
+        \item Low Power
+        \item Very Low Volume (50 cm\textsuperscript{3})\cite{Term_Tape_Datasheet}
+    \end{itemize}
+    &
+    \begin{itemize}
+        \item Moderate TRL (7)
+        \item No Control
+    \end{itemize}
+    \\
+\hline
+    Deployable Boom
+    &
+    \begin{itemize}
+        \item Low Power
+        \item Simple
+        \item Low Volume (150 cm\textsuperscript{3})\cite{RODEO_Presentation}
+    \end{itemize}
+    &
+    \begin{itemize}
+        \item Moderate TRL (7)
+        \item No Control
+    \end{itemize}
+    \\
+\hline
+\end{tabular}
+\caption{EoL Systems Pros and Cons}
+\label{tbl:Eol_ProCon}
+\end{table}
+
+%----------------------------------------------------------------------------------------
+%	Trade Study Processes and Results
+%----------------------------------------------------------------------------------------
+\section{Trade Study Processes and Results}
+Looks like this will just be the kind of thing we had in the presentation. An outline of the trade study metrics, and the weights we will assign to them. Chris also said that Dr. E wants us to include some kind of Pugh matrix.... so i guess just kinda fudge one like we did for the CDD because that's what Dr. E wants. I would make sure to mention that is preliminary and is based more on intuition than actual analysis so that we're at least internally consistent when we talk about how much analysis we've done
+
+\subsection{Launch}
+
+\subsubsection{Material}
+\paragraph{Metrics}
+\begin{itemize}
+\item{Density}\\
+\\
+Density is a fundamental physics and engineering concept that involves the mass and volume of an object. The more dense an object the stronger it may be; but, also the heavier it may be. The largest densities will be ranked lower and smallest ranked higher. 
+\item{Tensile Ultimate Strength and Elastic Modulus}\\
+\\
+Tensile strength and elastic modulus dictate the tensile deformations of a material. Also, it provides one with the maximum tensile forces and loads. This will be important for launch testing. The higher tensile strength and elastic modulus a material have will result in a higher ranking.
+\item{Shear Strength and Shear Modulus}\\
+\\
+Shear strength and shear modulus determine the maximum shearing loads. It also dictates the shear deformations of a material. This is also important for launch testing. Therefore, the higher shear strength and modulus of a material will result in a higher ranking. 
+\item{Melting Point, Specific Heat, Thermal Conductivity}\\
+\\
+These three thermal properties are important for the thermal analysis. The Cubesat will be in a sun synchronous orbit meaning that the materials thermal properties will play a role in the survival of the Cubesat. The higher these properties the higher the rank. 
+\item{Fatigue Strength}\\
+\\
+Fatigue strength is important because it impacts the longevity measure of the Cubesat structure. The Cubesat must be able to survive launch as well as perform its intended mission. Therefore, the higher the fatigue strength the higher the ranking. 
+\item{Cost}\\
+\\
+When designing anything, cost is going to play an important role. For the material, this will mean trying to maximize the amount of material and the quality of that material, with the budget that is defined. Materials that cost more will be ranked lower. 
+\end{itemize}
+
+Table \ref{tbl:material_Metric_Scores} below provides a description for how different values would be assigned to each design option in regards to each metric. 
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|c|c|c|c|c|} 
+\hline
+    \textbf{Metric} & \textbf{5} & \textbf{4} & \textbf{3} & \textbf{2} & \textbf{1}
+    \\
+\hline
+    \textbf{Density} & >2750kg/m3 & 2750-2700kg/m3 & 2700-2650kg/m3 & 2650-2600kg/m3 & <2600kg/m3
+    \\
+\hline
+    \textbf{Strength Properties} & >500MPa & 475-400Mpa & 375-300MPa & 275-200MPa & <175MPa 
+    \\
+\hline
+    \textbf{Shear Properties} & >325MPa & 300-225MPa & 200-125MPa & 100-50MPa & <50MPa 
+    \\
+\hline
+    \textbf{Thermal Properties} & >660 & 660-500C & 650-500C & 640-500C & <500C 
+    \\
+\hline
+    \textbf{Fatigue Strength} & >325MPa & 300-225MPa & 200-125MPa & 100-50MPa & <50MPa 
+    \\
+\hline
+    \textbf{Cost} & <\$8 per ft2 & <\$11 per ft2 & <\$14 per ft2 & <\$17 per ft2 & <\$20 per ft2
+    \\
+
+\hline
+\end{tabular}
+\caption{Material Trade Study Metric Values}
+\label{tbl:material_Metric_Scores}
+\end{table}
+
+\paragraph{Weights}
+\begin{itemize}
+    \item Density - .2
+    \item Tensile Ultimate Strength and Elastic Modulus - .2
+    \item Shear Strength and Shear Modulus - .2
+    \item Melting Point, Specific Heat, Thermal Conductivity - .2
+    \item Fatigue Strength - .1
+    \item Cost - .1
+\end{itemize}
+
+For the mission to succeed, the material chosen for the CubeSat must be strong yet lightweight to protect from launch loads. Additionally, the material must meet the requirements of the thermal systems and high a high enough density to provide radiation shielding. Specific mechanical and material properties dictate the material selection which is then weighted as a choice in the chassis selection.
+
+\paragraph{Potential Pugh Matrix}
+
+Table \ref{tbl:material_Pugh} below is an example Pugh matrix that could be generated using the metrics and weights defined above once significant analysis has been performed on each of the different Key Design Options. 
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|c|c|c|c|c|} 
+\hline
+    \textbf{Category} & \textbf{Weight} & \textbf{Aluminum 7075} & \textbf{Aluminum 6061} & \textbf{Aluminum 5052} & \textbf{Aluminum 5005}
+    \\
+\hline
+    \textbf{Density} & 0.2 & 2 & 3 & 5 & 4
+    \\
+\hline
+    \textbf{Strength Properties} & 0.2 & 5 & 4 & 4 & 3 
+    \\
+\hline
+    \textbf{Shear Properties} & 0.2 & 5 & 4 & 3 & 2 
+    \\
+\hline
+    \textbf{Thermal Properties} & 0.2 & 5 & 4 & 3 & 4
+    \\
+\hline
+    \textbf{Fatigue Strength} & 0.1 & 4 & 2 & 3 & 4 
+    \\
+\hline
+    \textbf{Cost} & 0.1 & 2 & 4 & 3 & 3 
+    \\
+\hline
+    \textbf{Total} & 1 & 4.0 & 3.6 & 3.6 & 3.3 
+    \\
+\hline
+\end{tabular}
+\caption{Example Material Pugh Matrix }
+\label{tbl:material_Pugh}
+\end{table}
+
+In this example case, the aluminum 7075 option has emerged as the best option, narrowly beating out aluminum 6061 and 5052 which were both tied for second. This is a good indication that, should no other critical errors be uncovered with this kind of system, that aluminum 7075 is a good option for the material.
+
+
+\subsubsection{Chassis}
+\paragraph{Metrics}
+\begin{itemize}
+\item{Mass}\\
+\\
+The entire Cubesat has a mass budget that can't be exceeded. Since the chassis of the Cubesat is a large part of that budget, minimizing this value is vital. Therefore, the smaller mass numbers will be ranked higher. 
+\item{Volume}\\
+\\
+Similar to mass, there is also a volume budget. There are many components, as well as the payload, that must fit inside of the Cubesat. Therefore, it is important that there is enough room for everything. The larger the volume the higher the ranking will be.
+\item{Thermal Range}\\
+\\
+Similar to the material selection, the thermal range is important for thermal analysis. The chassis must be able to survive within a certain thermal range. Therefore, the higher this range the higher the ranking.
+\item{Material}\\
+\\
+The material a chassis is built from is important because some materials have better qualities and properties than others. Therefore, chassis using preferred materials will receive a higher score. 
+\item{Cost}\\
+\\
+When designing anything, cost is going to play an important role. For the chassis, this will entail purchasing the cheapest structure that also meets all the requirements. Chassis that cost more will be ranked lower.
+\end{itemize}
+
+Table \ref{tbl:chassis_Metric_Scores} below provides a description for how different values would be assigned to each design option in regards to each metric. 
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|c|c|c|c|c|} 
+\hline
+    \textbf{Metric} & \textbf{5} & \textbf{4} & \textbf{3} & \textbf{2} & \textbf{1}
+    \\
+\hline
+    \textbf{Mass} & <250g & <275g & <300g & <325g & <350g
+    \\
+\hline
+    \textbf{Volume} & >2900cm3 & >2800cm3 & >2700cm3 & >2600cm3 & >2500cm3
+    \\
+\hline
+    \textbf{Thermal Range} & >80C & >60C & >50C & >40C & >30C
+    \\
+\hline
+    \textbf{Material} & Aluminum 7075 & Aluminum 6061 & Aluminum 5052 & Aluminum 5005 & Other
+    \\
+\hline
+    \textbf{Cost} & >\$2000 & >\$3000 & >\$4000 & >\$5000 & >\$6000
+    \\
+
+\hline
+\end{tabular}
+\caption{Chassis Trade Study Metric Values}
+\label{tbl:chassis_Metric_Scores}
+\end{table}
+
+\paragraph{Weights}
+\begin{itemize}
+    \item Mass - .25
+    \item Volume - .25
+    \item Thermal Range - .2
+    \item Material - .2
+    \item Cost - .1
+\end{itemize}
+
+From a structural perspective, the total mass of the chassis and the available internal volume are crucial preliminary factors. Secondary factors include the thermal performance as a result from the thermal team and the material choice as per prior analysis. These are good preliminary metrics, but the feasibility study will reveal the best option via finite element analysis.
+
+\paragraph{Potential Pugh Matrix}
+
+Table \ref{tbl:chassis_Pugh} below is an example Pugh matrix that could be generated using the metrics and weights defined above once significant analysis has been performed on each of the different Key Design Options. 
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|c|c|c|c|} 
+\hline
+    \textbf{Category} & \textbf{Weight} & \textbf{ISIS} & \textbf{Pumpkin Space} & \textbf{EnduroSat}
+    \\
+\hline
+    \textbf{Mass} & 0.25 & 3 & 2 & 4
+    \\
+\hline
+    \textbf{Volume} & 0.25 & 4 & 3 & 5
+    \\
+\hline
+    \textbf{Thermal Range/Performance} & 0.2 & 5 & 5 & 3
+    \\
+\hline
+    \textbf{Material} & 0.2 & 3 & 3 & 4
+    \\
+\hline
+    \textbf{Cost} & 0.1 & 2 & 4 & 3
+    \\
+\hline
+    \textbf{Total} & 1 & 3.55 & 3.25 & 3.95
+    \\
+\hline
+\end{tabular}
+\caption{Example Chassis Pugh Matrix }
+\label{tbl:chassis_Pugh}
+\end{table}
+
+In this example case, the EnduroSat chassis option has emerged as the best option, narrowly beating out ISIS chassis, with the pumpkin space chassis in last. This is a good indication that, should no other critical errors be uncovered with this kind of system, that EnduroSat chassis is a good option for the chassis.
+
+\subsection{Power}
+\subsubsection{Metrics}
+\paragraph{Solar Panel Metrics}
+\begin{itemize}
+\item Cost\\
+\\
+CubeSats were created as low-cost options for space missions.  Due to this, minimizing the cost is a very important factor.  For the power generation section of the power CPE,  this means maximizing the power generated by the CubeSat for the least amount of money.  Systems that cost more will be ranked lower based on this metric.
+\item{Mass} \\
+\\
+CubeSats have a strict mass limit that applies to all subsections.  For the power generation section of the power CPE, this means maximizing the power generated by the CubeSat while not exceeding the allowable mass.  Systems that have larger masses will be ranked lower based on this metric.
+\item{Power Generation} \\
+\\
+Power generation is a very important metric for the power generation section of the power CPE.  This metric measures the amount of power each potential system can generate for the CubeSat.  Systems that generate less power will be ranked lower based on this metric.
+\item{Heritage} \\
+\\
+Knowing that a system will work in space, because it has been tested in space before, is very important. For the power generation section of the power CPE, heritage refers to how much testing in space the system has received.  Systems that have not been tested in space will rank lower based on this metric vs systems that have seen use on other missions.
+\end{itemize}
+\paragraph{Batteries Metrics}
+\begin{itemize}
+\item Cost\\
+\\
+CubeSats were created as low-cost options for space missions.  Due to this, minimizing the cost is a very important factor.  For the power storage section of the power CPE,  this means maximizing the amount of storable power inside the CubeSat for the least amount of money.  Systems that cost more will be ranked lower based on this metric.
+\item{Mass} \\
+\\
+CubeSats have a strict mass limit that applies to all subsections.  For the power storage section of the power CPE, this means maximizing the amount of power that can be stored by the CubeSat while not exceeding the allowable mass.  Systems that have larger masses will be ranked lower based on this metric.
+\item{Power Storage} \\
+\\
+Power storage is the most important metric for the power storage section of the power CPE.  This metric measures the amount of power each potential system can store inside of the CubeSat.  Systems that can store less power will be ranked lower based on this metric.
+\item{Lifespan} \\
+\\
+How long the storage system inside the CubeSat can run without beginning to decrease in effectiveness, or all together, is very important.  For the power storage section of the power CPE, this means how long a battery can continue to store power in space.  Systems that begin to decrease in efficiency or die all together sooner will be ranked lower based on this metric.
+\end{itemize}
+\subsubsection{Weights}
+\paragraph{Solar Panel Weight}
+\begin{itemize}
+    \item Cost – 0.10
+    \item Mass – 0.30
+    \item Power Generation – 0.40
+    \item Heritage – 0.20
+\end{itemize}
+Power generation is the most important factor because it is paramount to have enough power produced to power other subsystems such as communication, thermal, and payload.  Mass is a very strict design requirement that cannot be budged.  Heritage, while still important, does not necessarily rule out an option by itself and should not have a weight that allows it to do so.  The smallest weight was given to cost because, while it is still important, it is not as strict of a design requirement as the other metrics.
+\paragraph{Batteries Weight}
+\begin{itemize}
+    \item Cost – 0.10
+    \item Mass – 0.25
+    \item Power Storage – 0.40
+    \item Lifespan – 0.25
+\end{itemize}    
+Power storage is the most important factor because it is paramount to have enough power in the CubeSat's storage to power other subsystems.  Mass and lifespan are very important as well.  Mass is a very strict design requirement that cannot be budged, and lifespan is necessary to survive the mission without running out of power .  Cost was again given a low weight because it is not as strict of a design requirement as the other metrics.
+\subsubsection{Evidence of Feasibility}
+\subsection{Thermal}
+\subsubsection{Metrics}
+
+\begin{itemize}
+   \item Mass \\
+   \\
+CubeSats must meet a certain mass requirement based on the design requirements. For the thermal CPE, this means collaborating with the other subsystems in order to make sure the final CubeSat comes in under the mission required weight. Systems that weigh more will be ranked lower on this metric.
+   \item Cost \\
+   \\
+When designing anything, cost is always an important factor. For the thermal CPE, this means maximizing the thermal precision while also trying to stay under the  defined budget. Systems that cost more will be ranked lower based on this metric.
+   \item Power Required \\
+   \\
+CubeSats need to meet a defined power budget. For the thermal CPE, this means minimizing the power consumption of active thermal systems by using more passive thermal systems and/or finding active thermal systems that consume less power. Systems that require more power will be ranked lower on this metric.
+   \item Thermal Precision \\
+   \\
+Thermal precision is the most important thermal CPE metric. The goal of the thermal CPE is to maintain a temperature range within the CubeSat where all sensors and batteries can operate efficiently throughout the lifetime of the mission. Systems with less precise temperature management will be ranked lower for this metric.
+\end{itemize}
+
+Table \ref{tbl:Thermal_Metric_Scores} below provides a description for how different values would be assigned to each design option in regards to each metric. 
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|c|c|c|c|c|} 
+\hline
+    \textbf{Metric} & \textbf{5} & \textbf{4} & \textbf{3} & \textbf{2} & \textbf{1}
+    \\
+\hline
+    \textbf{Mass} & <100g & 100-150g & 150-200g & 200-300g & >300g 
+    \\
+\hline
+    \textbf{Cost} & <\$10,000 & \$10,000-40,000 & \$40,000-\$70,000 & \$70,000-\$100,000 & >\$100,000
+    \\
+\hline
+    \textbf{Power Required} & <1W & 1-5W & 5-10W & 10-25W & >25W 
+    \\
+\hline
+    \textbf{Thermal Precision} & <25$^{\circ}$  & 30$^{\circ}$-50$^{\circ}$ & 50$^{\circ}$-70$^{\circ}$ & 70$^{\circ}$-90$^{\circ}$ & >90$^{\circ}$ 
+    \\
+\hline
+\end{tabular}
+\caption{Thermal Trade Study Metric Values}
+\label{tbl:Thermal_Metric_Scores}
+\end{table}
+
+\subsubsection{Weights}
+
+\begin{itemize}
+    \item Mass - 0.25
+    \item Cost - 0.10
+    \item Power Required - 0.25
+    \item Thermal Precision - 0.40
+\end{itemize}
+
+Thermal precision is given the highest weight of 0.40 because it is the most important factor to be achieved by the thermal subsystem.  The entire mission is based on a precise sensor that can only operate at a certain temperature range.  Due to this strict temperature requirement, it is paramount that the Cubesat adhere to this in order to avoid complete mission failure.  The highest weight was given to this metric to help assure that thermal devices that cannot provide this firm temperature range are ranked lower in the trade study.\\
+
+Power required and mass are given the same weighting of 0.25.  This is because they are both very key metric based on two design requirement.  The thermal devices that are chosen must fit the power budget.  This means that they cannot consume more power than is allocated to the thermal subsystem.  If the devices consume too much power, than the mission would fail.  These devices must also fit into the required mass allotment.  Similarly to power required, the thermal subsystem will be given an amount of mass that can be used specifically for thermal protection on the Cubesat.  The devices chosen cannot exceed this mass.  Due to the likeness of these two metrics, they were weighted the same.\\
+
+The smallest weight of 0.10 was given to cost.  While a lot of factors, including mass, power, and thermal protection, are mission critical, meaning that the Cubesat would not work without these, cost is not.  Cost is still a very important metric and it is necessary to compare lots of different options cost-wise before choosing one.  It is ranked lowest due to its relative importance compared to other metrics though.\\
+\subsection{Communication}
+\subsubsection{Transmitter Frequency}
+\paragraph{Metrics}
+\begin{itemize}
+    \item Cost \\
+    \\
+While cost is an important factor in the development of the communication system, it is also very important to choose the form of communication that will most benefit the mission. It is important to take into account the cost of the communication system and especially the ground station, as the cost of a single ground station can be quite significant. However, the ground station and communicating system are a necessary part of a CubeSat mission; without them, the mission would fail and so cost the cost of the communication system is less drastic than the need for a functioning system. 
+    \item Beam Width \\
+    \\
+The determined beam width is related to a number of different factors, but for a ground station, the width is primarily determined by the frequency being selected to communicate with the CubeSat and is specified by the manufacturers of pre-built ground stations. As a result, the beam width of the ground station antenna is determined by the chosen transmitter frequency. With a larger beam width, it will be easier to communicate between the ground station and CubeSat. With a small beam width, the controls of the antennas and CubeSat need to be more fine-tuned to be able to make contact with the smaller beam.
+    \item Uplink Capability \\
+    \\
+Being able to control the CubeSat from the ground and make any necessary changes or commands can be an important feature for a CubeSat mission. While it is not always necessary to send information to the CubeSat if the system’s autonomous features can maintain proper control, it is required to make any changes to the software and to trigger the end-of-life procedure.
+    \item Maximum Downlink Speed \\
+    \\
+The downlink speed is a vital characteristic of the communication system. With limited coverage, the CubeSat and ground station need to be able to communicate at a fast-enough speed that all of the necessary information can be transmitted in that time.
+\end{itemize}
+
+Table \ref{tbl:Transmitter_Metric_Scores} below provides a description on the different weights given to the scores for the metrics of the transmitter frequency. These scores can be used to create a ranking system and score for different frequencies that could be used to communicate between the ground station and the CubeSat. 
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{3.5cm}|c|c|c|c|c|}
+\hline
+    \textbf{Metric} & \textbf{5} & \textbf{4} & \textbf{3} & \textbf{2} & \textbf{1}
+    \\
+\hline
+    \textbf{Estimated Cost (\$)} & 80,000 or less & 80,000-90,000 & 90,000-100,000 & 100,000-110,000 & 110,000 or more
+    \\
+\hline
+    \textbf{Beam Width} & 60$^{\circ}$ or more & 60$^{\circ}$ - 45$^{\circ}$ & 45$^{\circ}$ - 30$^{\circ}$ & 30$^{\circ}$ - 15$^{\circ}$ & 15$^{\circ}$ or less
+
+    \\
+\hline
+    \textbf{Uplink Capability} & Yes &  &  &  & No
+    \\
+\hline
+    \textbf{Maximum Downlink Speed (kbps)} & 140 or more & 140 - 100 & 100 - 60 & 60 - 20 & 20 or less
+    \\
+
+\hline
+\end{tabular}
+\caption{Transmitter Trade Study Metric Values}
+\label{tbl:Transmitter_Metric_Scores}
+\end{table}
+
+\paragraph{Weights}
+\begin{itemize}
+    \item Cost - 0.20
+    \item Beam Width - 0.30
+    \item Uplink Capability - 0.40
+    \item Maximum Downlink Speed - 0.10
+\end{itemize}
+
+The cost of the transmitter frequency is given a 20\% weight. The weight of this metric is due to the requirements of the communications system and the necessary role that it plays in the STARS mission. It is required that the CubeSat must have the capability of communicating with the ground station. Without means of communication, the STARS mission would ultimately be ruled a failure. As a result, it is imperative that the communications system must operate successfully and reliably. It is also important to note that with the high cost of ground stations, the differences between the different types of ground stations is less significant compared to the already high cost. This further reinforces the given weight for this metric as the differences in cost between transmission frequencies is less significant than the overall cost. 
+
+The beam width is given a weight of 30\% as it is one of the more important metrics of the transmitter frequency. While the type of frequency chosen is not the sole variable for determining the beam width, it is a major factor in this characteristic. For ground stations, the beam width is often predetermined for each station depending on what frequency is being used. The ground station may even use several different frequencies to communicate with the CubeSat, but even in this case, the beam widths can still be determined by the manufacturer. The beam width is an important feature in determining the appropriate frequency to utilize as it plays a role in determining the effectiveness of communicating with the CubeSat from the ground station. With a larger beam width, there is more room for error in the case that the antennas are misaligned or are unable to point directly towards the target. If a fault like this were to occur, a larger beam width may still capture the target in its field of view while a smaller beam width must be much more accurate and would likely miss the target should a fault occur with the targeting system. 
+
+The ability for the transmission frequency to allow for uplink to the CubeSat from the ground station is given a weight of 40\%, the highest of these metrics. This metric is the most important factor in determining what transmitter frequency to utilize in the STARS mission. Not all frequencies that could be used for the mission are able to send data both to and from the CubeSat and would require additional communication systems in order to successfully complete the mission. 
+
+The maximum downlink speed of the communications system was given a weight of 10\%. This is the lowest weight given to the metrics of the transmitter frequency. The downlink speed is in important in determining the amount of data that can be transmitted to the ground station from the CubeSat during communication windows. This metric was given a lower weight as the mean transmission times and the total transmission times per month calculated in Table \ref{satcom} show enough communication time for the CubeSat to be able to transmit necessary amounts of data during communication windows. 
+
+\paragraph{Potential Pugh Matrix}
+
+
+\subsubsection{Antenna}
+\paragraph{Metrics}
+\paragraph{Weights}
+\subsubsection{Evidence of Feasibility}
+
+\subsection{End of Life}
+\subsubsection{Metrics}
+\begin{itemize}
+\item Mass\\
+\\
+Mass is a critical component of any spacecraft. STARS must conform to specific mass requirements in order to match the 3U standard as stated in \textbf{FR.1} The mass of the CubeSat depends on the mass of each individual system. So, each system should aim to be as light as possible while ensuring that they meet all design requirements. 
+% FR Number subject to change with rework of Functional Requirements
+\item{Volume} \\
+\\
+The entire size of the CubeSat shall be constrained to a 3U standard as specified by requirements \textbf{FR.1}  and  \textbf{DR.1.1.}  As  such,  a maximum  of  1U  or  less  has  been  allocated  to  the  end  of  life  systems on  this mission. Any  divergence  from  this  strict  standard  would  negatively  affect  ride  share options  and  could possibly lead to the inability to launch. 
+% Bold Numbers subject to change with rework of Functional Requirements
+
+\item{Power Consumption} \\
+\\
+Electrical power is a limited resource on board any spacecraft. The STARS onboard power system will only be able to supply a given amount of power at any given time, and so ensuring that the EoL system requires as little power as possible reduces the strain on the overall power budget.
+\item{Cost} \\
+\\
+Budget constraints are an important part of system design. For the project to remain within budget, the propulsion system should strive to be as inexpensive as possible while still maintaining capability to perform all the desires tasks.  
+\end{itemize}
+
+Table \ref{tbl:EoL_Metric_Scores} below provides a description for how different values would be assigned to each design option in regards to each metric. 
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|c|c|c|c|c|} 
+\hline
+    \textbf{Metric} & \textbf{5} & \textbf{4} & \textbf{3} & \textbf{2} & \textbf{1}
+    \\
+\hline
+    \textbf{Mass} & <100g & 100-150g & 150-200g & 200-300g & >300g 
+    \\
+\hline
+    \textbf{Volume} & <75cm\textsuperscript{3} & 75-100cm\textsuperscript{3} & 100-150cm\textsuperscript{3} & 150-300cm\textsuperscript{3} & >300cm\textsuperscript{3} 
+    \\
+\hline
+    \textbf{Power} & <1W & 1-5W & 5-10W & 10-25W & >25W 
+    \\
+\hline
+    \textbf{Cost} & <\$10,000 & \$10,000-50,000 & \$50,000-\$100,000 & \$100,000-\$200,000 & >\$200,000 
+    \\
+
+\hline
+\end{tabular}
+\caption{EoL Trade Study Metric Values}
+\label{tbl:EoL_Metric_Scores}
+\end{table}
+\subsubsection{Weights}
+\begin{itemize}
+    \item Mass - .35
+    \item Volume - .35
+    \item Power - .1
+    \item Cost - .2
+\end{itemize}
+
+The Mass and Volume metrics are both given an equal weighting. This is because until activation the EoL system is merely dead weight to the CubeSat. It is of paramount importance that the EoL system minimize its burden on the other CubeSat Systems throughout the mission phase so that STARS can more easily achieve its goals. For this reason, Mass and Volume are both rated equally, and they are both rated higher than the other two metrics. 
+
+The Power metric is given only a 10\% weight, much smaller than the other three. This is because the EoL system will only be activated at the end of the mission, remaining in a dormant state until almost all of the other systems are likely to be inactive. At this time, the CubeSat will likely have more power available to send to the EoL system as, for example, the payload will no longer require power. Additionally, for all three of the passive options, drag chutes, electromagnetic tethers, and deployable booms, power is only required during deployment. This means that the power draw they require would only be for a very limited amount of time, likely on the magnitude of a few seconds to a few minutes. 
+
+The Cost metric, while important, is not as critical as Mass and Volume, and as such is given a slightly lower weighting, at 20\%. Cost is, of course, an important thing to consider, the entire CubeSat must fall within a certain budget and minimizing the cost of any individual component or system helps ensure that this is the case. However, in the case of EoL systems, there is another aspect to consider. If the EoL system fails to deorbit the CubeSat within the timeline specified by NASA STD 8719.14B there is a possibility that NASA or the IADC could impose strict fines on the organization responsible. Because of this, spending extra money to ensure that the EoL system is reliable and will preform adequately is more than reasonable. 
+\subsubsection{Potential Pugh Matrix}
+
+Table \ref{tbl:EoL_Pugh} below is an example Pugh matrix that could be generated using the metrics and weights defined above once significant analysis has been performed on each of the different Key Design Options. 
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|c|c|c|c|c|} 
+\hline
+    \textbf{Category} & \textbf{Weight} & \textbf{Cold Gas} & \textbf{Drag Chute} & \textbf{Electromagnetic Tether} & \textbf{Deployable Boom}
+    \\
+\hline
+    \textbf{Mass} & 0.35 & 1 & 3 & 5 & 5
+    \\
+\hline
+    \textbf{Volume} & 0.35 & 2 & 3 & 5 & 3 
+    \\
+\hline
+    \textbf{Power} & 0.1 & 3 & 4 & 5 & 5 
+    \\
+\hline
+    \textbf{Cost} & 0.2 & 4 & 4 & 3 & 4 
+    \\
+\hline
+    \textbf{Total} & 1 & 2.15 & 3.3 & 4.6 & 4.1 
+    \\
+\hline
+\end{tabular}
+\caption{Example EoL Pugh Matrix }
+\label{tbl:EoL_Pugh}
+\end{table}
+
+In this example case, the electromagnetic tether option has emerged as the best option, narrowly beating out deployable boom. This is a good indication that, should no other critical errors be uncovered with this kind of system, that the electromagnetic tether is a good option for the EoL system.
+
+%----------------------------------------------------------------------------------------
+%	Baseline Design
+%----------------------------------------------------------------------------------------
+\section{Feasibility Study}
+
+From Chris's powerpoint on PDR - Week 10.pptx on moodle:
+\begin{itemize}
+    \item Likely most difficult and lengthy portion of PDR document.
+    \item Use literature search and existing data to show precedent.
+    \item Assemble relevant equations or specifications for each element (both element specific and system specific).
+    \item Conduct analysis using equations where applicable. Simulation software where necessary (when simple equations won’t work).
+\end{itemize}
+
+\subsection{Launch}
+\subsubsection{Literature Data}
+\subsubsection{Simulation Analysis}
+\subsubsection{Equations}
+
+\subsection{Control}
+\subsubsection{Literature Data}
+\subsubsection{Simulation Analysis}
+\subsubsection{Equations}
+
+\subsection{Power}
+\subsubsection{Literature Data}
+\subsubsection{Simulation Analysis}
+\subsubsection{Equations}
+
+\subsection{Thermal}
+\subsubsection{Literature Data}
+\subsubsection{Simulation Analysis}
+\subsubsection{Equations}
+
+\subsection{Communication}
+\subsubsection{Literature Data}
+\subsubsection{Simulation Analysis}
+\subsubsection{Equations}
+
+\subsection{End of Life}
+\subsubsection{Literature Data}
+A crucial characteristic of the End of Life requirements is to ensure a complete disintegration of all parts of the satellite upon re-entry. Failure to do so can lead to parts of the craft landing back on the Earth's surface. Besides the obvious safety concerns of debris falling over populated areas, there are also logistical and legal ramifications of a failed disintegration. Logistically, it must be ensured that there is less than 1 in 10,000 chance that any non-disintegrated debris will cause concerns for any other mission, land or sea traffic, or persons on the ground. Legally, the company or group in control of the satellite will be responsible for any damages caused by falling parts. 
+
+In order to establish that the STARS mission will disintegrate on re-entry, a literature review will be conducted in so far as to research the materials used in its construction and how they will respond to the space environment. 
+
+[ADD MORE HERE]
+
+\subsubsection{Simulation Analysis}
+de-orbit analysis
+\subsubsection{Equations}
+In order to prove the feasibility of using various subsystems to trickle energy out of the battery as an effective means of power dissipation, the effective power draw over time must be calculated. 
+
+%----------------------------------------------------------------------------------------
+%	Baseline Design
+%----------------------------------------------------------------------------------------
+\section{Baseline Design}
+
+The following subsystems were not included with the in depth trade study analysis performed on CPEs.  Results from the CDD are highlighted here.
+\bigskip
+
+\subsection{Pros Cons Template}
+% *******************************************************
+% This is the template for a table with bullet points
+% p{0.2\textwidth} - you can change that 0.2 to change width
+%       all the widths must equal 1 (it's a percent of total width)
+% a row is in between the \hline's
+%       note: be sure to have the final line with \\
+% columns are separated with &
+% make sure to include a unique \label{tbl:yourtablename}
+%       for referencing the table
+% the \caption is the text that will show up under the table
+% don't forget to \cite your source
+% *******************************************************
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{0.2\textwidth}|p{.4\textwidth}|p{.4\textwidth}|} 
+\hline
+\textbf{Avionics} & \textbf{Pros} & \textbf{Cons}
+\\
+\hline
+     COTS
+     &
+    \begin{itemize}
+        \item How the CubeSat will reach the desired orbit
+        \item Structural considerations for expected loading
+    \end{itemize}
+    &
+    \begin{itemize}
+        \item How the CubeSat will reach the desired orbit
+        \item Structural considerations for expected loading
+    \end{itemize}
+    \\
+\hline
+     Control
+     &
+    \begin{itemize}
+        \item Maintain attitude of CubeSat per subsystem requirements
+        \item Maintain control of CubeSat per subsystem requiremen
+    \end{itemize}
+    &
+        \begin{itemize}
+        \item Maintain attitude of CubeSat per subsystem requirements
+        \item Maintain control of CubeSat per subsystem requiremen
+    \end{itemize}
+    \\
+\hline
+    Test1
+    &
+    \begin{itemize}
+        \item BulletTest1
+        \item BulletTest2
+    \end{itemize}
+    &
+    Test 3
+    \\
+\hline
+\end{tabular}
+\caption{Avionics Pros and Cons \cite{Boain}}
+\label{tbl:avionicsprocon}
+\end{table}
+% *******************************************************
+
+\subsection{Trade Study Template}
+% *******************************************************
+% template for trade study section
+% columns can also be c l r for center / left / right, separated by pipe
+%       |c|c|l|l|c| will do 5 columns, some centered some left justified
+%       in here -> \begin{tabular}{|l|l|l|l|l|l|}
+% *******************************************************
+\subsubsection{Metrics}
+\textbf{Cost:} lorem ipsum put your description here
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|l|l|l|l|} 
+\hline
+    \textbf{Estimated Cost (\$) } & 100,000 & 200,000 & 300,000 & 400,000 & 500,000
+    \\
+\hline
+    \textbf{Score:} & 5 & 4 & 3 & 2 & 1
+    \\
+\hline
+\end{tabular}
+\caption{Avionics: Cost Scoring Defintion \cite{Boain}}
+\label{tbl:avioniccost}
+\end{table}
+
+\textbf{Memory:} lorem ipsum put your description here
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|l|l|l|l|} 
+\hline
+    \textbf{Memory (MB) } & 100,000 & 200,000 & 300,000 & 400,000 & 500,000
+    \\
+\hline
+    \textbf{Score:} & 5 & 4 & 3 & 2 & 1
+    \\
+\hline
+\end{tabular}
+\caption{Avionics: Memory Scoring Definition \cite{Boain}}
+\label{tbl:avionicsmemory}
+\end{table}
+
+\subsubsection{Weights}
+
+\begin{itemize}
+    \item Mass - .35
+    \item Volume - .35
+    \item Power - .1
+    \item Cost - .2
+\end{itemize}
+
+We like these weights because (rationale for weights) ........ 
+
+\subsubsection{Scoring (Pugh Matrix)}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|l|l|} 
+\hline
+    \textbf{Category} & \textbf{Weight} & \textbf{COTS} & \textbf{Homemade}
+    \\
+\hline
+    \textbf{Cost} & 0.5 & 1 & 5
+    \\
+\hline
+    \textbf{Memory} & 0.5 & 4 & 3
+    \\
+\hline
+\end{tabular}
+\caption{Avionics: Scoring Summary \cite{Boain}}
+\label{tbl:avionicsscoresy}
+\end{table}
+
+% *******************************************************
+
+\subsection{Non-CPE Subsystems}
+\noindent\textbf{Payload:} High energy particle detector
+\begin{itemize}
+    \item Mass: 1.25 kg
+    \item Volume: ~100 cm3, cylindrical envelope ~3.2 cm radius, 6 cm length
+    \item Thermal Limits: $-20\degree$C to $+30\degree$C
+    \item FOV: $~50\degree$
+    \item Power: <1 W
+\end{itemize}
+
+\noindent\textbf{Avionics:} COTS Highly Integrated On-board Computing System
+\begin{itemize}
+    \item Space heritage: Many TRL 9 options
+    \item Features: Sensor integration, processor, memory
+    \item Attributes: Power consumption, radiation resistance
+\end{itemize}
+
+
+\subsection{Trade study overview}
+\subsection{Sensitivity Analysis}
+\subsection{Literature Review}
+\subsection{Orbital Parameters}
+STARS will operate in Low Earth Orbit (LEO) as per \textbf{FR.4} in order to monitor the inner Van Allen radiation belt, which starts at approximately 640 km.\cite{VanAllen_1} As stated in \textbf{DR.4.1} the orbit shall be 500 km sun synchronous, meaning that the satellite is passing over any given location along the orbit's ground track at the same local mean solar time on each pass. \cite{Boain} The specific form of sun synchronous orbit (SSO) selected for this mission is the dawn-dusk orbital pattern. A dawn-dusk orbit is a SSO which has a ground track that follows the line along the Earth that represents the transition between night and day. \cite{Boain} Figure \ref{fig:Dusk_Dawn} provides a 3D render of the proposed dawn-dusk orbit.
+\begin{figure}[H]
+    \includegraphics[width=0.8\columnwidth]{OrbitSnap.png}\\
+    \caption{Dawn-Dusk Sun Synchronous Orbit}
+    \label{fig:Dusk_Dawn} 
+\end{figure}  
+The unique ground track of a dawn-dusk orbit will allow STARS to remain in constant sunlight throughout the entire lifetime of the mission. This will help the power system meet \textbf{DR.5.1} by allowing the solar panels to constantly collect power from the sun. Constant power collection will also allow STARS to stay active for longer periods of time and increase the amount of data collected and transmitted. Remaining in constant sunlight also impacts \textbf{DR.5.2} and \textbf{DR.5.3.1} which revolve around the temperature and radiation STARS is experiencing. With constant exposure to sunlight STARS will be under constant thermal loads and solar radiation, which the thermal subsystem will have to account for. This orbit does require not only the specific inclination required to maintain a SSO, but it must also have a specific time of ascending node in order to be considered dawn-dusk. A dawn-dusk orbit must have an ascending node that occurs at either 06:00:00 or 18:00:00. In order for the orbit to 500 km sun synchronous it must have an inclination of approximately 97.4\degree. \cite{Garada} While a dawn dusk orbit presents a few issues for the mission the benefit of constant power generation far outweighs the inconveniences they present.
+
+There is another benefit to this orbital design that originates from the sun synchronous nature of STARS' orbit. Orbital period increases with altitude so the 500 km proposed by \textbf{FR.4} will result in over 15 revolutions per day, according to simulations made in STK. Sun synchronous orbits maintain a constant trajectory around the Earth as it rotates. This means that the satellite will make multiple passes over the same area in a single day. Having so many revolutions per day will therefore allow for multiple communication windows in a single day. Multiple communication windows will allow for a greater amount of data transmission and more freedom in the mission design. If STARS needs to go into a state of low power consumption for a few passes then it will still have plenty of time to make the next communication window. Several altitudes were considered for STARS, ranging from 450 to 600 km, with each being analyzed for communication with the ground station over the course of a year. For the simulation the ground station was set to be on top of Engineering Building 3 at North Carolina State University. Table \ref{Altitude} provides the minimum, maximum, mean, and total communication times from STARS to the ground station.  
+\begin{table}[H]
+\centering
+\begin{tabular}{| +c | ^c | ^c | ^c | ^c | }
+	\hline
+	\rowstyle{\bfseries}%
+	Altitude (km) & \shortstack{Minimum Transmit \\ Time (s)} & \shortstack{Maximum Transmit \\ Time (s)} & \shortstack{Mean Transmit \\ Time (s)} & \shortstack{Total Transmit \\ Time (s)} \\ \hline
+	450 & 25.743 & 655.946 & 516.093 & 873745 \\ \hline
+	500 & 21.610 & 695.943 & 546.680 & 965437 \\ \hline   
+	550 & 14.317 & 734.760 & 577.544 & 1056906 \\ \hline
+	600 & 24.586 & 772.581 & 607.149 & 1147511 \\ \hline
+
+\end{tabular}
+\caption{Communication Windows for Simulated Orbit Altitudes}
+\label{Altitude}
+\end{table}
+This range of orbits was selected because they are the most readily available in ride along programs such as the ISIS Small Satellite Launch Service. \cite{ISIS} Both maximum and mean transmit time increase as altitude increases, which results in higher total transmit times. The mean transmit time for any of these altitudes would fulfill the needs of STARS with regards to data transmission. However higher altitudes are more desirable since higher total transmit times would result in more data transmitted to the ground station. Higher orbits draw closer to the inner Van Allen Belt that STARS is studying, which could present more radiation issues for the CubeSat. The proposed 500 km orbit was considered to be a good median for all these factors, and is one of the most readily available altitudes for ride along launches. \cite{ISIS} 
+%----------------------------------------------------------------------------
+%	Schedule
+%----------------------------------------------------------------------------------------
+\section{Schedule}
+\subsection{Project Timeline}
+The project timeline shows all major events that will be occurring as part of the STARS project. A flow chart is used in the figure below for the project timeline as it is a visual where one can see a clear sequence of events. The figure below shows the project timeline for NASC with some time estimations. 
+\begin{figure}[H]
+    \includegraphics[width=\columnwidth]{NASC_Critical_Path_PDR_Overview.png}\\
+    \caption{NASC Complete Schedule}
+    \label{fig:NASC Complete Schedule} 
+\end{figure}  
+The schedule is broken up into three distinct phases: Project Conceptual Phase, Design and Analysis Phase, and Ground Demonstration Phase. The Project Conceptual Phase is the early project phase where the NASC focused on setting the ground work for the project and combined the two originally separate teams, NASB and Wolf\^3. The next phase is the Design and Analysis Phases where the NASC's focus is towards developing the design and conducting analysis to validate the design for STARS. The Ground Demonstration Phase is where NASC will be focused on developing and testing different elements of the CubeSat design to validate models made during the design cycle.
+
+The different colors represent the current status of the different tasks. The green tasks are tasks that have been completed at the writing of this document, yellow tasks represent currently in progress tasks, and red tasks represent future tasks. The blue boxes within the task boxes represent the approximate timeline for completion of the tasks. The critical path analysis conducted for PDR analysis estimate is found in section 8.2. The CDR analysis timeframe is an estimate based on current assumptions for PDR and is subject to change based on the timeframe for PDR analysis to be conducted. 
+\subsection{PDR Analysis Critical Path}
+The critical path for PDR Analysis can be found in the figure below.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\columnwidth]{NASC_PDR_Analysis.png}\\
+    \caption{NASC PDR Analysis Critical Path}
+    \label{fig:NASC PDR Critical Path} 
+\end{figure}  
+The different timetables for the PDR analysis were determined by estimating the time that each analysis was going to take and determining the dependency for the analysis to take place. For example the GNC subsystem is dependent on the thermal management subsystem because the thermal subsystem will have pointing requirements and maneuver requirements that feed into the GNC subsystem. The critical path is represented by a thicker red arrow which represents the longest sequence of events required to complete the PDR analysis. This critical path dictates the overall schedule for the analysis while other subsystems take reduced time and can be conducted in parallel. Other colored arrows are to make it easier to distinguish the different connections between subsystems. 
+%----------------------------------------------------------------------------------------
+%	Budget
+%----------------------------------------------------------------------------------------
+\section{Budget}
+While the budget for this project is theoretical, there is still a limit. Therefore, it has to be made sure that the budget is maintained and not exceeded. The first step is to receive a desired parts list from each of the subsystems. This will occur after each subsystem has chosen which part is the best through their analysis. With this list of parts, comparisons will be done on different Cubesat part websites. This comparison will be between prices as well as quality because sometimes the cheapest option isn't the best. While this is being done, a cost model will be created. This needs to be created because the price of the parts will change over time and that change needs to be tracked since this is a mulit-year project. 
+
+%----------------------------------------------------------------------------------------
+%	Conclusion
+%----------------------------------------------------------------------------------------
+\section{Conclusion}
+\subsection{Summary}
+\subsection{Discussions and Recommendations}
+
+%----------------------------------------------------------------------------------------
+%	BIBLIOGRAPHY
+%----------------------------------------------------------------------------------------
+\pagebreak
+%\printbibliography
+% put entries in this file: pdrbib
+% or we can create separate .bib files, and just separate the names with comma
+%  \bibliography{pdrbib,avionicsbib,cpebib} 
+%\bibliography{pdrbib}
+%\bibliographystyle{unsrt}
+%\bibliographystyle{model1-num-names}
+%\bibliographystyle{elsarticle-num}
+\printbibliography[heading=none]
+
+%---------------------------------------------------------------------------------------
+%	APPENDIX
+%---------------------------------------------------------------------------------------
+\section{Appendix A: STK Model Data}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{| +c | ^c | ^c | ^c | ^c | }
+	\hline
+	\rowstyle{\bfseries}%
+	Month & \shortstack{Minimum Transmit \\ Time (s)} & \shortstack{Maximum Transmit \\ Time (s)} & \shortstack{Mean Transmit \\ Time (s)} & \shortstack{Total Transmit \\ Time (s)} \\ \hline
+	Nov & 107.079 & 695.930 & 548.547 & 76248 \\ \hline
+	Dec & 29.729  & 695.849 & 531.170 & 78613 \\ \hline   
+	Jan & 105.345 & 695.675 & 545.028 & 78484 \\ \hline
+	Feb & 37.511  & 695.813 & 538.232 & 70508 \\ \hline
+    Mar & 21.610  & 695.932 & 543.083 & 78747 \\ \hline
+    Apr & 142.641 & 695.944 & 552.211 & 76205 \\ \hline
+    May & 180.793 & 695.918 & 550.913 & 79332 \\ \hline
+    Jun & 216.358 & 695.808 & 552.883 & 76851 \\ \hline
+    Jul & 242.257 & 695.600 & 552.752 & 79596 \\ \hline
+    Aug & 265.263 & 695.306 & 552.954 & 79625 \\ \hline
+    Sep & 245.500 & 695.565 & 550.672 & 77094 \\ \hline
+    Oct & 220.018 & 695.746 & 548.284 & 71825 \\ \hline
+    
+\end{tabular}
+\caption{Simulated Communication Window Data from November 2019 to October 2020}
+\label{satcom}
+\end{table}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{| +c | ^c | ^c | ^c |}
+	\hline
+	\rowstyle{\bfseries}%
+	Month & \shortstack{Minimum Environmental \\ Temperature (\degree C)} & \shortstack{Maximum Environmental \\ Temperature (\degree C)} & \shortstack{Mean Environmental \\ Temperature (\degree C)} \\ \hline
+	Nov & -40.520 & -36.370 & -39.190 \\ \hline
+	Dec & -39.750 & -35.717 & -38.336 \\ \hline   
+	Jan & -39.634 & -35.773 & -38.424 \\ \hline
+	Feb & -40.271 & -37.178 & -39.338 \\ \hline
+    Mar & -41.285 & -38.448 & -40.188 \\ \hline
+    Apr & -75.189 & -37.202 & -40.488 \\ \hline
+    May & -85.807 & -36.558 & -47.908 \\ \hline
+    Jun & -86.049 & -36.551 & -50.998 \\ \hline
+    Jul & -86.051 & -36.702 & -50.000 \\ \hline
+    Aug & -85.890 & -37.489 & -42.845 \\ \hline
+    Sep & -42.426 & -38.859 & -41.175 \\ \hline
+    Oct & -41.502 & -38.831 & -40.594 \\ \hline
+    
+\end{tabular}
+\caption{Simulated Environmental Temperature Conditions}
+\label{temperature}
+\end{table}
+
+
+\begin{table}[H]
+\centering
+\begin{tabular}{| +c | ^c | ^c | ^c |}
+	\hline
+	\rowstyle{\bfseries}%
+	Month & \shortstack{Minimum Solar \\ Flux ($\frac{W}{m^2})$} & \shortstack{Maximum Solar \\ Flux ($\frac{W}{m^2})$} & \shortstack{Mean Solar \\ Flux ($\frac{W}{m^2})$} \\ \hline
+	Nov & 1385.1 & 1403.6 & 1395.1 \\ \hline
+	Dec & 1403.6 & 1411.9 & 1408.9 \\ \hline   
+	Jan & 1406.4 & 1412.0 & 1410.3 \\ \hline
+	Feb & 1391.1 & 1406.4 & 1399.4 \\ \hline
+    Mar & 1367.0 & 1390.4 & 1379.0 \\ \hline
+    Apr & 1344.6 & 1367.1 & 1355.5 \\ \hline
+    May & 1327.5 & 1344.6 & 1335.3 \\ \hline
+    Jun & 1320.6 & 1327.5 & 1323.2 \\ \hline
+    Jul & 1320.6 & 1325.2 & 1321.9 \\ \hline
+    Aug & 1325.1 & 1340.3 & 1331.9 \\ \hline
+    Sep & 1340.3 & 1361.9 & 1350.7 \\ \hline
+    Oct & 1361.9 & 1383.4 & 1372.7 \\ \hline
+    
+\end{tabular}
+\caption{Simulated Solar Flux Experienced}
+\label{flux}
+\end{table}
+
+\end{document}
+
+% - Release $Name:  $ -
