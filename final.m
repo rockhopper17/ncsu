@@ -21,6 +21,7 @@ G = 6.67259e-20;
 % default step size values, sometimes modified in the ic scenariois
 deltaT = 1*3600; % step size (hr * s/hr) [s]
 N = 2*365*(24*3600)/deltaT;  % num steps days * (hrs/day * s/hr)
+%N = 30*(24*3600)/deltaT;  % num steps days * (hrs/day * s/hr)
 
 % only capture every numFrameSkip'th frame, animation code takes awhile
 %numFrameSkip = 25;  % default number of frames to skip
@@ -36,7 +37,7 @@ numframes = frate * runtime;  % total number of frames to capture
 % initial conditions 
 % ****************************************************************************************
 % ic = 1: sun/earth/moon
-% ic = 2: inner solar system (sun/mercury/venus/earth/mars)
+% ic = 2: inner solar system (sun/mercury/venus/earth/mars) with rocket to mars
 % ic = 3: 3 body - 2 stars orbiting each other + 1 planet orbiting way out
 % ic = 4: 3body figure 8s w real m,G values (blows up sometime after 60 days)
 % ic = 5: 3body periodic solns w m=1, G=1
@@ -55,7 +56,7 @@ movienames = {'SunEarthMoon','innersol','3body1planet','3bodyFig8Real',...
 
 ic = 2;  % set which scenario to execute ***********
 
-makemovie = true; % set this to true for writing out a movie file
+makemovie = false; % set this to true for writing out a movie file
 
 % switch on ic (initial conditions) for different scenarios
 if ic == 1
@@ -363,6 +364,9 @@ for i = 1:N
 
 	% using RK4 integrator	
 	x = rk4('final_state',x,t,deltaT);
+
+	% using rk2 integrator
+	%x = step2('final_state',x,t,deltaT);
 
 	% inject impulsive delta V
 	if ic == 2 & i == 8000
