@@ -1,0 +1,13 @@
+function dum = dFdz(z)
+% equation 5.43 or 8-24 notes
+global A
+if z == 0
+dum = sqrt(2)/40*y(0)^1.5 + A/8*(sqrt(y(0)) ...
++ A*sqrt(1/2/y(0)));
+else
+dum = (y(z)/C(z))^1.5*(1/2/z*(C(z) - 3*S(z)/2/C(z)) ...
++ 3*S(z)^2/4/C(z)) ...
++ A/8*(3*S(z)/C(z)*sqrt(y(z)) ...
++ A*sqrt(C(z)/y(z)));
+end
+end
